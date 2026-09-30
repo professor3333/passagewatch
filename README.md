@@ -32,7 +32,20 @@ tracking → directional counting → review prioritization → human correction
 ## Data
 
 Development uses the [Caltech Fish Counting (CFC) dataset](https://data.caltech.edu/records/g945x-41103)
-(MIT license). Data is downloaded by scripts and never committed to this repository.
+(MIT license; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Data is downloaded from
+the publisher and never committed to this repository.
+
+```bash
+make data-tiny   # ~1.5 GB: tiny subset, MOT annotations, clip metadata, baseline results
+```
+
+Every publisher file is listed with its size and MD5 in
+[`configs/data/cfc_sources.yaml`](configs/data/cfc_sources.yaml). Downloads resume after
+interruption. A file is kept only after its checksum matches, and every extracted file is
+recorded with its SHA-256 in `data/manifests/inventory/`.
+
+> The `tiny` bundle includes clips from the official **test** locations. Those clips are
+> never used for training or tuning.
 
 ## Development
 
