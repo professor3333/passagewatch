@@ -1,0 +1,74 @@
+# Publisher files for the Caltech Fish Counting (CFC) dataset.
+# Sizes and MD5 checksums are copied from the CaltechDATA records API:
+#   https://data.caltech.edu/api/records/1y23m-j8r69/files
+#   https://data.caltech.edu/api/records/g945x-41103/files
+# Retrieved 2026-09-30. Downloads are verified against these values.
+
+dataset: cfc
+title: Caltech Fish Counting Dataset
+license: MIT
+homepage: https://github.com/visipedia/caltech-fish-counting
+citation: >-
+  Kay, J., Kulits, P., Stathatos, S., Deng, S., Young, E., Beery, S., Van Horn, G., and
+  Perona, P. The Caltech Fish Counting Dataset: A Benchmark for Multiple-Object Tracking
+  and Counting. European Conference on Computer Vision (ECCV), 2022.
+url_template: https://data.caltech.edu/records/{record}/files/{key}?download=1
+
+records:
+  - id: 1y23m-j8r69
+    version: "1.0"
+    files:
+      - {key: fish_counting_annotations.tar.gz, size: 5288093, md5: 34c6bbd5e9187f05bfc0be72df002b19}
+      - {key: fish_counting_metadata.tar.gz, size: 54569, md5: 152286bd6f25f965aadf41e8a0c44140}
+      - {key: fish_counting_results.tar.gz, size: 18007652, md5: ef8d517ad45419edce7af2e7dc5016be}
+      - {key: tiny_dataset.tar.gz, size: 1439070850, md5: 6ae6062d50a90d4b084ebe476a392c0e}
+      - {key: coco_formatted_annotations.tar.gz, size: 10805725, md5: 92694f9df235cf1e089f65e06faa9c82}
+      - {key: fish_counting_frames.tar.gz, size: 131279952716, md5: 176648e618fc5013db972aa7ded01517}
+  - id: g945x-41103
+    version: "1.1"
+    files:
+      - {key: cfc_v1.1.yaml, size: 515, md5: 3c84baebeffcbb7696915ca9c3d66ad0}
+      - {key: file_lists_v1.1.zip, size: 6489562, md5: 450ec249a48972b837236f7322677626}
+      - {key: yolo_annotations_v1.1.zip, size: 81375764, md5: ca4f5cc88d950e7bf94c995e10c6441a}
+      - {key: coco_annotations_v1.1.zip, size: 14497860, md5: dc6f119e1618dc823672127ccc7a9448}
+      - {key: kenai.tar, size: 44074741065, md5: 2f6a20c066495af6315147dd66aa2475}
+      - {key: kenai-3channel.tar, size: 38173356946, md5: 8c602e2e6cc25d9b1e181c0dd64041e0}
+      - {key: rightbank.tar, size: 51020684249, md5: d1da4962b3829a2a26e1a3bb3f196c9c}
+      - {key: rightbank-3channel.tar, size: 43605731947, md5: 0511c1dea9762b35a901a84770efff9c}
+      - {key: channel.tar, size: 1680528910, md5: 16db94bef9af773b725301811f695e13}
+      - {key: channel-3channel.tar, size: 1482535631, md5: 3e6c9fc312ebab93ca6dbd74a5280ba4}
+      - {key: elwha.tar, size: 23212231899, md5: f6b01d55673e51958828f04debe1c62a}
+      - {key: elwha-3channel.tar, size: 20127667596, md5: 6c9ff31cdc258e452c58c0f5dd0380d8}
+      - {key: nushagak.tar, size: 11270250492, md5: 57143d6b2c9a26994de4f8810a9c66f7}
+      - {key: nushagak-3channel.tar, size: 9994844355, md5: 32e27121b914e40d6d8b69bd6a699209}
+
+# Named download sets. `contains_test_locations` marks sets with clips from the official
+# test locations (kenai-rightbank, kenai-channel, elwha, nushagak). Those clips must never
+# be used for training, tuning, or hard-example mining.
+bundles:
+  tiny:
+    description: >-
+      Tiny development subset (up to 50 consecutive frames from up to 20 clips per
+      location), plus the full MOT annotations, clip metadata, and the published ECCV22
+      baseline tracking results used to validate the counting evaluator.
+    contains_test_locations: true
+    files:
+      - 1y23m-j8r69/tiny_dataset.tar.gz
+      - 1y23m-j8r69/fish_counting_annotations.tar.gz
+      - 1y23m-j8r69/fish_counting_metadata.tar.gz
+      - 1y23m-j8r69/fish_counting_results.tar.gz
+  labels:
+    description: Annotations, metadata, and baseline results only (no imagery).
+    contains_test_locations: true
+    files:
+      - 1y23m-j8r69/fish_counting_annotations.tar.gz
+      - 1y23m-j8r69/fish_counting_metadata.tar.gz
+      - 1y23m-j8r69/fish_counting_results.tar.gz
+  kenai-trainval:
+    description: Kenai training and validation imagery (raw 1-channel) with v1.1 file lists.
+    contains_test_locations: false
+    files:
+      - g945x-41103/kenai.tar
+      - g945x-41103/file_lists_v1.1.zip
+      - 1y23m-j8r69/fish_counting_annotations.tar.gz
+      - 1y23m-j8r69/fish_counting_metadata.tar.gz
