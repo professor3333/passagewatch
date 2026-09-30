@@ -1,8 +1,7 @@
 # Dataset Card: Caltech Fish Counting (CFC)
 
-> **Status: Stage 2, in progress.** This card records what has been verified so far.
-> Validation results, the split manifest, and the known annotation issues are added as
-> they are measured.
+> **Status: Stage 2, in progress.** This card records what has been verified so far,
+> including the validation results. The split manifest is added next.
 
 ## Source and license
 
@@ -55,9 +54,10 @@ input size for a location.
   one. The fields that are present are `clip_name`, `num_frames`, `framerate`, `width`,
   `height`, and the meter extents `x_meter_start`, `x_meter_stop`, `y_meter_start`,
   `y_meter_stop`.
-- **Some boxes extend beyond the image:** the smallest `bb_top` is `−1`, and at least one
-  box extends past the right or bottom edge. How these are handled will be defined by the
-  validator.
+- **Some boxes extend beyond the image:** 14 boxes in 10 clips (smallest `bb_top` is `−1`,
+  one box extends past the bottom edge). They are kept **unclipped**, as the official
+  evaluator does, and reported as warnings.
+- **`gt.txt` rows are sorted by frame** in every clip.
 
 ## The tiny subset
 
@@ -68,16 +68,76 @@ metadata. It was produced by CFC's `CFC/tools/get_tiny_dataset.py`.
 - **80 of its 120 clips come from the official test locations.** PassageWatch uses those
   clips only for pipeline development (checking that files load and display). They are
   never used for training, tuning, threshold selection, or error mining.
-- **The annotations and images are not aligned one to one.** `gt_tiny.txt` keeps the rows
-  for the first 50 *annotated* frame numbers (1-based), while the image window is chosen by
-  comparing those numbers with 0-based file numbers. As a result, some annotations
-  reference frames whose images are not in the subset, and some images have no
-  annotations. For example, one elwha clip has images `197–246` but annotated frames
-  `209–255`. The validator must report this, and tiny-subset annotations must never be
-  assumed complete for a frame.
+- **`gt_tiny.txt` is not aligned with the images, so PassageWatch does not use it.** We
+  verified the mechanism against the tool's source (`visipedia/caltech-fish-counting` commit
+  `81380c9`) and reproduced it on all 120 clips:
+  - `gt_tiny.txt` copies `gt.txt` rows in file order until it has seen 50 distinct frame
+    numbers. It stops after the *first* row of the 50th frame, so that frame can be
+    incomplete.
+  - The image window starts at `min(annotated frame) − 12`, or at image `0` when that frame
+    is 12 or earlier. The 1-based frame number is used as a 0-based file number, so the
+    first annotation lands 11 images into the window, not 12. Annotated frames that are not
+    consecutive run past the end of the window.
+
+  For example, one elwha clip has images `197–246` but `gt_tiny.txt` frames `209–255`.
+- **PassageWatch takes tiny-clip boxes from the full `gt.txt`, restricted to the image
+  window.** Every tiny image then has its complete annotations. `gt_tiny.txt` is only
+  checked to be a subset of `gt.txt` (it is, in all 120 clips). The windows contain 13,335
+  boxes on 4,842 annotated frames.
+- **Most tiny trajectories are truncated.** 269 of the 452 tracks inside the windows also
+  have boxes outside them.
 - **Tiny-subset counts are not benchmark counts.** Trajectories are truncated to 50
   frames, so counting results on the tiny subset cannot be compared with published
   benchmark numbers.
+- **Four tiny clips have images one pixel larger or smaller than their metadata** (for
+  example, images `789×1933` with metadata `789×1932`). Box bounds and the counting
+  normalization use the metadata size, as the official evaluator does. These are recorded
+  as warnings.
+
+## Validation
+
+`scripts/validate_data.py` (`make validate-tiny`) parses every clip, converts it to the
+internal convention (`docs/counting_policy.md` §1), and checks it. Each problem gets an issue
+code. A clip with any **error** is **quarantined**: it stays on disk and is listed with its
+reasons, and later stages must not use it. A **warning** is recorded, and the clip stays
+usable. Nothing is repaired or skipped silently. The reports are committed at
+[`data/manifests/validation/cfc/`](../data/manifests/validation/cfc/):
+`tiny.json` (with every frame decoded) and `full.json` (annotations and metadata only,
+because the full frames have not been downloaded).
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `missing_metadata_file` | error | A location has no metadata file (reported per location) |
+| `invalid_metadata` | error | A metadata entry fails the schema (unknown field, non-positive size or rate) or its `clip_name` is duplicated |
+| `missing_metadata` | error | A clip directory has no valid metadata entry |
+| `missing_annotations` | error | A clip has no `gt.txt` |
+| `missing_clip_directory` | error | A metadata entry has no clip or frame directory |
+| `mot_format` | error | A MOT row cannot be parsed (reported with file and line) |
+| `frame_out_of_range` | error | An annotated frame is outside `[1, num_frames]` |
+| `duplicate_track_frame` | error | A track has two boxes in the same frame |
+| `non_positive_box_size` | error | Box width or height ≤ 0 |
+| `box_outside_image` | error | A box does not overlap the image at all |
+| `missing_frames` | error | A frame file is missing inside the expected window |
+| `frame_window_out_of_range` | error | Frame files exist beyond `num_frames` |
+| `unreadable_frame` | error | A frame cannot be decoded |
+| `image_size_mismatch` | error | Image size differs from the metadata by more than 1 px |
+| `tiny_rows_not_in_gt` | error | `gt_tiny.txt` has rows that are not in `gt.txt` |
+| `box_partially_outside_image` | warning | A box extends beyond the image; it is kept unclipped |
+| `image_size_differs_slightly` | warning | Image size differs from the metadata by exactly 1 px |
+| `unexpected_file` | warning | A stray file in a clip directory (for example `.ipynb_checkpoints`); ignored |
+| `missing_tiny_annotations` | warning | A tiny clip has no `gt_tiny.txt` (it is not used anyway) |
+| `no_boxes_in_window` | warning | A tiny window contains no boxes |
+
+Results on 2026-09-30:
+
+| Data | Clips | Quarantined | Warnings |
+|---|---:|---:|---|
+| Tiny subset (6,000 frames decoded) | 120 | 0 | 4 clips with 1 px size differences; 2 boxes partly outside (1 clip) |
+| Full annotations + metadata | 1,567 | 0 | 14 boxes partly outside (10 clips); 1 stray `.ipynb_checkpoints` (kenai-train) |
+
+Also recorded per clip, as statistics rather than issues: tracks with missing frames
+between their first and last box (801 of 8,252 in the full annotations, which is normal for
+occlusions), and single-box tracks (1 in the full annotations).
 
 ## Known limitations
 

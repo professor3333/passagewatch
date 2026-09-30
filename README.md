@@ -36,13 +36,20 @@ Development uses the [Caltech Fish Counting (CFC) dataset](https://data.caltech.
 the publisher and never committed to this repository.
 
 ```bash
-make data-tiny   # ~1.5 GB: tiny subset, MOT annotations, clip metadata, baseline results
+make data-tiny       # ~1.5 GB: tiny subset, MOT annotations, clip metadata, baseline results
+make validate-tiny   # check annotations, metadata, and every frame; write the report
 ```
 
 Every publisher file is listed with its size and MD5 in
 [`configs/data/cfc_sources.yaml`](configs/data/cfc_sources.yaml). Downloads resume after
 interruption. A file is kept only after its checksum matches, and every extracted file is
 recorded with its SHA-256 in `data/manifests/inventory/`.
+
+Validation (`scripts/validate_data.py`) converts the 1-based MOT annotations to the internal
+convention once and checks them against the clip metadata and the frames. A clip with any
+error is **quarantined** with its reasons, never silently skipped. The reports are in
+`data/manifests/validation/cfc/`, and the issue codes are listed in the
+[dataset card](docs/dataset_card.md#validation).
 
 > The `tiny` bundle includes clips from the official **test** locations. Those clips are
 > never used for training or tuning.
