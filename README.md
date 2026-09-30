@@ -11,13 +11,23 @@ evidence and a prioritized review queue. Automatic and human-reviewed counts sta
 distinguishable, and every report is traceable to the model and pipeline versions
 that produced it.
 
-> **Status: early development.** Nothing below the design stage is implemented yet.
-> No results have been measured; this README will only report numbers once they are.
+> **Status: early development (Stage 1 of 12).** The scope and counting policy are
+> defined; the pipeline is not implemented yet. No results have been measured, and this
+> README will report numbers only after they are. See the [roadmap](docs/roadmap.md).
 
 ## Planned pipeline
 
 Recording → validation → frame decoding → preprocessing → neural detection →
 tracking → directional counting → review prioritization → human corrections → export.
+
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [Scope](docs/scope.md) | What Version 1 accepts, produces, and deliberately excludes |
+| [Counting policy](docs/counting_policy.md) | Coordinate convention, the `cfc-compatible-v1` counting rule, direction mapping, and the evaluation metric |
+| [Roadmap](docs/roadmap.md) | Twelve stages, each with its completion test |
+| [Design](docs/design.md) | The full system design: data, models, evaluation, service, and operations |
 
 ## Data
 
