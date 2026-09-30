@@ -24,6 +24,10 @@ into it **once**, at ingestion.
 
 CFC `gt.txt` rows are `frame, id, bb_left, bb_top, bb_width, bb_height, conf, x, y, z`.
 **Frames, IDs, and box coordinates are 1-indexed** (the smallest `bb_left` and `bb_top` are 1).
+Image files, however, are named from `0.jpg`: **gt frame `N` is image `N−1.jpg`**. This was
+verified against the full annotations: across all 1,567 clips, gt frames lie in
+`[1, num_frames]`, and 470 clips have an annotation on frame `num_frames` itself, which
+could not happen with 0-based numbering.
 
 ```
 frame_index = frame - 1
@@ -99,9 +103,14 @@ Image directions become upstream and downstream **only** when orientation is con
 | `left` | downstream | upstream |
 | not set | — | — (only rightward/leftward counts are reported) |
 
-`net = upstream − downstream`. CFC's per-clip metadata provides `upstream_direction`, so
-benchmark clips have a known orientation. For uploads, the user confirms orientation on a
-preview frame, and it is recorded in the job and in every export.
+`net = upstream − downstream`. For uploads, the user confirms orientation on a preview
+frame, and it is recorded in the job and in every export.
+
+**CFC clips have no recorded orientation.** The CFC README documents an
+`upstream_direction` metadata field, but the published metadata
+(`fish_counting_metadata.tar.gz`, verified 2026-09-30) does not contain it for any of the
+1,567 clips. Benchmark evaluation therefore uses image directions (rightward/leftward)
+only, which is also what the official nMAE measures.
 
 Horizontal-flip augmentation during training swaps left and right. Wherever direction
 labels are used, they must be swapped too.
