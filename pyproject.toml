@@ -5,13 +5,19 @@ description = "Auditable fish-passage counting and review for sonar video"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "pyarrow>=17",
+    "pydantic>=2.8",
+    "pyyaml>=6.0",
+]
 
 [dependency-groups]
 dev = [
     "mypy>=1.11",
+    "pyarrow-stubs>=20.0.0.20260819",
     "pytest>=8.3",
     "ruff>=0.6",
+    "types-pyyaml>=6.0.12.20260906",
 ]
 
 [build-system]

@@ -17,6 +17,7 @@ build/
 
 # Datasets and derived data (tracked via DVC or kept outside git)
 data/raw/
+data/extracted/
 data/interim/
 data/processed/
 data/cache/
