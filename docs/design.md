@@ -958,7 +958,7 @@ The project is complete when you can demonstrate all of the following:
 - [ ] Basic monitoring and a tested rollback procedure exist.
 - [ ] The README explains the problem, architecture, data, evaluation, limitations, and usage.
 - [ ] Another developer can clone the repository and reproduce the essential workflow.
-- [ ] A recruiter can demonstrate both the deep learning experiments and the engineered application within a few minutes.
+- [ ] A newcomer can be shown both the deep learning experiments and the engineered application within a few minutes.
 
 ---
 
