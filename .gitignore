@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Environment and secrets
+.env
+.env.*
+
+# Datasets and derived data (tracked via DVC or kept outside git)
+data/raw/
+data/interim/
+data/processed/
+data/cache/
+data/quarantine/
+
+# Models, experiments, and serving state
+models/
+*.pt
+*.pth
+*.onnx
+mlruns/
+mlartifacts/
+var/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Frontend
+node_modules/
+frontend/dist/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
