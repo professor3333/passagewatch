@@ -1,4 +1,4 @@
-.PHONY: install lint format typecheck test check data-tiny
+.PHONY: install lint format typecheck test check data-tiny validate-tiny
 
 install:
 	uv sync
@@ -21,3 +21,6 @@ check: lint typecheck test
 
 data-tiny:
 	uv run python scripts/download_data.py --bundle tiny
+
+validate-tiny:
+	uv run python scripts/validate_data.py --subset tiny
