@@ -40,6 +40,11 @@ This matches the official evaluator's normalization, `((bb_left − 1)/W, (bb_to
 w/W, h/H)`. Exporting back to MOT format (for the official evaluator) applies the exact
 inverse: `bb_left = x_min + 1`, `bb_top = y_min + 1`. A unit test checks the round trip.
 
+The conversion lives only in `passagewatch.ingestion.mot`. Boxes that extend beyond the
+image are kept **unclipped**, as in the official evaluator. `W` and `H` for normalization
+are the clip **metadata** size, which is what the official evaluator uses. A few tiny-subset
+images differ from it by one pixel; see `docs/dataset_card.md`.
+
 ## 2. The rule (`cfc-compatible-v1`)
 
 This rule reproduces the counting function in the official CFC evaluator
