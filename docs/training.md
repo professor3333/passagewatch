@@ -48,6 +48,17 @@ Only the kenai-train partition is used. kenai-val and the test locations are nev
    in the background, so you can close the browser. Follow it under the notebook's
    **Versions** (the log shows streaming and training progress).
 
+A healthy log goes through these stages, in order:
+
+| Stage | What you see |
+|---|---|
+| Start | `== commit: <hash> …`, then a small table with the GPU name (e.g. `Tesla T4`) |
+| Environment (a few minutes) | package installation, then `torch 2.14.1+cu126 on Tesla T4` |
+| Data | the labels download, then `kenai-dev-v1-train: keeping 183 clips (57012 frames)` and progress lines such as `  12%  5.3/44.1 GB  9.2 MB/s  eta 70 min` |
+| Check | `57012 files checked against 87530 inventoried` |
+| Training | `yolox-tiny-v1: 19064 samples from 183 clips, 1192 iterations/epoch on cuda`, then a line every 50 iterations (`epoch 1/30  iter 50/35760  loss …  img/s`) and `finished epoch N/30 in … min` |
+| End | `== done: /kaggle/working/runs/yolox-tiny-v1` and a file listing |
+
 The session time limit and the weekly GPU quota are set by Kaggle and shown in your
 account. Streaming the data also counts against the GPU quota, because the GPU session is
 running.

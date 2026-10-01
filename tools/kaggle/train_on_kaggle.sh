@@ -8,6 +8,8 @@
 #   3. training, resuming from <run>/latest.pt if it exists.
 # Use .venv/bin/python, never `uv run`: uv run would re-sync to the CPU-only torch.
 set -euo pipefail
+# Print progress immediately: Kaggle background runs capture output through a pipe.
+export PYTHONUNBUFFERED=1
 
 CONFIG="${CONFIG:-configs/training/yolox-tiny-v1.yaml}"
 CUDA_INDEX="${CUDA_INDEX:-cu126}"
