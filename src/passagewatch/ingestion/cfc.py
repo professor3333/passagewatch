@@ -42,15 +42,24 @@ class CfcLayout:
     metadata_dir: Path
     frames_dir: Path | None = None
     tiny_annotations_dir: Path | None = None
+    # Full layout only: when set, only these clips are expected to have frames (a subset
+    # such as configs/data/kenai_subset.yaml); the others are checked as annotations only.
+    frame_clips: frozenset[str] | None = None
 
     @classmethod
-    def full(cls, extract_root: Path, frames_dir: Path | None = None) -> CfcLayout:
+    def full(
+        cls,
+        extract_root: Path,
+        frames_dir: Path | None = None,
+        frame_clips: frozenset[str] | None = None,
+    ) -> CfcLayout:
         """``extract_root`` is the directory holding the extracted publisher archives."""
         return cls(
             subset="full",
             annotations_dir=extract_root / "fish_counting_annotations/annotations",
             metadata_dir=extract_root / "fish_counting_metadata/metadata",
             frames_dir=frames_dir,
+            frame_clips=frame_clips,
         )
 
     @classmethod
@@ -85,7 +94,11 @@ class CfcLayout:
         return self.tiny_annotations_dir / location / clip / TINY_GT_FILE
 
     def frame_dir(self, location: str, clip: str) -> Path | None:
-        return None if self.frames_dir is None else self.frames_dir / location / clip
+        if self.frames_dir is None:
+            return None
+        if self.frame_clips is not None and clip not in self.frame_clips:
+            return None
+        return self.frames_dir / location / clip
 
 
 def frame_indices(frame_dir: Path) -> tuple[list[int], list[str]]:
