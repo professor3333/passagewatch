@@ -14,8 +14,13 @@ repository.
   text below is reproduced from `CFC/LICENSE` in the repository above.
 - **Used for:** training and evaluation data (sonar frames, bounding-box and track
   annotations, clip metadata) and the published ECCV 2022 baseline tracking results.
-  PassageWatch's counting rule and nMAE metric reproduce the logic of the official
-  evaluator (`CFC/evaluate.py`).
+  PassageWatch's counting rule and nMAE metric reimplement the logic of the official
+  evaluator (`CFC/evaluate.py`). No CFC code is vendored. The per-clip reference in
+  `tests/regression/cfc_official_nmae_eccv22.json` was computed by running that evaluator
+  on the published results.
+- **TrackEval** (<https://github.com/JonathonLuiten/TrackEval>, MIT, commit `bcd03a6`) is
+  used only offline, by `tools/cfc_official_nmae/`, to produce that reference. It is not a
+  dependency and is not distributed.
 - **Citation:**
 
   > Kay, J., Kulits, P., Stathatos, S., Deng, S., Young, E., Beery, S., Van Horn, G., and

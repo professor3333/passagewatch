@@ -148,8 +148,41 @@ official evaluator raises a division-by-zero error. PassageWatch instead reports
 *undefined* for that group, and reports the absolute count error and false counts per
 hour instead.
 
-Before any PassageWatch result is trusted, our implementation must reproduce the
-official nMAE values on the published CFC baseline tracking results (Stage 3).
+### Validation against the official evaluator
+
+The implementation (`passagewatch.counting.policy` and `passagewatch.evaluation.nmae`)
+reproduces the official evaluator **exactly, clip by clip**. The reference was produced by
+running CFC's own `CFC/evaluate.py` (commit `81380c9`, with its pinned TrackEval
+`bcd03a6`) on the published ECCV22 tracks in `fish_counting_results.tar.gz`. All 2,170
+clip results (1,085 clips × 2 trackers) have identical numerators and denominators:
+
+| Location | Clips | Passages | Baseline nMAE | Baseline++ nMAE |
+|---|---:|---:|---|---|
+| kenai-val | 64 | 183 | 9/183 = 0.0492 | 6/183 = 0.0328 |
+| kenai-rightbank | 657 | 2,144 | 252/2,144 = 0.1175 | 79/2,144 = 0.0368 |
+| kenai-channel | 69 | 164 | 87/164 = 0.5305 | 20/164 = 0.1220 |
+| elwha | 223 | 334 | 108/334 = 0.3234 | 71/334 = 0.2126 |
+| nushagak | 72 | 2,654 | 371/2,654 = 0.1398 | 234/2,654 = 0.0882 |
+
+These are CFC's published tracks, not PassageWatch results, and they are used only to check
+the evaluator. They are not used to tune anything.
+
+- The per-clip reference is committed as `tests/regression/cfc_official_nmae_eccv22.json`.
+  `tests/regression/test_official_nmae.py` (slow; it needs `make data-tiny`) checks it.
+- `tools/cfc_official_nmae/run_official.py` regenerates the reference. It runs in a
+  separate Python 3.10 environment, because the pinned TrackEval needs NumPy < 1.24.
+- `scripts/evaluate_counts.py` evaluates MOT-format results. It evaluates kenai-val by
+  default and refuses test locations without `--allow-test-locations`.
+
+Implementation details needed for exact agreement:
+
+- Box centers are computed in the official order: normalize the box origin and size, then
+  add half the size. This avoids floating-point differences at `u = L` and at the
+  stationary threshold.
+- As in TrackEval, every clip in the location's metadata is evaluated, and a missing
+  prediction file is an error. A box outside `[1, num_frames]` is also an error; TrackEval
+  raises in that case too.
+- Two boxes of one track in one frame are an error, as in TrackEval.
 
 ## 6. Versioning rules
 
