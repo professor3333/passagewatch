@@ -1,0 +1,41 @@
+# Reference deployment on one CPU host: the API and one inference worker, from the same
+# image, sharing the data volume (SQLite database, uploads, artifacts). Release bundles are
+# mounted read-only from the host (PASSAGEWATCH_BUNDLES, default ./bundles); the active one
+# is bundles/active. Model weights are never part of the image.
+#
+#   docker compose up -d --build        # then http://127.0.0.1:8000/health/ready
+#
+# A reverse proxy (HTTPS, frontend) and Prometheus are added in later stages.
+
+name: passagewatch
+
+x-service: &service
+  image: passagewatch:local
+  build: .
+  volumes:
+    - data:/data
+    - ${PASSAGEWATCH_BUNDLES:-./bundles}:/bundles:ro
+  environment:
+    PASSAGEWATCH_DEVICE: cpu
+  restart: unless-stopped
+
+services:
+  api:
+    <<: *service
+    command: ["api"]
+    ports:
+      - "127.0.0.1:${PASSAGEWATCH_HTTP_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/health/live')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    <<: *service
+    command: ["worker"]
+    # A job interrupted by shutdown is recovered by the next worker after its lease expires.
+    stop_grace_period: 30s
+
+volumes:
+  data:

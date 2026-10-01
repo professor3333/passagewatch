@@ -1,0 +1,22 @@
+# Only source, configs and the lock file belong in the image. Data, weights, bundles and
+# local state are mounted at run time or never needed by the service.
+.git
+.venv
+**/__pycache__
+.mypy_cache
+.ruff_cache
+.pytest_cache
+data
+models
+bundles
+runs
+var
+mlruns
+mlartifacts
+tools
+notebooks
+*.pt
+*.onnx
+*.sqlite*
+.env
+.env.*
