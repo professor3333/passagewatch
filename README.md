@@ -29,6 +29,7 @@ tracking → directional counting → review prioritization → human correction
 | [Dataset card](docs/dataset_card.md) | CFC source, verified format facts, validation, splits, manifests, and the Kenai development subset |
 | [Classical baseline](docs/classical_baseline.md) | Method, tuning protocol, and measured results of the non-learned baseline |
 | [Training](docs/training.md) | How detectors are trained on a free Kaggle GPU, resumed, and collected |
+| [Neural baseline](docs/neural_baseline.md) | YOLOX-Tiny through the same tracker: selection and measured results |
 | [Roadmap](docs/roadmap.md) | Twelve stages, each with its completion test |
 | [Design](docs/design.md) | The full system design: data, models, evaluation, service, and operations |
 
@@ -77,9 +78,17 @@ The nMAE evaluator matches CFC's official evaluator exactly on its published bas
 uv run python scripts/evaluate_counts.py --tracker baseline++   # kenai-val only by default
 ```
 
-The tuned classical baseline (`classical-v2`, tuned on kenai-train only) reaches nMAE
-0.235 on kenai-val. CFC's published learned Baseline reaches 0.049 on the same clips
-([results](docs/classical_baseline.md#results)):
+Measured on the 64 kenai-val clips, with 95% intervals from a paired bootstrap over clips:
+
+| System | kenai-val nMAE |
+|---|---|
+| Classical baseline `classical-v2` (tuned on kenai-train) | 0.235 [0.181, 0.300] |
+| YOLOX-Tiny + the same tracker (selected on kenai-val) | 0.120 [0.078, 0.171] |
+| CFC published Baseline / Baseline++ | 0.049 / 0.033 |
+
+These are development numbers on a validation day, not test results. Details are in
+[classical baseline](docs/classical_baseline.md#results) and
+[neural baseline](docs/neural_baseline.md#results).
 
 ```bash
 uv run python scripts/run_classical.py --manifest full-v2 --partitions val \
