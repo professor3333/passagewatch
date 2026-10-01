@@ -38,6 +38,9 @@ the publisher and never committed to this repository.
 ```bash
 make data-tiny       # ~1.5 GB: tiny subset, MOT annotations, clip metadata, baseline results
 make validate-tiny   # check annotations, metadata, and every frame; write the report
+make manifest-tiny   # validate, then write the versioned split manifest (tiny-v1)
+uv run python scripts/view_clip.py --location kenai-train --list    # list clips
+uv run python scripts/view_clip.py --location kenai-train --sheet   # boxes on frames, as PNG
 ```
 
 Every publisher file is listed with its size and MD5 in
@@ -50,6 +53,11 @@ convention once and checks them against the clip metadata and the frames. A clip
 error is **quarantined** with its reasons, never silently skipped. The reports are in
 `data/manifests/validation/cfc/`, and the issue codes are listed in the
 [dataset card](docs/dataset_card.md#validation).
+
+Each clip's partition is recorded in an immutable, versioned manifest
+(`data/manifests/splits/cfc/<version>.parquet`). The partition follows the publisher's split
+by location, and test-location clips are marked as never usable for tuning. The schema and
+versioning rules are in the [dataset card](docs/dataset_card.md#splits-and-manifests).
 
 > The `tiny` bundle includes clips from the official **test** locations. Those clips are
 > never used for training or tuning.

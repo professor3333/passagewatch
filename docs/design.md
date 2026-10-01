@@ -491,7 +491,7 @@ Recommended stack:
 | Training | PyTorch |
 | Image/video processing | OpenCV and FFmpeg |
 | Experiment tracking | Local MLflow |
-| Data versioning | DVC plus immutable manifests |
+| Data versioning | Immutable, hash-chained manifests; DVC deferred ([ADR 0001](decisions/0001-data-versioning.md)) |
 | API | FastAPI and Pydantic |
 | Worker | Separate Python process |
 | Database | SQLite in WAL mode on a single host |
@@ -626,7 +626,7 @@ A database is justified because jobs, corrections, and report versions have rela
 | Stored item | Storage |
 |---|---|
 | Source archives | Immutable local directory or object storage |
-| Dataset manifests | Parquet/JSON, versioned with DVC |
+| Dataset manifests | Parquet/JSON, immutable versions committed to git ([ADR 0001](decisions/0001-data-versioning.md)) |
 | Model bundles | Versioned artifact directory or model repository |
 | Uploaded clips | Dedicated media storage |
 | Jobs and leases | SQLite |
@@ -783,7 +783,7 @@ Reserve the final held-out evaluation for declared releases rather than using it
 Use a clear division of responsibilities:
 
 - **Git:** source, configurations, tests, schemas, and documentation.
-- **DVC:** dataset manifests, selected derived data, and pipeline dependencies.
+- **DVC:** deferred. Publisher data is re-downloaded and verified against committed checksums; whether derived artifacts need DVC is decided at Stage 4 ([ADR 0001](decisions/0001-data-versioning.md)).
 - **MLflow:** training runs, metrics, and artifacts.
 - **Docker:** reproducible training and serving environments.
 - **GitHub Actions:** validation and image builds.

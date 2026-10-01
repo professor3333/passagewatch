@@ -1,7 +1,8 @@
 # Dataset Card: Caltech Fish Counting (CFC)
 
-> **Status: Stage 2, in progress.** This card records what has been verified so far,
-> including the validation results. The split manifest is added next.
+> **Status: complete for Stage 2** (tiny subset downloaded; full imagery not yet). Every
+> number below was computed by PassageWatch from the published files on 2026-09-30 and
+> 2026-10-01, unless it is attributed to the paper.
 
 ## Source and license
 
@@ -58,6 +59,17 @@ input size for a location.
   one box extends past the bottom edge). They are kept **unclipped**, as the official
   evaluator does, and reported as warnings.
 - **`gt.txt` rows are sorted by frame** in every clip.
+- **Clip names encode their source recording.** Every one of the 1,567 names is
+  `<recording>_<start>_<stop>`: frames `[start, stop)` of a source recording whose name ends
+  in `YYYY-MM-DD_HHMMSS`, and `stop − start = num_frames` in every clip. There are 1,021
+  recordings. No recording appears in two locations, and no two clips of one recording
+  overlap, but 32 pairs of clips are back to back (one ends where the next begins).
+- **The frame conversion is confirmed from the images.** Fish are brighter than the water
+  around them. On the 40 kenai-train and kenai-val tiny clips, the mean contrast between a
+  box and a ring around it is highest when each box is compared with image `N−1` for gt
+  frame `N` (33.1, against 31.0 at image `N` and 30.2 at image `N−2`), and this offset is
+  the best one in 31 of the 40 clips. A slow test keeps checking this
+  (`tests/data/test_viewer_and_alignment.py`). The viewer shows the same alignment by eye.
 
 ## The tiny subset
 
@@ -122,6 +134,7 @@ because the full frames have not been downloaded).
 | `unreadable_frame` | error | A frame cannot be decoded |
 | `image_size_mismatch` | error | Image size differs from the metadata by more than 1 px |
 | `tiny_rows_not_in_gt` | error | `gt_tiny.txt` has rows that are not in `gt.txt` |
+| `invalid_clip_name` | error | The clip name is not `<recording>_<start>_<stop>`, or `stop − start ≠ num_frames` |
 | `box_partially_outside_image` | warning | A box extends beyond the image; it is kept unclipped |
 | `image_size_differs_slightly` | warning | Image size differs from the metadata by exactly 1 px |
 | `unexpected_file` | warning | A stray file in a clip directory (for example `.ipynb_checkpoints`); ignored |
@@ -138,6 +151,72 @@ Results on 2026-09-30:
 Also recorded per clip, as statistics rather than issues: tracks with missing frames
 between their first and last box (801 of 8,252 in the full annotations, which is normal for
 occlusions), and single-box tracks (1 in the full annotations).
+
+## Splits and manifests
+
+**Rule.** A clip's partition is its location's official split: kenai-train → `train`,
+kenai-val → `val`, and kenai-rightbank, kenai-channel, elwha, nushagak → `test`. Whole clips
+are assigned; frames are never split. Test clips have `tuning_allowed = false`: they are
+never used for training, tuning, threshold selection, or error mining, including the 80
+test-location clips in the tiny subset. Quarantined clips stay in the manifest with
+`usable = false`.
+
+| Location | Partition | Clips | Recordings | Days | Dates |
+|---|---|---:|---:|---:|---|
+| kenai-train | train | 482 | 346 | 15 | 2018-05-26 … 2018-06-10 |
+| kenai-val | val | 64 | 45 | 1 | 2018-06-03 |
+| kenai-rightbank | test | 657 | 390 | 16 | 2018-05-26 … 2018-06-10 |
+| kenai-channel | test | 69 | 62 | 2 | 2018-08-16 … 2018-08-17 |
+| elwha | test | 223 | 167 | 23 | 2018-07-09 … 2018-09-14 |
+| nushagak | test | 72 | 11 | 7 | 2018-07-02 … 2018-08-06 |
+
+What these groups mean for later claims:
+
+- **Train and val share no day.** Validation is a held-out day (2018-06-03), but that day
+  lies inside the training period. It measures generalization to new recordings and a new
+  day, not to a later season.
+- **kenai-rightbank was recorded on the same 16 days as kenai-train and kenai-val**, by a
+  sonar on the other bank. Results on it measure transfer to a new camera position on the
+  same river and days, not to a new time period.
+- **Internal holdouts** (for example, the data used to fit a confidence calibrator) must be
+  carved out of `train` by `recording_date` or at least by `recording_id`, never by clip.
+  Back-to-back clips from one recording must stay together.
+
+**Manifests.** `scripts/build_manifest.py --version <subset>-v<N>` (`make manifest-tiny`)
+validates the clips and writes `data/manifests/splits/cfc/<version>.parquet` plus a JSON
+sidecar. A version is immutable: rerunning with identical content is a no-op, and any
+difference is refused until a new version name is used. The sidecar records the content
+hash of the rows, the SHA-256 of the validation report and inventories it came from, and
+per-partition totals. `read_manifest` checks the content hash on every read. Committed
+versions:
+
+| Version | Clips | Usable | Frames validated | Notes |
+|---|---:|---:|---|---|
+| `tiny-v1` | 120 | 120 | yes (6,000 frames) | train 20, val 20, test 80 clips |
+| `full-v1` | 1,567 | 1,567 | no | annotations and metadata only; the full imagery is not downloaded yet |
+
+Columns (schema version 1):
+
+| Column | Meaning |
+|---|---|
+| `location`, `clip_name` | Clip identity |
+| `recording_id`, `recording_date`, `recording_frame_start`, `recording_frame_stop` | Source recording and the clip's frame range in it, parsed from the clip name |
+| `official_split`, `partition` | Publisher split, and the partition PassageWatch uses (identical in v1) |
+| `tuning_allowed` | `false` for test locations |
+| `status`, `usable`, `quarantine_reasons`, `warning_codes` | Validation outcome (see [Validation](#validation)) |
+| `frames_validated` | Whether the frames were decoded and checked |
+| `num_frames`, `width`, `height`, `framerate` | Clip metadata |
+| `frame_start`, `frame_stop` | The frame window available (the whole clip, or the tiny window) |
+| `boxes`, `tracks` | Annotation totals inside the window |
+| `gt_sha256` | SHA-256 of the clip's `gt.txt` |
+
+Data versioning uses these hash-chained manifests rather than DVC; see
+[ADR 0001](decisions/0001-data-versioning.md).
+
+**Viewing a clip.** `scripts/view_clip.py --location <loc> --clip <name>` writes an MP4 of
+the clip window with boxes, track IDs, the counting line at `x = 0.5`, and the frame index
+and time. `--sheet` writes a PNG contact sheet instead, and `--list` lists the clips.
+Output goes to `data/cache/viewer/`, which is not committed.
 
 ## Known limitations
 
