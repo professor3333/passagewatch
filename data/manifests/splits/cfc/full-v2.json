@@ -1,0 +1,36 @@
+{
+ "name": "cfc-full-v2",
+ "schema_version": 1,
+ "dataset": "cfc",
+ "subset": "full",
+ "rows": 1567,
+ "content_sha256": "a2ecbceda8ba33094717de5fd0124813eb16fa2bbf5633acf139b10ca8d49fb5",
+ "split_rule": "partition = publisher split of the clip's location (kenai-train -> train, kenai-val -> val, all other locations -> test); whole clips only; tuning_allowed = partition != test; quarantined clips are listed but not usable",
+ "inputs": {
+  "frames_subset_config": "fb79751d270f0257ea6d14467534da7cd5c33ca8f5b34dece6f83e5398eb53ea",
+  "validation_report": "3dea3fa50e5e2df3fcec8622c2d0c8a1281a938ecaf22bcef016d5e69de86e82",
+  "inventory/fish_counting_annotations": "760ff92cbe7ba678cb8dcb9f0dc1ac0b284091a678abaed2a4f0268387994315",
+  "inventory/fish_counting_metadata": "4e5934a687bfc4f9715185363341be7a97f93715dfd2c3d720a6c291f298eccf",
+  "inventory/kenai-dev-v1": "4b42e8769c423a6df3e5b43beb38d6d9fd9db2268937730562320718c280e0bd"
+ },
+ "partitions": {
+  "test": {
+   "clips": 1021,
+   "usable_clips": 1021,
+   "window_frames": 334017,
+   "boxes": 365148
+  },
+  "train": {
+   "clips": 482,
+   "usable_clips": 482,
+   "window_frames": 162680,
+   "boxes": 132220
+  },
+  "val": {
+   "clips": 64,
+   "usable_clips": 64,
+   "window_frames": 30518,
+   "boxes": 18565
+  }
+ }
+}
