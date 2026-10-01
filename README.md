@@ -39,6 +39,7 @@ the publisher and never committed to this repository.
 make data-tiny       # ~1.5 GB: tiny subset, MOT annotations, clip metadata, baseline results
 make validate-tiny   # check annotations, metadata, and every frame; write the report
 make manifest-tiny   # validate, then write the versioned split manifest (tiny-v1)
+make data-kenai-dev  # stream 44 GB once, keep ~19 GB of Kenai train/val frames (full-v2)
 uv run python scripts/view_clip.py --location kenai-train --list    # list clips
 uv run python scripts/view_clip.py --location kenai-train --sheet   # boxes on frames, as PNG
 ```

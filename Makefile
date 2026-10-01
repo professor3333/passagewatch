@@ -1,4 +1,4 @@
-.PHONY: install lint format typecheck test check data-tiny validate-tiny manifest-tiny
+.PHONY: install lint format typecheck test check data-tiny validate-tiny manifest-tiny data-kenai-dev
 
 install:
 	uv sync
@@ -27,3 +27,7 @@ validate-tiny:
 
 manifest-tiny:
 	uv run python scripts/build_manifest.py --version tiny-v1
+
+data-kenai-dev:
+	uv run python scripts/stream_subset.py --config configs/data/kenai_subset.yaml
+	uv run python scripts/build_manifest.py --version full-v2 --frames-subset configs/data/kenai_subset.yaml

@@ -7,6 +7,8 @@ any difference requires a new version name.
 Examples:
     uv run python scripts/build_manifest.py --version tiny-v1
     uv run python scripts/build_manifest.py --version full-v1      # annotations only
+    uv run python scripts/build_manifest.py --version full-v2 \\
+        --frames-subset configs/data/kenai_subset.yaml            # + streamed Kenai frames
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ from passagewatch.ingestion.manifest import (
     manifest_paths,
     write_manifest,
 )
+from passagewatch.ingestion.subsets import load_subset_config, select_clips
 from passagewatch.validation.cfc import validate_dataset
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +40,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--version", required=True, help="e.g. tiny-v1 or full-v1")
     parser.add_argument("--extract-dir", type=Path, default=REPO_ROOT / "data/extracted/cfc")
     parser.add_argument("--manifest-dir", type=Path, default=REPO_ROOT / "data/manifests")
+    parser.add_argument(
+        "--frames-subset",
+        type=Path,
+        default=None,
+        help="full manifests: a subset config whose streamed frames are validated too",
+    )
     args = parser.parse_args(argv)
 
     out_dir = args.manifest_dir / "splits/cfc"
@@ -45,16 +54,29 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         parser.error(str(exc))
     subset = args.version.split("-")[0]
-    layout = (
-        CfcLayout.tiny(args.extract_dir) if subset == "tiny" else CfcLayout.full(args.extract_dir)
-    )
+    inventories = list(INVENTORIES[subset])
+    report_name = subset
+    inputs: dict[str, str] = {}
+    if subset == "tiny":
+        layout = CfcLayout.tiny(args.extract_dir)
+    elif args.frames_subset is None:
+        layout = CfcLayout.full(args.extract_dir)
+    else:
+        config = load_subset_config(args.frames_subset)
+        full = CfcLayout.full(args.extract_dir)
+        metadata = {i.location: full.metadata(i.location).clips for i in config.include}
+        selected = frozenset(select_clips(config, metadata))
+        layout = CfcLayout.full(args.extract_dir, args.extract_dir / config.name, selected)
+        inventories.append(config.name)
+        report_name = f"full-{config.name}"
+        inputs["frames_subset_config"] = sha256_of(args.frames_subset)
 
     report = validate_dataset(layout)
-    report_path = args.manifest_dir / f"validation/cfc/{subset}.json"
+    report_path = args.manifest_dir / f"validation/cfc/{report_name}.json"
     report.write_json(report_path)
 
-    inputs = {"validation_report": sha256_of(report_path)}
-    for name in INVENTORIES[subset]:
+    inputs["validation_report"] = sha256_of(report_path)
+    for name in inventories:
         inventory = args.manifest_dir / f"inventory/cfc/{name}.parquet"
         inputs[f"inventory/{name}"] = sha256_of(inventory)
 
@@ -67,10 +89,13 @@ def main(argv: list[str] | None = None) -> int:
     usable = sum(r["usable"] for r in rows)
     print(f"{len(rows)} clips ({usable} usable) -> {paths.parquet}")
     for partition in ("train", "val", "test"):
-        selected = [r for r in rows if r["partition"] == partition]
-        if selected:
-            tuning = selected[0]["tuning_allowed"]
-            print(f"  {partition:5} {len(selected):5d} clips  tuning_allowed={tuning}")
+        part = [r for r in rows if r["partition"] == partition]
+        if part:
+            with_frames = sum(r["frames_validated"] for r in part)
+            print(
+                f"  {partition:5} {len(part):5d} clips ({with_frames} with validated frames)  "
+                f"tuning_allowed={part[0]['tuning_allowed']}"
+            )
     return 0
 
 

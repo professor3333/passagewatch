@@ -102,9 +102,42 @@ metadata. It was produced by CFC's `CFC/tools/get_tiny_dataset.py`.
   frames, so counting results on the tiny subset cannot be compared with published
   benchmark numbers.
 - **Four tiny clips have images one pixel larger or smaller than their metadata** (for
-  example, images `789×1933` with metadata `789×1932`). Box bounds and the counting
+  example, images `789×1933` with metadata `789×1932`). The same happens in 28 of the 247
+  clips of the Kenai development subset, always in height and always by exactly 1 px. Box bounds and the counting
   normalization use the metadata size, as the official evaluator does. These are recorded
   as warnings.
+
+## Kenai development subset (`kenai-dev-v1`)
+
+The Kenai train/val imagery (`kenai.tar`, 44.1 GB) does not fit on the development
+machine, so PassageWatch streams it once and keeps only a subset
+([`configs/data/kenai_subset.yaml`](../configs/data/kenai_subset.yaml)):
+
+- **all of kenai-val** (64 clips, 30,518 frames), and
+- **every third kenai-train day, starting from the first**: 2018-05-26, 05-29, 06-01,
+  06-05 and 06-08 (183 of 482 clips, 57,012 of 162,680 frames). Whole days are kept, so
+  day-grouped holdouts remain possible. This covers both cameras (LeftFar, LeftNear) and
+  both the late-May and the June periods.
+
+Facts verified while streaming it (2026-10-01):
+
+- **`kenai.tar` is gzip-compressed**, despite its name. Its members are individual frames,
+  `kenai/<clip>_<n>.jpg`, in mixed order (train and val clips interleaved), so even a subset
+  needs one pass over the whole archive.
+- `scripts/stream_subset.py` streams it from the publisher through the decompressor and
+  writes only the selected frames, as `<location>/<clip>/<n>.jpg`. The archive itself is
+  never stored. The MD5 of the whole 44.1 GB stream matched the publisher's value, and the
+  frames were promoted only after that check. A dropped connection resumes with an HTTP
+  `Range` request into the same stream.
+- The archive holds 193,198 frames: exactly the 162,680 + 30,518 frames of kenai-train and
+  kenai-val in the metadata. No member had an unexpected name or an unknown clip.
+  87,530 frames (19.3 GB) were kept, and their SHA-256 values are in
+  `data/manifests/inventory/cfc/kenai-dev-v1.parquet`.
+- **Frame numbers in `kenai.tar` are 0-based and complete:** every kept clip has exactly
+  the files `0 … num_frames − 1`, all of which decode. This is the same convention as the
+  tiny subset, so gt frame `N` is image `N − 1` here too.
+
+`make data-kenai-dev` reproduces the subset, and `full-v2` records it (see below).
 
 ## Validation
 
@@ -147,6 +180,7 @@ Results on 2026-09-30:
 |---|---:|---:|---|
 | Tiny subset (6,000 frames decoded) | 120 | 0 | 4 clips with 1 px size differences; 2 boxes partly outside (1 clip) |
 | Full annotations + metadata | 1,567 | 0 | 14 boxes partly outside (10 clips); 1 stray `.ipynb_checkpoints` (kenai-train) |
+| Full annotations + `kenai-dev-v1` frames (87,530 frames decoded, 247 clips) | 1,567 | 0 | as above, plus 28 subset clips with 1 px size differences |
 
 Also recorded per clip, as statistics rather than issues: tracks with missing frames
 between their first and last box (801 of 8,252 in the full annotations, which is normal for
@@ -193,7 +227,8 @@ versions:
 | Version | Clips | Usable | Frames validated | Notes |
 |---|---:|---:|---|---|
 | `tiny-v1` | 120 | 120 | yes (6,000 frames) | train 20, val 20, test 80 clips |
-| `full-v1` | 1,567 | 1,567 | no | annotations and metadata only; the full imagery is not downloaded yet |
+| `full-v1` | 1,567 | 1,567 | no | annotations and metadata only |
+| `full-v2` | 1,567 | 1,567 | 247 clips | as `full-v1`, plus the frames of the `kenai-dev-v1` subset (183 train, 64 val clips) |
 
 Columns (schema version 1):
 
