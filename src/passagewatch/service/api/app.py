@@ -59,6 +59,7 @@ from passagewatch.service.jobs import (
     new_id,
     utc_now,
 )
+from passagewatch.service.logs import configure_logging
 from passagewatch.service.settings import ServiceSettings
 
 API_VERSION = "v1"
@@ -424,4 +425,5 @@ def _writable(directory: Path) -> None:
 
 def app_from_env() -> FastAPI:
     """Entry point for ``uvicorn passagewatch.service.api.app:app_from_env --factory``."""
+    configure_logging()
     return create_app(ServiceSettings.from_env())

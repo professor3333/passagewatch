@@ -116,15 +116,21 @@ def process_job(
             tracks_artifact=job.job_id,
             now=utc_now(),
         )
-        logger.info("job %s succeeded: %s", job.job_id, result.summary())
+        logger.info(
+            "job succeeded",
+            extra={"job_id": job.job_id, "worker_id": worker_id, **result.summary()},
+        )
         return "succeeded"
     except LeaseLostError:
-        logger.warning("job %s: lease lost; stopping without publishing", job.job_id)
+        logger.warning(
+            "lease lost; stopping without publishing",
+            extra={"job_id": job.job_id, "worker_id": worker_id},
+        )
         return "lease_lost"
     except (ValueError, FileNotFoundError) as exc:
         return _fail(store, job, worker_id, str(exc), retryable=False)
     except Exception as exc:
-        logger.exception("job %s failed", job.job_id)
+        logger.exception("job failed", extra={"job_id": job.job_id, "worker_id": worker_id})
         return _fail(store, job, worker_id, f"{type(exc).__name__}: {exc}", retryable=True)
     finally:
         if heartbeat.is_alive():
@@ -136,7 +142,10 @@ def _fail(store: JobStore, job: Job, worker_id: str, error: str, *, retryable: b
         updated = store.fail(job.job_id, worker_id, error=error, retryable=retryable, now=utc_now())
     except LeaseLostError:
         return "lease_lost"
-    logger.warning("job %s: %s (%s)", job.job_id, error, updated.status)
+    logger.warning(
+        "job failed",
+        extra={"job_id": job.job_id, "error": error, "status": updated.status},
+    )
     return updated.status
 
 
@@ -154,7 +163,7 @@ def sweep_expired_uploads(conn: sqlite3.Connection, settings: ServiceSettings) -
         mark_clip_deleted(conn, clip.clip_id, now=utc_now())
         removed.append(clip.clip_id)
     if removed:
-        logger.info("deleted %d expired uploads", len(removed))
+        logger.info("deleted expired uploads", extra={"clips": len(removed)})
     return removed
 
 
@@ -174,7 +183,10 @@ def run_worker(
     last_sweep = 0.0
     try:
         worker_heartbeat(conn, worker_id, pipeline.version, now=utc_now())
-        logger.info("worker %s ready with %s", worker_id, pipeline.version)
+        logger.info(
+            "worker ready",
+            extra={"worker_id": worker_id, "pipeline_version": pipeline.version},
+        )
         while not stop.is_set() and (max_jobs is None or done < max_jobs):
             if time.monotonic() - last_sweep >= settings.retention_sweep_seconds:
                 sweep_expired_uploads(conn, settings)
@@ -189,7 +201,10 @@ def run_worker(
                 worker_heartbeat(conn, worker_id, pipeline.version, now=utc_now())
                 stop.wait(settings.worker_poll_seconds)
                 continue
-            logger.info("job %s leased (attempt %d)", job.job_id, job.attempts)
+            logger.info(
+                "job leased",
+                extra={"job_id": job.job_id, "worker_id": worker_id, "attempt": job.attempts},
+            )
             process_job(conn, settings, pipeline, job, worker_id)
             worker_heartbeat(conn, worker_id, pipeline.version, now=utc_now())
             done += 1

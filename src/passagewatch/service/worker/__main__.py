@@ -7,18 +7,18 @@ its lease expires.
 
 from __future__ import annotations
 
-import logging
 import signal
 import sys
 import threading
 
+from passagewatch.service.logs import configure_logging
 from passagewatch.service.settings import ServiceSettings
 from passagewatch.service.worker.loop import default_worker_id, run_worker
 from passagewatch.service.worker.pipeline import InferencePipeline
 
 
 def main() -> int:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    configure_logging()
     settings = ServiceSettings.from_env()
     pipeline = InferencePipeline.load(
         settings.bundle_dir.resolve(), settings.device, settings.inference_batch
