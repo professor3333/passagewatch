@@ -245,13 +245,22 @@ def test_bundles_are_built_once_and_loaded_with_their_checkpoint(tmp_path: Path)
 
     assert again == path and bundle.detector.epoch == 3 and bundle.detector.input_width == 64
     assert bundle.provenance["training_metadata"] == {"manifest": "full-v2"}
-    with pytest.raises(BundleExistsError):
+    with pytest.raises(BundleExistsError, match="different configuration"):
         build_bundle(
             checkpoint=ckpt,
             tracker_config=tracker,
             score_threshold=0.3,
             version="pw-1",
             bundles_dir=tmp_path / "bundles",
+        )
+    with pytest.raises(BundleExistsError, match="different provenance"):
+        build_bundle(
+            checkpoint=ckpt,
+            tracker_config=tracker,
+            score_threshold=0.2,
+            version="pw-1",
+            bundles_dir=tmp_path / "bundles",
+            provenance={"selection": "elsewhere"},
         )
     assert activate(tmp_path / "bundles", "pw-1").resolve() == path.resolve()
     assert InferencePipeline.load(tmp_path / "bundles" / "active").version == "pw-1"
