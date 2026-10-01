@@ -1,4 +1,4 @@
-.PHONY: install lint format typecheck test check data-tiny validate-tiny
+.PHONY: install lint format typecheck test check data-tiny validate-tiny manifest-tiny
 
 install:
 	uv sync
@@ -24,3 +24,6 @@ data-tiny:
 
 validate-tiny:
 	uv run python scripts/validate_data.py --subset tiny
+
+manifest-tiny:
+	uv run python scripts/build_manifest.py --version tiny-v1
