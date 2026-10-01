@@ -26,6 +26,8 @@ tracking → directional counting → review prioritization → human correction
 |---|---|
 | [Scope](docs/scope.md) | What Version 1 accepts, produces, and deliberately excludes |
 | [Counting policy](docs/counting_policy.md) | Coordinate convention, the `cfc-compatible-v1` counting rule, direction mapping, and the evaluation metric |
+| [Dataset card](docs/dataset_card.md) | CFC source, verified format facts, validation, splits, manifests, and the Kenai development subset |
+| [Classical baseline](docs/classical_baseline.md) | Method, tuning protocol, and measured results of the non-learned baseline |
 | [Roadmap](docs/roadmap.md) | Twelve stages, each with its completion test |
 | [Design](docs/design.md) | The full system design: data, models, evaluation, service, and operations |
 
@@ -72,6 +74,15 @@ The nMAE evaluator matches CFC's official evaluator exactly on its published bas
 
 ```bash
 uv run python scripts/evaluate_counts.py --tracker baseline++   # kenai-val only by default
+```
+
+The tuned classical baseline (`classical-v2`, tuned on kenai-train only) reaches nMAE
+0.235 on kenai-val. CFC's published learned Baseline reaches 0.049 on the same clips
+([results](docs/classical_baseline.md#results)):
+
+```bash
+uv run python scripts/run_classical.py --manifest full-v2 --partitions val \
+    --frames-dir data/extracted/cfc/kenai-dev-v1 --config configs/tracking/classical-v2.yaml
 ```
 
 ## Development

@@ -188,3 +188,21 @@ def test_pipeline_counts_a_synthetic_passage(tmp_path: Path) -> None:
 def test_config_is_strict(bad: dict[str, object]) -> None:
     with pytest.raises(ValueError):
         ClassicalConfig.model_validate(bad)
+
+
+def test_tuned_config_keeps_its_recorded_values() -> None:
+    # classical-v2 is the result of tuning plan 1; a different value needs a new name.
+    v1 = load_classical_config(REPO_ROOT / "configs/tracking/classical-v1.yaml")
+    v2 = load_classical_config(REPO_ROOT / "configs/tracking/classical-v2.yaml")
+
+    assert v2.name == "classical-v2"
+    assert (v2.detector.threshold_sigma, v2.detector.noise_bands) == (5.0, 4)
+    assert (v2.tracker.max_age, v2.tracker.min_length) == (4, 8)
+    unchanged = v2.model_copy(
+        update={
+            "name": v1.name,
+            "detector": v2.detector.model_copy(update={"threshold_sigma": 3.0, "noise_bands": 1}),
+            "tracker": v2.tracker.model_copy(update={"max_age": 3, "min_length": 3}),
+        }
+    )
+    assert unchanged.sha256() == v1.sha256()

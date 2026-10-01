@@ -1,0 +1,28 @@
+# Classical baseline, tuned (configs/tracking/tuning/classical-plan-1.yaml).
+# Selected by counting nMAE on the kenai-train part of kenai-dev-v1 (183 clips) only;
+# kenai-val was not used for selection. Changes from classical-v1: threshold_sigma 3 -> 5,
+# noise_bands 1 -> 4, tracker.max_age 3 -> 4, tracker.min_length 3 -> 8.
+# Results: docs/classical_baseline.md. Never edit these values; tune into a new name.
+
+name: classical-v2
+detector:
+  max_analysis_height: 960
+  background_window: 61
+  background_stride: 3
+  background_update_every: 5
+  blur_sigma_px: 1.0
+  threshold_sigma: 5.0
+  min_contrast: 8.0
+  open_px: 2
+  close_px: 5
+  min_area_m2: 0.004
+  max_area_m2: 0.6
+  fan_threshold: 8
+  noise_bands: 4
+tracker:
+  gate_m: 0.5
+  max_age: 4
+  min_hits: 3
+  min_length: 8
+  process_noise: 0.05
+  measurement_noise: 0.05
