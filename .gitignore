@@ -35,6 +35,12 @@ var/
 *.sqlite-wal
 *.sqlite-shm
 
+# Offline reference tooling (cloned and installed locally, never committed)
+tools/cfc_official_nmae/lib/
+tools/cfc_official_nmae/.venv/
+tools/cfc_official_nmae/evaluate.py
+tools/cfc_official_nmae/*.json
+
 # Frontend
 node_modules/
 frontend/dist/

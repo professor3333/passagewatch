@@ -62,6 +62,17 @@ versioning rules are in the [dataset card](docs/dataset_card.md#splits-and-manif
 > The `tiny` bundle includes clips from the official **test** locations. Those clips are
 > never used for training or tuning.
 
+## Counting and evaluation
+
+Counting follows the versioned policy `cfc-compatible-v1`, which reproduces the CFC
+benchmark's start/end-side rule: a fish that crosses the line and returns contributes zero.
+The nMAE evaluator matches CFC's official evaluator exactly on its published baseline tracks
+([details](docs/counting_policy.md#validation-against-the-official-evaluator)):
+
+```bash
+uv run python scripts/evaluate_counts.py --tracker baseline++   # kenai-val only by default
+```
+
 ## Development
 
 Requires [uv](https://docs.astral.sh/uv/).
