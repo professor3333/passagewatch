@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from passagewatch.detection.classical import (
     DetectorConfig,
+    FrameDetections,
     boxes_in_meters,
     clip_scale,
     detect_clip,
@@ -49,8 +50,12 @@ def load_classical_config(path: Path) -> ClassicalConfig:
 class ClipRun:
     tracks: BoxAnnotations
     trajectories: list[Trajectory]
-    detections: int
+    frame_detections: list[FrameDetections]
     seconds: dict[str, float]
+
+    @property
+    def detections(self) -> int:
+        return sum(len(d.scores) for d in self.frame_detections)
 
 
 def run_clip(clip: Clip, config: ClassicalConfig) -> ClipRun:
@@ -74,7 +79,7 @@ def run_clip(clip: Clip, config: ClassicalConfig) -> ClipRun:
     return ClipRun(
         tracks=trajectories_to_annotations(trajectories),
         trajectories=trajectories,
-        detections=sum(len(d.scores) for d in detections),
+        frame_detections=detections,
         seconds={
             "decode": decoded - started,
             "detect": detected - decoded,

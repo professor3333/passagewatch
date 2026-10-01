@@ -1,0 +1,30 @@
+# Tuning plan for the classical baseline: six experiments, one factor (or one coupled pair)
+# at a time, in this order. Selected by counting nMAE on the kenai-train subset only;
+# kenai-val is used once at the end to compare the untuned and tuned configurations.
+#
+# Order: first what decides whether a fish is detected at all (threshold, range-dependent
+# noise), then what removes clutter (size, smoothing), then association and track length.
+
+name: classical-plan-1
+base: configs/tracking/classical-v1.yaml
+result_name: classical-v2
+experiments:
+  - id: E1-threshold
+    vary:
+      detector.threshold_sigma: [3.0, 4.0, 5.0, 6.0, 7.0]
+  - id: E2-noise-bands
+    vary:
+      detector.noise_bands: [1, 4, 8]
+  - id: E3-min-area
+    vary:
+      detector.min_area_m2: [0.004, 0.008, 0.015, 0.025]
+  - id: E4-smoothing
+    vary:
+      detector.blur_sigma_px: [0.0, 1.0, 2.0]
+  - id: E5-association
+    vary:
+      tracker.gate_m: [0.3, 0.5, 0.8]
+      tracker.max_age: [2, 4]
+  - id: E6-track-length
+    vary:
+      tracker.min_length: [3, 5, 8, 12]

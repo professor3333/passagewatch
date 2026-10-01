@@ -18,6 +18,7 @@ resolutions. Boxes are returned in the internal convention, in original-frame pi
 
 from __future__ import annotations
 
+import itertools
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -46,6 +47,9 @@ class DetectorConfig(BaseModel):
     min_area_m2: float = Field(default=0.004, ge=0)
     max_area_m2: float = Field(default=0.6, gt=0)
     fan_threshold: int = Field(default=8, ge=0)
+    # Sonar noise changes with range (image rows). With n > 1 bands, the noise level is
+    # estimated separately in n horizontal bands of rows instead of once per frame.
+    noise_bands: int = Field(default=1, ge=1)
 
 
 @dataclass(frozen=True)
@@ -109,6 +113,36 @@ def _windows(n: int, config: DetectorConfig) -> list[tuple[int, int, list[int]]]
     return blocks
 
 
+def _row_bands(fan: NDArray[np.bool_], count: int) -> list[tuple[int, int]]:
+    """Split the rows that contain fan pixels into ``count`` bands of equal height."""
+    rows = np.flatnonzero(fan.any(axis=1))
+    edges = np.linspace(rows[0], rows[-1] + 1, count + 1).round().astype(int)
+    return [(int(a), int(b)) for a, b in itertools.pairwise(edges.tolist()) if b > a]
+
+
+def _noise_maps(
+    diff: NDArray[np.float32], fan: NDArray[np.bool_], bands: list[tuple[int, int]]
+) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
+    """Per-row robust center (median) and spread (1.4826 x MAD), as ``(h, 1)`` columns.
+
+    Rows above the first band and below the last use the nearest band's values.
+    """
+    h = diff.shape[0]
+    center = np.zeros((h, 1), dtype=np.float32)
+    spread = np.ones((h, 1), dtype=np.float32)
+    for i, (a, b) in enumerate(bands):
+        values = diff[a:b][fan[a:b]]
+        if values.size == 0:
+            continue
+        med = float(np.median(values))
+        mad = 1.4826 * float(np.median(np.abs(values - med))) or 1.0
+        lo = 0 if i == 0 else a
+        hi = h if i == len(bands) - 1 else b
+        center[lo:hi] = med
+        spread[lo:hi] = mad
+    return center, spread
+
+
 def _kernel(size: int) -> NDArray[np.uint8] | None:
     if size <= 1:
         return None
@@ -126,6 +160,7 @@ def detect_clip(frames: GrayFrames, scale: Scale, config: DetectorConfig) -> lis
     min_area = config.min_area_m2 / scale.analysis_pixel_area_m2
     max_area = config.max_area_m2 / scale.analysis_pixel_area_m2
 
+    bands = _row_bands(fan, config.noise_bands)
     results: list[FrameDetections] = []
     for start, stop, samples in _windows(n, config):
         background = np.median(frames[samples], axis=0).astype(np.float32)
@@ -133,10 +168,8 @@ def detect_clip(frames: GrayFrames, scale: Scale, config: DetectorConfig) -> lis
             diff = frames[t].astype(np.float32) - background
             if config.blur_sigma_px > 0:
                 diff = cv2.GaussianBlur(diff, (0, 0), config.blur_sigma_px)
-            inside = diff[fan]
-            median = float(np.median(inside))
-            sigma = 1.4826 * float(np.median(np.abs(inside - median))) or 1.0
-            threshold = max(median + config.threshold_sigma * sigma, config.min_contrast)
+            center, spread = _noise_maps(diff, fan, bands)
+            threshold = np.maximum(center + config.threshold_sigma * spread, config.min_contrast)
             mask = ((diff > threshold) & fan).astype(np.uint8)
             if open_k is not None:
                 mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, open_k)
@@ -158,7 +191,8 @@ def detect_clip(frames: GrayFrames, scale: Scale, config: DetectorConfig) -> lis
                         (top + height) * scale.sy,
                     )
                 )
-                scores.append((contrast - median) / sigma)
+                row = min(top + height // 2, len(center) - 1)
+                scores.append((contrast - float(center[row, 0])) / float(spread[row, 0]))
             results.append(
                 FrameDetections(
                     boxes=np.asarray(boxes, dtype=np.float64).reshape(-1, 4),
