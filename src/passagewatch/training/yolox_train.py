@@ -276,6 +276,14 @@ class Trainer:
     def _log(self, record: dict[str, Any]) -> None:
         with (self.out_dir / "metrics.jsonl").open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(record) + "\n")
+        # A short progress line for logs (e.g. a Kaggle background run).
+        print(
+            f"epoch {record['epoch']}/{self.config.epochs}  "
+            f"iter {record['iteration']}/{self.config.epochs * self.iters_per_epoch}  "
+            f"loss {record['total_loss']:.3f}  lr {record['lr']:.2e}  "
+            f"{record['images_per_second']:.0f} img/s",
+            flush=True,
+        )
 
     def _write_run_info(self) -> None:
         info = {
@@ -380,6 +388,11 @@ class Trainer:
                     return self.state
             self.state = TrainState(
                 epoch=epoch + 1, batch_in_epoch=0, iteration=self.state.iteration
+            )
+            print(
+                f"finished epoch {epoch + 1}/{self.config.epochs} "
+                f"in {(time.perf_counter() - started) / 60:.1f} min",
+                flush=True,
             )
             last = self.state.epoch == self.config.epochs
             if last or self.state.epoch % self.config.save_every_epochs == 0:
