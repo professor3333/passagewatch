@@ -51,9 +51,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+## YOLOX
+
+- **Source:** <https://github.com/Megvii-BaseDetection/YOLOX>, commit `6ddff48`
+  (2025-06-08)
+- **License:** Apache License 2.0. Copyright (c) 2021-2022 Megvii Inc. The full license
+  text is in `src/passagewatch/detection/yolox/LICENSE`. The repository has no `NOTICE` file.
+- **Used for:** the YOLOX model definition (backbone, neck, detection head, and loss),
+  **vendored** in `src/passagewatch/detection/yolox/`. Four files are unchanged. Three are
+  modified (`yolo_head.py`, `losses.py`, and `boxes.py`, which is assembled from excerpts),
+  and each says so in its header. The changes let the code run on any PyTorch device; the
+  full list is in that directory's `README.md`.
+- **Pretrained weights:** COCO-pretrained `yolox_tiny.pth` and `yolox_s.pth` from the YOLOX
+  GitHub release `0.1.1rc0`, under the same license. They are downloaded at run time and
+  verified by size and SHA-256 (`configs/training/pretrained.yaml`). They are not
+  committed or redistributed.
+- **Citation:**
+
+  > Ge, Z., Liu, S., Wang, F., Li, Z., and Sun, J. YOLOX: Exceeding YOLO Series in 2021.
+  > arXiv:2107.08430, 2021.
+
 ## Python dependencies
 
-Python dependencies are installed from PyPI and pinned in `uv.lock`. Each package is
-distributed under its own license. Detector and tracker code (YOLOX, ByteTrack), along with
-any pretrained weights, will be listed here with their pinned versions and licenses when
-they are added.
+Python dependencies are installed from PyPI (PyTorch on Linux from PyTorch's CPU wheel index)
+and pinned in `uv.lock`. Each package is distributed under its own license. A tracker
+(ByteTrack) will be listed here with its pinned version and license if it is added.
