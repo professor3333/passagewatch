@@ -15,7 +15,7 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
@@ -29,3 +29,9 @@ jobs:
         run: uv run mypy src/ scripts/
       - name: Test
         run: uv run pytest -m "not slow"
+      - name: Shell scripts
+        run: shellcheck docker/entrypoint.sh scripts/compose_smoke_test.sh tools/kaggle/train_on_kaggle.sh
+      - name: Container build
+        run: docker compose build
+      - name: Deployment smoke test (API + worker containers, random-weights bundle)
+        run: ./scripts/compose_smoke_test.sh

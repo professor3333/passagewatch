@@ -30,6 +30,7 @@ tracking → directional counting → review prioritization → human correction
 | [Classical baseline](docs/classical_baseline.md) | Method, tuning protocol, and measured results of the non-learned baseline |
 | [Training](docs/training.md) | How detectors are trained on a free Kaggle GPU, resumed, and collected |
 | [Neural baseline](docs/neural_baseline.md) | YOLOX-Tiny through the same tracker: selection and measured results |
+| [Architecture](docs/architecture.md) | The service: API, worker, job lifecycle, storage, release bundles, configuration |
 | [Roadmap](docs/roadmap.md) | Twelve stages, each with its completion test |
 | [Design](docs/design.md) | The full system design: data, models, evaluation, service, and operations |
 
@@ -97,6 +98,35 @@ These are development numbers on a validation day, not test results. Details are
 uv run python scripts/run_classical.py --manifest full-v2 --partitions val \
     --frames-dir data/extracted/cfc/kenai-dev-v1 --config configs/tracking/classical-v2.yaml
 ```
+
+## Running the service
+
+The service is an HTTP API plus an inference worker (Docker Compose, CPU). It needs a
+release bundle in `bundles/` (model weights are not in git). To build one from a trained
+checkpoint and make it active:
+
+```bash
+uv run python scripts/build_bundle.py --version passagewatch-0.2.0 \
+    --checkpoint models/runs/yolox-tiny-v1/epoch-025.pt --score-threshold 0.2 \
+    --tracking-config configs/tracking/classical-v2.yaml \
+    --selection docs/neural_baseline.md --activate
+docker compose up -d --build
+curl http://127.0.0.1:8000/health/ready
+```
+
+Analyze a recording (a ZIP of frames `0.jpg … N-1.jpg`, or a video):
+
+```bash
+curl -F file=@clip.zip -F framerate=10 -F x_meter_start=-1.6 -F x_meter_stop=1.6 \
+     -F y_meter_start=4.4 -F y_meter_stop=0.5 http://127.0.0.1:8000/v1/clips
+curl -X POST http://127.0.0.1:8000/v1/jobs -H 'Content-Type: application/json' \
+     -d '{"clip_id": "<clip_id>", "counting": {"upstream_direction": "right"}}'
+curl http://127.0.0.1:8000/v1/jobs/<job_id>/results
+```
+
+If port 8000 is taken, set another with `PASSAGEWATCH_HTTP_PORT=8010 docker compose up -d`.
+`./scripts/compose_smoke_test.sh` checks a deployment end to end with a random-weights
+bundle (CI runs it). Details are in [docs/architecture.md](docs/architecture.md).
 
 ## Development
 
