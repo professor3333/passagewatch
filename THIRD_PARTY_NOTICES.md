@@ -74,5 +74,13 @@ SOFTWARE.
 ## Python dependencies
 
 Python dependencies are installed from PyPI (PyTorch on Linux from PyTorch's CPU wheel index)
-and pinned in `uv.lock`. Each package is distributed under its own license. A tracker
-(ByteTrack) will be listed here with its pinned version and license if it is added.
+and pinned in `uv.lock`. Each package is distributed under its own license.
+
+## ByteTrack (method only)
+
+`passagewatch.tracking.bytetrack` implements the ByteTrack association method from its
+paper. No ByteTrack code is vendored or installed.
+
+> Zhang, Y., Sun, P., Jiang, Y., Yu, D., Weng, F., Yuan, Z., Luo, P., Liu, W., and Wang, X.
+> ByteTrack: Multi-Object Tracking by Associating Every Detection Box. *European Conference
+> on Computer Vision (ECCV)*, 2022.

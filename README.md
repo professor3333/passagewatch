@@ -86,6 +86,9 @@ Measured on the 64 kenai-val clips, with 95% intervals from a paired bootstrap o
 | YOLOX-Tiny + the same tracker (selected on kenai-val) | 0.120 [0.078, 0.171] |
 | CFC published Baseline / Baseline++ | 0.049 / 0.033 |
 
+ByteTrack, fed the same detections, was not measurably better than the Kalman tracker
+(−0.011 [−0.048, +0.021]), so the Kalman tracker is kept
+([tracker experiment](docs/neural_baseline.md#tracker-experiment-stage-5-kalman-tracker-versus-bytetrack)).
 These are development numbers on a validation day, not test results. Details are in
 [classical baseline](docs/classical_baseline.md#results) and
 [neural baseline](docs/neural_baseline.md#results).

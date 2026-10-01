@@ -1,0 +1,20 @@
+# Follow-up to tracker-plan-1, declared after seeing its results. Plan 1 used ByteTrack's
+# default score scale (tracks start at >= 0.6), far above this detector's selected operating
+# point (0.2), so fish scoring 0.2-0.6 could never start a track. Plan 2 matches ByteTrack's
+# thresholds to the detector's score scale, with the same budget of four settings. Its
+# result carries extra selection on kenai-val (docs/neural_baseline.md).
+
+name: tracker-plan-2
+kalman:
+  base: configs/tracking/classical-v2.yaml
+  score_threshold: 0.2
+  settings:
+    - {}                                      # the current pipeline, as the reference
+bytetrack:
+  base:
+    low_threshold: 0.05
+  settings:
+    - {high_threshold: 0.2, new_track_threshold: 0.3, min_length: 3}
+    - {high_threshold: 0.2, new_track_threshold: 0.3, min_length: 8}
+    - {high_threshold: 0.3, new_track_threshold: 0.4, min_length: 3}
+    - {high_threshold: 0.3, new_track_threshold: 0.4, min_length: 8}
