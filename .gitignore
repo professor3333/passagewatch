@@ -25,6 +25,7 @@ data/quarantine/
 
 # Models, experiments, and serving state
 models/
+bundles/
 *.pt
 *.pth
 *.onnx
