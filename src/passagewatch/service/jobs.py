@@ -255,14 +255,30 @@ class JobStore:
 
     # -- worker side ---------------------------------------------------------------
 
-    def lease(self, worker_id: str, *, lease_seconds: int, now: datetime) -> Job | None:
-        """Lease the oldest runnable job: queued, or running with an expired lease."""
+    def lease(
+        self,
+        worker_id: str,
+        *,
+        lease_seconds: int,
+        now: datetime,
+        pipeline_version: str | None = None,
+    ) -> Job | None:
+        """Lease the oldest runnable job: queued, or running with an expired lease.
+
+        With ``pipeline_version``, only jobs recorded with that version are leased: a worker
+        never runs a job with a different model than the job was created for.
+        """
         with transaction(self.conn):
             self._expire(now)
+            version_clause = "" if pipeline_version is None else " AND pipeline_version = ?"
+            params: tuple[Any, ...] = (QUEUED, RUNNING, iso(now))
+            if pipeline_version is not None:
+                params += (pipeline_version,)
             row = self.conn.execute(
-                "SELECT * FROM jobs WHERE status = ? OR (status = ? AND lease_expires_at < ?)"
-                " ORDER BY created_at LIMIT 1",
-                (QUEUED, RUNNING, iso(now)),
+                "SELECT * FROM jobs WHERE (status = ? OR (status = ? AND lease_expires_at < ?))"
+                + version_clause
+                + " ORDER BY created_at LIMIT 1",
+                params,
             ).fetchone()
             if row is None:
                 return None

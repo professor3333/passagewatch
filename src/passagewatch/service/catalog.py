@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from passagewatch.service.db import transaction
@@ -168,3 +168,43 @@ def expired_clips(conn: sqlite3.Connection, *, now: datetime) -> list[ClipRecord
         (iso(now),),
     ).fetchall()
     return [ClipRecord(**{f: r[f] for f in _CLIP_FIELDS}) for r in rows]
+
+
+@dataclass(frozen=True)
+class WorkerRecord:
+    worker_id: str
+    pipeline_version: str
+    ready_at: str
+    heartbeat_at: str
+    current_job: str | None
+
+
+def worker_heartbeat(
+    conn: sqlite3.Connection,
+    worker_id: str,
+    pipeline_version: str,
+    *,
+    now: datetime,
+    current_job: str | None = None,
+) -> None:
+    """Record that a worker has its model loaded and is alive (first call marks it ready)."""
+    with transaction(conn):
+        conn.execute(
+            "INSERT INTO workers (worker_id, pipeline_version, ready_at, heartbeat_at, current_job)"
+            " VALUES (?, ?, ?, ?, ?) ON CONFLICT (worker_id) DO UPDATE SET"
+            " pipeline_version = excluded.pipeline_version,"
+            " heartbeat_at = excluded.heartbeat_at, current_job = excluded.current_job",
+            (worker_id, pipeline_version, iso(now), iso(now), current_job),
+        )
+
+
+def live_workers(
+    conn: sqlite3.Connection, pipeline_version: str, *, now: datetime, stale_seconds: float
+) -> list[WorkerRecord]:
+    cutoff = iso(now - timedelta(seconds=stale_seconds))
+    rows = conn.execute(
+        "SELECT * FROM workers WHERE pipeline_version = ? AND heartbeat_at >= ?",
+        (pipeline_version, cutoff),
+    ).fetchall()
+    fields = ("worker_id", "pipeline_version", "ready_at", "heartbeat_at", "current_job")
+    return [WorkerRecord(**{f: r[f] for f in fields}) for r in rows]

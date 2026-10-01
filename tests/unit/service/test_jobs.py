@@ -14,7 +14,7 @@ from passagewatch.service.catalog import (
     mark_clip_deleted,
     register_pipeline_version,
 )
-from passagewatch.service.db import connect
+from passagewatch.service.db import _SCHEMA_V1, SCHEMA_VERSION, connect
 from passagewatch.service.jobs import (
     FAILED,
     QUEUED,
@@ -302,7 +302,7 @@ def test_schema_survives_reconnection(tmp_path: Path) -> None:
 
     second = connect(tmp_path / "s.db")
 
-    assert second.execute("SELECT version FROM schema_version").fetchone()[0] == 1
+    assert second.execute("SELECT version FROM schema_version").fetchone()[0] == SCHEMA_VERSION
     assert second.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
     assert second.execute("SELECT COUNT(*) FROM pipeline_versions").fetchone()[0] == 1
 
@@ -348,3 +348,42 @@ def test_concurrent_workers_never_lease_the_same_job(tmp_path: Path) -> None:
         t.join()
 
     assert len(leased) == 10 and len(set(leased)) == 10
+
+
+def test_a_version_1_database_is_upgraded_in_place(tmp_path: Path) -> None:
+    old = sqlite3.connect(tmp_path / "v1.db")
+    old.executescript(
+        "CREATE TABLE schema_version (version INTEGER NOT NULL);"
+        + _SCHEMA_V1
+        + "INSERT INTO schema_version VALUES (1);"
+        + "INSERT INTO pipeline_versions VALUES ('pw-old', '2026-01-01', 'x', '{}');"
+    )
+    old.close()
+
+    conn = connect(tmp_path / "v1.db")
+
+    assert conn.execute("SELECT version FROM schema_version").fetchone()[0] == 2
+    assert conn.execute("SELECT COUNT(*) FROM pipeline_versions").fetchone()[0] == 1
+    assert conn.execute("SELECT COUNT(*) FROM workers").fetchone()[0] == 0
+
+
+def test_workers_are_live_only_while_heartbeating(conn: sqlite3.Connection) -> None:
+    from passagewatch.service.catalog import live_workers, worker_heartbeat
+
+    worker_heartbeat(conn, "w1", "pw-1", now=T0)
+    worker_heartbeat(conn, "w2", "pw-0", now=T0)
+
+    assert [w.worker_id for w in live_workers(conn, "pw-1", now=at(30), stale_seconds=60)] == ["w1"]
+    assert live_workers(conn, "pw-1", now=at(61), stale_seconds=60) == []
+    worker_heartbeat(conn, "w1", "pw-1", now=at(90), current_job="job_x")
+    (w1,) = live_workers(conn, "pw-1", now=at(100), stale_seconds=60)
+    assert w1.ready_at < w1.heartbeat_at and w1.current_job == "job_x"
+
+
+def test_workers_only_lease_jobs_of_their_pipeline_version(store: JobStore) -> None:
+    register_pipeline_version(store.conn, "pw-other", {"detector": "y"}, now=T0)
+    job = create(store).job  # recorded with pw-test
+
+    assert store.lease("w1", lease_seconds=LEASE, now=at(1), pipeline_version="pw-other") is None
+    leased = store.lease("w2", lease_seconds=LEASE, now=at(2), pipeline_version="pw-test")
+    assert leased is not None and leased.job_id == job.job_id
