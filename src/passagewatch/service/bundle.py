@@ -61,3 +61,75 @@ class ReleaseBundle(_Frozen):
 def load_bundle(bundle_dir: Path) -> ReleaseBundle:
     data = json.loads((bundle_dir / BUNDLE_FILE).read_text(encoding="utf-8"))
     return ReleaseBundle.model_validate(data)
+
+
+class BundleExistsError(ValueError):
+    """A bundle version already exists with different content."""
+
+
+def build_bundle(
+    *,
+    checkpoint: Path,
+    tracker_config: dict[str, Any],
+    score_threshold: float,
+    version: str,
+    bundles_dir: Path,
+    provenance: dict[str, Any] | None = None,
+) -> Path:
+    """Create ``bundles_dir/<version>/`` from a training checkpoint; versions are immutable.
+
+    The checkpoint is copied as ``detector.pt`` and its SHA-256 recorded. The detector's size,
+    input, training run and epoch are read from the checkpoint itself, not passed in.
+    """
+    import hashlib
+    import shutil
+
+    import torch
+
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
+    config = payload["config"]
+    digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+    bundle = ReleaseBundle(
+        pipeline_version=version,
+        detector=DetectorSpec(
+            model_size=config["model_size"],
+            checkpoint="detector.pt",
+            checkpoint_sha256=digest,
+            input_height=config["input_height"],
+            input_width=config["input_width"],
+            score_threshold=score_threshold,
+            training_run=config["name"],
+            epoch=int(payload["state"]["epoch"]),
+        ),
+        preprocessing_version=payload["preprocessing_version"],
+        tracker=TrackerSpec(config=tracker_config),
+        counting_policy="cfc-compatible-v1",
+        provenance={"training_metadata": payload.get("metadata", {}), **(provenance or {})},
+    )
+    target = bundles_dir / version
+    if target.exists():
+        existing = load_bundle(target)
+        if existing != bundle:
+            raise BundleExistsError(f"bundle {version} exists with different content")
+        return target
+    tmp = bundles_dir / f".{version}.partial"
+    shutil.rmtree(tmp, ignore_errors=True)
+    tmp.mkdir(parents=True)
+    shutil.copyfile(checkpoint, tmp / "detector.pt")
+    (tmp / BUNDLE_FILE).write_text(
+        json.dumps(bundle.model_dump(mode="json"), indent=1) + "\n", encoding="utf-8"
+    )
+    tmp.rename(target)
+    return target
+
+
+def activate(bundles_dir: Path, version: str) -> Path:
+    """Point ``bundles_dir/active`` at a version (the active-release pointer)."""
+    if not (bundles_dir / version / BUNDLE_FILE).is_file():
+        raise FileNotFoundError(f"no bundle {version} in {bundles_dir}")
+    link = bundles_dir / "active"
+    tmp = bundles_dir / ".active.tmp"
+    tmp.unlink(missing_ok=True)
+    tmp.symlink_to(version)
+    tmp.replace(link)
+    return link
