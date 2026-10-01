@@ -1,0 +1,11 @@
+# The training half of kenai-dev-v1 (configs/data/kenai_subset.yaml): the same five
+# kenai-train days, without kenai-val. Used on GPU hosts, where only training frames are
+# needed (~12.5 GB instead of ~19 GB). Its frames are byte-identical to those of
+# kenai-dev-v1; scripts/verify_frames.py checks them against the committed inventory.
+
+name: kenai-dev-v1-train
+archive: g945x-41103/kenai.tar
+member_prefix: kenai/
+include:
+  - location: kenai-train
+    days: [2018-05-26, 2018-05-29, 2018-06-01, 2018-06-05, 2018-06-08]

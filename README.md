@@ -28,6 +28,7 @@ tracking → directional counting → review prioritization → human correction
 | [Counting policy](docs/counting_policy.md) | Coordinate convention, the `cfc-compatible-v1` counting rule, direction mapping, and the evaluation metric |
 | [Dataset card](docs/dataset_card.md) | CFC source, verified format facts, validation, splits, manifests, and the Kenai development subset |
 | [Classical baseline](docs/classical_baseline.md) | Method, tuning protocol, and measured results of the non-learned baseline |
+| [Training](docs/training.md) | How detectors are trained on a free Kaggle GPU, resumed, and collected |
 | [Roadmap](docs/roadmap.md) | Twelve stages, each with its completion test |
 | [Design](docs/design.md) | The full system design: data, models, evaluation, service, and operations |
 
