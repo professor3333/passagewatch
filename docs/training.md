@@ -1,0 +1,118 @@
+# Training a Detector
+
+Training needs a GPU; everything else (development, evaluation, serving) runs on CPU.
+PassageWatch trains on a free **Kaggle** notebook GPU. The notebook downloads the data
+itself, so nothing is uploaded from the development machine.
+
+## What a training run does
+
+`tools/kaggle/train_on_kaggle.sh`, run from a fresh clone of the repository:
+
+1. Creates a Python 3.12 environment with the locked dependencies (`uv.lock`) and the CUDA
+   build of the **locked** torch and torchvision versions. It stops if no GPU is visible.
+2. Downloads the CFC labels (MD5-verified) and streams the `kenai-dev-v1-train` frames
+   (`configs/data/kenai_subset_train.yaml`: the five kenai-train days of `kenai-dev-v1`,
+   about 12.5 GB kept from a 44 GB stream). Every frame is then checked against the
+   committed SHA-256 inventory (`scripts/verify_frames.py`), so the GPU host trains on
+   exactly the frames validated in manifest `full-v2`.
+3. Trains with `scripts/train_yolox.py` (configuration `configs/training/yolox-tiny-v1.yaml`
+   by default), resuming from `latest.pt` if the run directory already has one.
+
+Only the kenai-train partition is used. kenai-val and the test locations are never loaded.
+
+## One-time Kaggle setup
+
+1. Sign in at <https://www.kaggle.com>.
+2. **Verify your phone number** (Settings → Phone verification). Without it, notebooks
+   cannot use a GPU or the internet.
+
+## Running it
+
+1. **Create** → **New Notebook**.
+2. In the right-hand panel, under **Session options**:
+   - **Accelerator:** *GPU T4 x2* (one GPU is used);
+   - **Internet:** on.
+3. Replace the first cell with:
+
+   ```bash
+   %%bash
+   set -euo pipefail
+   REF=main   # or a commit/tag; the run records the exact commit either way
+   git clone --quiet https://github.com/professor3333/passagewatch.git /tmp/passagewatch
+   cd /tmp/passagewatch
+   git checkout --quiet "$REF"
+   CONFIG=configs/training/yolox-tiny-v1.yaml bash tools/kaggle/train_on_kaggle.sh
+   ```
+
+4. Click **Save Version** → **Save & Run All (Commit)** → **Save**. The notebook now runs
+   in the background, so you can close the browser. Follow it under the notebook's
+   **Versions** (the log shows streaming and training progress).
+
+The session time limit and the weekly GPU quota are set by Kaggle and shown in your
+account. Streaming the data also counts against the GPU quota, because the GPU session is
+running.
+
+## Collecting the results
+
+When the version finishes, open it and go to **Output**. The run directory
+`runs/yolox-tiny-v1/` contains:
+
+| File | Contents |
+|---|---|
+| `epoch-NNN.pt` | Weights after each epoch, with config and metadata |
+| `latest.pt` | Everything needed to resume (weights, optimizer, AMP scaler, RNG states, position) |
+| `metrics.jsonl` | Losses, learning rate and throughput every 50 iterations |
+| `run.json` | Config, seeds, sample counts, device, torch version, git commit, manifest hash |
+
+Download the directory and put it at `models/runs/yolox-tiny-v1/` in your local clone
+(`models/` is not committed). The next step chooses the released epoch by **counting
+nMAE on kenai-val** through the full pipeline, not by training loss.
+
+## If a run stops early
+
+Checkpoints are written every 500 iterations and after every epoch, so a run that hits the
+session limit loses at most a few minutes of work. To continue:
+
+1. Open the notebook, click **Add Input**, and add **the output of the stopped version**
+   (search for your notebook by name under *Your Work*).
+2. Add a line `export RESUME_FROM=/kaggle/input/<input name>/runs/yolox-tiny-v1` before
+   the `bash tools/kaggle/train_on_kaggle.sh` line, using the input's path as shown in the
+   right-hand panel.
+3. **Save Version** again. Training continues exactly where it stopped: the sample order and
+   augmentation of each epoch are seeded, and the RNG states are restored.
+
+## Training locally (smoke tests only)
+
+The development Mac (Apple M1) can run a few iterations on its GPU through PyTorch's MPS
+backend. It manages about 5 images per second, far too slow for a real run (an epoch
+would take over an hour), but enough to check the pipeline:
+
+```bash
+uv run python scripts/train_yolox.py --config configs/training/yolox-tiny-v1.yaml \
+    --manifest full-v2 --frames-dir data/extracted/cfc/kenai-dev-v1 \
+    --out runs/train/smoke --device mps --max-iters 20
+```
+
+## Training design
+
+See the docstring of `passagewatch.training.yolox_train` for details.
+
+- **Transfer learning:** COCO-pretrained YOLOX with a new one-class head. One head-only
+  epoch, with the backbone and neck frozen (including their BatchNorm statistics), is
+  followed by full fine-tuning in which the backbone and neck learn 10× slower than the
+  head. `pretrained: null` gives the from-scratch control.
+- **Learning rate:** YOLOX's linear scaling (0.01 / 64 per image), a quadratic warm-up
+  over one epoch, then cosine decay to 5% of the peak. Training uses SGD with Nesterov
+  momentum and weight decay on weights only.
+- **Data:** every 3rd frame of each training clip, including frames without fish. Boxes
+  are clipped to the frame. Preprocessing is the serving code itself
+  (`letterbox-gray3-v1`, 960 × 416 input); a test checks that, with augmentation off, a
+  training sample equals the serving input exactly.
+- **Augmentation (modest):** horizontal flip, contrast/brightness, Gaussian noise and
+  slight blur. There are no rotations, crops or color changes. Detection labels carry no
+  direction of travel, so a flip has no left/right label to swap.
+- **Reproducibility:** fixed seeds for Python, NumPy and PyTorch, plus a seeded per-epoch
+  sample order. Augmentation is seeded per (seed, epoch, sample). A resumed run is
+  bit-identical to an uninterrupted one on CPU (tested).
+- **Not yet:** MLflow tracking. Metrics go to `metrics.jsonl` and `run.json`, which a later
+  stage can import.

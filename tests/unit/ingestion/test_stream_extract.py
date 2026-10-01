@@ -209,3 +209,16 @@ def test_repository_subset_config_is_valid() -> None:
 
     assert config.archive == "g945x-41103/kenai.tar"
     assert {i.location for i in config.include} == {"kenai-train", "kenai-val"}
+
+
+def test_training_subset_is_the_train_half_of_kenai_dev_v1() -> None:
+    from passagewatch.ingestion.subsets import load_subset_config
+
+    root = Path(__file__).resolve().parents[3] / "configs/data"
+    full = load_subset_config(root / "kenai_subset.yaml")
+    train = load_subset_config(root / "kenai_subset_train.yaml")
+
+    assert train.archive == full.archive and train.member_prefix == full.member_prefix
+    assert [i.location for i in train.include] == ["kenai-train"]
+    full_train = next(i for i in full.include if i.location == "kenai-train")
+    assert train.include[0].days == full_train.days
