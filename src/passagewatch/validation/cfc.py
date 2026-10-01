@@ -37,6 +37,7 @@ from passagewatch.ingestion.mot import (
     mot_to_internal,
     read_mot_rows,
 )
+from passagewatch.ingestion.splits import parse_clip_name
 
 MAX_EXAMPLES = 5
 REPORT_VERSION = 1
@@ -64,6 +65,7 @@ class Code(StrEnum):
     UNREADABLE_FRAME = "unreadable_frame"
     IMAGE_SIZE_MISMATCH = "image_size_mismatch"
     TINY_ROWS_NOT_IN_GT = "tiny_rows_not_in_gt"
+    INVALID_CLIP_NAME = "invalid_clip_name"
     # Warnings: recorded; the clip stays usable.
     BOX_PARTIALLY_OUTSIDE_IMAGE = "box_partially_outside_image"
     IMAGE_SIZE_DIFFERS_SLIGHTLY = "image_size_differs_slightly"
@@ -427,6 +429,20 @@ def validate_clip(
 
     def report(stats: ClipStats | None = None) -> ClipReport:
         return ClipReport(location, clip, tuple(issues), stats)
+
+    try:
+        name = parse_clip_name(clip)
+    except ValueError as exc:
+        issues.append(_issue(Code.INVALID_CLIP_NAME, str(exc)))
+    else:
+        if name.stop - name.start != meta.num_frames:
+            issues.append(
+                _issue(
+                    Code.INVALID_CLIP_NAME,
+                    f"clip name covers {name.stop - name.start} frames "
+                    f"but num_frames={meta.num_frames}",
+                )
+            )
 
     gt_path = layout.gt_path(location, clip)
     if not gt_path.is_file():

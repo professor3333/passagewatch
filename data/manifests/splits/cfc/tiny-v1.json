@@ -1,0 +1,35 @@
+{
+ "name": "cfc-tiny-v1",
+ "schema_version": 1,
+ "dataset": "cfc",
+ "subset": "tiny",
+ "rows": 120,
+ "content_sha256": "b32a784cccbab04334ca44a50c115f8c20676c364b7a9a9bbbbe8606e9ff0edb",
+ "split_rule": "partition = publisher split of the clip's location (kenai-train -> train, kenai-val -> val, all other locations -> test); whole clips only; tuning_allowed = partition != test; quarantined clips are listed but not usable",
+ "inputs": {
+  "validation_report": "5af84255ff96523ae8fd9608c740c3b12641fdfb65613e7ac0b6fe2647f19f50",
+  "inventory/tiny_dataset": "d3dade65486d29ef370bbd11ab64aec3af1bb84e5487e79c2bc4a3c420928170",
+  "inventory/fish_counting_annotations": "760ff92cbe7ba678cb8dcb9f0dc1ac0b284091a678abaed2a4f0268387994315",
+  "inventory/fish_counting_metadata": "4e5934a687bfc4f9715185363341be7a97f93715dfd2c3d720a6c291f298eccf"
+ },
+ "partitions": {
+  "test": {
+   "clips": 80,
+   "usable_clips": 80,
+   "window_frames": 4000,
+   "boxes": 11218
+  },
+  "train": {
+   "clips": 20,
+   "usable_clips": 20,
+   "window_frames": 1000,
+   "boxes": 1068
+  },
+  "val": {
+   "clips": 20,
+   "usable_clips": 20,
+   "window_frames": 1000,
+   "boxes": 1049
+  }
+ }
+}

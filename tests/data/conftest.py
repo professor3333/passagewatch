@@ -17,6 +17,11 @@ WIDTH, HEIGHT = 40, 60
 NUM_FRAMES = 30
 
 
+def clip_name(label: str, start: int = 100) -> str:
+    """A CFC-style clip name: frames [start, start + NUM_FRAMES) of one recording."""
+    return f"{label}_2018-06-01_120000_{start}_{start + NUM_FRAMES}"
+
+
 def mot_line(frame: int, track: int, left: float, top: float, w: float, h: float) -> str:
     return f"{frame},{track},{left:.3f},{top:.3f},{w:.3f},{h:.3f},1.0,-1,-1,-1\n"
 
