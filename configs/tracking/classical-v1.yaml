@@ -1,0 +1,28 @@
+# Classical baseline: background subtraction -> connected components -> size filter ->
+# Kalman association. Sizes and distances are in meters (from each clip's metadata), so the
+# same values apply to clips rendered at different resolutions.
+#
+# These are untuned starting values. Tuned configurations get a new name; a name is never
+# reused for different values (runs record the config's SHA-256).
+
+name: classical-v1
+detector:
+  max_analysis_height: 960
+  background_window: 61        # frames in the temporal-median background (centered)
+  background_stride: 3         # use every 3rd frame of the window
+  background_update_every: 5   # recompute the background every 5 frames
+  blur_sigma_px: 1.0           # smooth speckle before thresholding (analysis pixels)
+  threshold_sigma: 3.0         # foreground: diff > median + 3 x robust noise sigma
+  min_contrast: 8.0            # ... and at least 8 gray levels
+  open_px: 2
+  close_px: 5
+  min_area_m2: 0.004           # ~ 6 x 6 cm; the smallest annotated fish are ~ 8 x 7 cm
+  max_area_m2: 0.6
+  fan_threshold: 8
+tracker:
+  gate_m: 0.5                  # max distance between prediction and detection per frame
+  max_age: 3                   # frames a track may go unmatched before it ends
+  min_hits: 3
+  min_length: 3
+  process_noise: 0.05
+  measurement_noise: 0.05

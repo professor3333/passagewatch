@@ -11,6 +11,7 @@ dependencies = [
     "pyarrow>=17",
     "pydantic>=2.8",
     "pyyaml>=6.0",
+    "scipy>=1.13",
 ]
 
 [dependency-groups]
@@ -19,6 +20,7 @@ dev = [
     "pyarrow-stubs>=20.0.0.20260819",
     "pytest>=8.3",
     "ruff>=0.6",
+    "scipy-stubs>=1.18.1.1",
     "types-pyyaml>=6.0.12.20260906",
 ]
 
