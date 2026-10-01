@@ -109,8 +109,15 @@ def build_bundle(
     target = bundles_dir / version
     if target.exists():
         existing = load_bundle(target)
-        if existing != bundle:
-            raise BundleExistsError(f"bundle {version} exists with different content")
+        if existing.config() != bundle.config():
+            raise BundleExistsError(
+                f"bundle {version} exists with a different configuration; use a new version"
+            )
+        if existing.provenance != bundle.provenance:
+            raise BundleExistsError(
+                f"bundle {version} exists with the same configuration but different provenance "
+                f"({existing.provenance}); rebuild with the same options or use a new version"
+            )
         return target
     tmp = bundles_dir / f".{version}.partial"
     shutil.rmtree(tmp, ignore_errors=True)
