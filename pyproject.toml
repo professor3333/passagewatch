@@ -12,6 +12,8 @@ dependencies = [
     "pydantic>=2.8",
     "pyyaml>=6.0",
     "scipy>=1.13",
+    "torch>=2.5",
+    "torchvision>=0.20",
 ]
 
 [dependency-groups]
@@ -35,6 +37,8 @@ packages = ["src/passagewatch"]
 line-length = 100
 target-version = "py312"
 src = ["src", "tests"]
+# Third-party code vendored unchanged or minimally changed (see its README).
+extend-exclude = ["src/passagewatch/detection/yolox"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "NPY", "RUF"]
@@ -43,6 +47,16 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM", "NPY", "RUF"]
 python_version = "3.12"
 strict = true
 mypy_path = "src"
+# Calls into the vendored, untyped YOLOX code are allowed; everything else stays strict.
+untyped_calls_exclude = ["passagewatch.detection.yolox"]
+
+[[tool.mypy.overrides]]
+module = "passagewatch.detection.yolox.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["torchvision", "torchvision.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -50,3 +64,14 @@ addopts = "-ra --strict-markers"
 markers = [
     "slow: long-running tests excluded from the default CI run",
 ]
+
+# CI and Linux hosts get CPU-only PyTorch (the serving target is CPU); macOS uses the
+# default wheels (CPU + MPS). GPU training hosts use their own CUDA PyTorch (docs/training.md).
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+torchvision = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
