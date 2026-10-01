@@ -36,6 +36,7 @@ from passagewatch.preprocessing.letterbox import (
     letterbox_gray,
     to_network_input,
 )
+from passagewatch.tracking.bytetrack import ByteTrackConfig, ByteTracker
 from passagewatch.tracking.kalman import KalmanTracker, TrackerConfig, trajectories_to_annotations
 
 # Detections below this score are never cached; thresholds are chosen above it.
@@ -164,22 +165,28 @@ class ClipEvaluation:
 def track_and_evaluate(
     clip: Clip,
     detections: list[FrameDetections],
-    tracker: TrackerConfig,
+    tracker: TrackerConfig | ByteTrackConfig,
     policy: CountingPolicy = CFC_COMPATIBLE_V1,
 ) -> ClipEvaluation:
     """Track ``detections`` (one per window frame) and compare counts with the reference.
 
-    Any detector's output can be evaluated this way, with the same tracker and counting.
+    Any detector's output can be evaluated this way, with either tracker and the same
+    counting. The Kalman tracker associates by distance in meters; ByteTrack by box IoU.
     """
     meta = clip.metadata
-    scale = Scale(
-        sx=1.0,
-        sy=1.0,
-        meters_per_px_x=abs(meta.x_meter_stop - meta.x_meter_start) / meta.width,
-        meters_per_px_y=abs(meta.y_meter_stop - meta.y_meter_start) / meta.height,
-    )
-    centers = [boxes_in_meters(d.boxes, scale) for d in detections]
-    trajectories = KalmanTracker(tracker).run(detections, centers, frame_offset=clip.frame_start)
+    if isinstance(tracker, ByteTrackConfig):
+        trajectories = ByteTracker(tracker).run(detections, frame_offset=clip.frame_start)
+    else:
+        scale = Scale(
+            sx=1.0,
+            sy=1.0,
+            meters_per_px_x=abs(meta.x_meter_stop - meta.x_meter_start) / meta.width,
+            meters_per_px_y=abs(meta.y_meter_stop - meta.y_meter_start) / meta.height,
+        )
+        centers = [boxes_in_meters(d.boxes, scale) for d in detections]
+        trajectories = KalmanTracker(tracker).run(
+            detections, centers, frame_offset=clip.frame_start
+        )
     tracks = trajectories_to_annotations(trajectories)
     error = ClipCountError(
         clip.name,
