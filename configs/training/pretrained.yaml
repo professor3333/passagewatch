@@ -1,0 +1,13 @@
+# COCO-pretrained YOLOX weights (Apache-2.0), from the YOLOX GitHub release 0.1.1rc0.
+# Sizes and SHA-256 were computed by PassageWatch on 2026-10-01; downloads are rejected
+# unless they match. Weights are cached under models/pretrained/ and never committed.
+
+weights:
+  yolox-tiny:
+    url: https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_tiny.pth
+    size: 40755013
+    sha256: 9de513de589ac98bb92d3bca53b5af7b9acfa9b0bacb831f7999d0f7afaee8f0
+  yolox-s:
+    url: https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.pth
+    size: 72089125
+    sha256: f55ded7181e1b0c13285c56e7790b8f0e8f8db590fe4edb37f0b7f345c913a30
