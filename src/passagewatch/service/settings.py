@@ -27,6 +27,13 @@ class ServiceSettings(BaseModel):
     job_deadline_seconds: int = Field(default=3600, gt=0)
     lease_seconds: int = Field(default=120, gt=0)
     tracks_page_limit: int = Field(default=200, gt=0)
+    # Worker
+    device: str = "cpu"  # the serving target is CPU; "auto" also tries CUDA, then MPS
+    inference_batch: int = Field(default=8, gt=0)
+    worker_poll_seconds: float = Field(default=2.0, gt=0)
+    heartbeat_seconds: float = Field(default=20.0, gt=0)
+    retention_sweep_seconds: float = Field(default=600.0, gt=0)
+    worker_stale_seconds: float = Field(default=60.0, gt=0)
 
     @property
     def db_path(self) -> Path:

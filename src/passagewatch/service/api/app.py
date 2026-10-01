@@ -43,6 +43,7 @@ from passagewatch.service.catalog import (
     add_clip,
     get_clip,
     get_pipeline_version,
+    live_workers,
     mark_clip_deleted,
     register_pipeline_version,
 )
@@ -382,10 +383,21 @@ def create_app(settings: ServiceSettings) -> FastAPI:
 
     @app.get("/health/ready")
     def ready(conn: Db) -> JSONResponse:
+        bundle: ReleaseBundle | None = state["bundle"]
         checks = {
             "database": _check(lambda: conn.execute("SELECT 1").fetchone()),
             "storage": _check(lambda: _writable(settings.media_dir)),
-            "release": state["bundle"] is not None,
+            "release": bundle is not None,
+            # A worker with the active version has loaded its model and is alive.
+            "worker": bundle is not None
+            and bool(
+                live_workers(
+                    conn,
+                    bundle.pipeline_version,
+                    now=utc_now(),
+                    stale_seconds=settings.worker_stale_seconds,
+                )
+            ),
         }
         ok = all(checks.values())
         return JSONResponse(

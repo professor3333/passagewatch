@@ -16,6 +16,7 @@ from fastapi.testclient import TestClient
 from passagewatch.counting.policy import Direction, Outcome, TrajectoryCount
 from passagewatch.service.api.app import create_app
 from passagewatch.service.artifacts import write_track_artifacts
+from passagewatch.service.catalog import worker_heartbeat
 from passagewatch.service.db import connect
 from passagewatch.service.jobs import JobStore, utc_now
 from passagewatch.service.settings import ServiceSettings
@@ -123,13 +124,19 @@ def complete(settings: ServiceSettings, job_id: str, right: int = 2, left: int =
 # -- health and release ------------------------------------------------------------------
 
 
-def test_health_and_model_info(client: TestClient) -> None:
+def test_health_and_model_info(client: TestClient, settings: ServiceSettings) -> None:
     assert client.get("/health/live").json() == {"status": "ok"}
+    not_ready = client.get("/health/ready")
+    assert not_ready.status_code == 503 and not_ready.json()["checks"]["worker"] is False
+
+    worker_heartbeat(connect(settings.db_path), "w1", "pw-test-1", now=utc_now())
+
     ready = client.get("/health/ready")
     assert ready.status_code == 200 and ready.json()["checks"] == {
         "database": True,
         "storage": True,
         "release": True,
+        "worker": True,
     }
     info = client.get("/v1/model-info").json()
     assert info["pipeline_version"] == "pw-test-1"

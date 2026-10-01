@@ -17,7 +17,18 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+
+# Version 2: workers report readiness (model loaded) and liveness for /health/ready.
+_SCHEMA_V2 = """
+CREATE TABLE workers (
+    worker_id         TEXT PRIMARY KEY,
+    pipeline_version  TEXT NOT NULL,
+    ready_at          TEXT NOT NULL,
+    heartbeat_at      TEXT NOT NULL,
+    current_job       TEXT
+);
+"""
 
 _SCHEMA_V1 = """
 CREATE TABLE clips (
@@ -153,3 +164,22 @@ def _migrate(conn: sqlite3.Connection) -> None:
                 conn.execute("ROLLBACK")
             if "already exists" not in str(exc) or _version(conn) < 1:
                 raise
+    _apply(conn, 2, _SCHEMA_V2)
+
+
+def _apply(conn: sqlite3.Connection, version: int, script: str) -> None:
+    """Apply one schema step if the database is older; tolerate a concurrent migration."""
+    if _version(conn) >= version:
+        return
+    try:
+        conn.executescript(
+            "BEGIN IMMEDIATE;\n"
+            + script
+            + f"\nUPDATE schema_version SET version = {version};"
+            + "\nCOMMIT;"
+        )
+    except sqlite3.OperationalError as exc:
+        if conn.in_transaction:
+            conn.execute("ROLLBACK")
+        if "already exists" not in str(exc) or _version(conn) < version:
+            raise
