@@ -94,6 +94,50 @@ The serving target is CPU. At 247 ms per frame, a 10-minute recording at 8 frame
 take about 20 minutes. Stage 10 profiles this and tries ONNX Runtime, a smaller input size
 and INT8, rerunning the full counting evaluation each time.
 
+### Tracker experiment (Stage 5): Kalman tracker versus ByteTrack
+
+The detections are identical (epoch 25, cached on kenai-val), and so are counting and
+evaluation; only the tracker changes. ByteTrack (`passagewatch.tracking.bytetrack`) is
+implemented from its paper, and associates by box IoU in two stages so that low-score
+detections can extend existing tracks. Each plan gives both trackers the same budget.
+
+**Plan 1** (`configs/tracking/tuning/tracker-plan-1.yaml`): ByteTrack at its usual score
+scale.
+
+| Tracker | Setting | nMAE | Missed / false |
+|---|---|---:|---|
+| Kalman | `max_age` 4, `min_length` 3 / **4, 8 (current)** / 8, 8 | 0.120 (tie) | 14–17 / 5–8 |
+| Kalman | `max_age` 8, `min_length` 3 | 0.142 | 13 / 13 |
+| ByteTrack | `high_threshold` 0.4, `min_length` 3 | 0.142 | 24 / 2 |
+| ByteTrack | other three settings | 0.153–0.164 | 26–29 / 1–2 |
+
+ByteTrack minus Kalman (best of each): **+0.022 [−0.023, +0.064]**. ByteTrack missed more
+passages. Reference boxes overlap themselves well from frame to frame (median IoU 0.69; only
+1.8% below 0.2), so IoU gating was not the cause. The cause was score scale: new tracks
+started only at a score ≥ 0.6, far above this detector's operating point of 0.2.
+
+**Plan 2** (`tracker-plan-2.yaml`, declared after seeing plan 1, so its result carries extra
+selection): ByteTrack thresholds matched to the detector's score scale.
+
+| Tracker | Setting | nMAE | Missed / false |
+|---|---|---:|---|
+| Kalman | current (`max_age` 4, `min_length` 8, detections ≥ 0.2) | 0.120 | 17 / 5 |
+| ByteTrack | high 0.3, new track 0.4, `min_length` 3 | **0.109** | 18 / 2 |
+| ByteTrack | high 0.2, new track 0.3, `min_length` 3 | 0.115 | 18 / 3 |
+| ByteTrack | either, `min_length` 8 | 0.142 | 25 / 1 |
+
+ByteTrack minus Kalman: **−0.011 [−0.048, +0.021]**, with ByteTrack better in 69% of
+resamples.
+
+**Decision: keep the Kalman tracker.** Calibrated ByteTrack is not measurably better (the
+interval includes zero, and it was selected from a follow-up plan), and a retained change
+needs a measured benefit. ByteTrack stays available as a tested alternative. Two things were
+learned: ByteTrack's thresholds must match the detector's score scale, and with ByteTrack a
+long minimum track length costs missed passages.
+
+`scripts/compare_trackers.py` runs a plan on cached detections and prints these tables. On
+ties it keeps the current settings.
+
 ### How to reproduce
 
 ```bash

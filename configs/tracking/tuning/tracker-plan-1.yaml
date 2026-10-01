@@ -1,0 +1,16 @@
+# Stage 5 tracker experiment: identical detections (yolox-tiny-v1, epoch 25, cached on
+# kenai-val), two trackers, the same budget of four settings each, selected by counting
+# nMAE. Only the tracker changes.
+
+name: tracker-plan-1
+kalman:
+  base: configs/tracking/classical-v2.yaml   # its tracker section; current pipeline
+  score_threshold: 0.2                        # the selected detector threshold
+  vary:
+    max_age: [4, 8]
+    min_length: [3, 8]
+bytetrack:
+  base: {}                                    # ByteTrackConfig defaults
+  vary:
+    high_threshold: [0.4, 0.6]
+    min_length: [3, 8]
