@@ -83,6 +83,34 @@ classical system, the neural one errs mainly by missing fish.
 
 Testing them is the job of Stages 5 and 8, which change one factor at a time.
 
+### Unbiased check on `kenai-holdout-v1` (Stage 8)
+
+The internal holdout (`docs/dataset_card.md`) is five kenai-train days that neither system
+trained on or was selected on: 174 clips, 580 passages. Each system was evaluated once with
+its fixed, already chosen settings (paired bootstrap over the 174 clips, 10,000 resamples,
+95% CI):
+
+| System | kenai-val nMAE | kenai-holdout-v1 nMAE |
+|---|---|---|
+| `classical-v2` | 0.235 [0.181, 0.300] | **0.369 [0.316, 0.430]** |
+| YOLOX-Tiny, epoch 25, threshold 0.2 (released) | 0.120 [0.078, 0.171] | **0.210 [0.166, 0.261]** |
+| YOLOX-Tiny − `classical-v2` | −0.115 [−0.182, −0.049] | **−0.159 [−0.224, −0.093]** |
+
+On the holdout, the neural system has 99 missed and 23 false passages (detection recall 0.71,
+precision 0.80); `classical-v2` has detection recall 0.30.
+
+What this shows:
+
+- **kenai-val flatters both systems.** Its single day (2018-06-03) is easier than these
+  five days. `classical-v2` was never selected on kenai-val, yet it also gets worse (0.235 →
+  0.369). So most of the gap is a day effect, not only the optimism of having selected the
+  neural setting on kenai-val.
+- **The neural system's advantage holds** on unseen days, and is larger there.
+- **Day-to-day variation is large.** Single-day validation numbers should not be quoted as
+  the system's accuracy. The holdout numbers are still from the same two cameras and the
+  same season; the official test locations (Stage 11) measure transfer to other cameras
+  and rivers.
+
 ### Runtime on the development Mac (Apple M1)
 
 | Device | YOLOX-Tiny at 960 × 416, batch 8 |
