@@ -44,6 +44,11 @@ Only the kenai-train partition is used. kenai-val and the test locations are nev
    CONFIG=configs/training/yolox-tiny-v1.yaml bash tools/kaggle/train_on_kaggle.sh
    ```
 
+   To train another configuration, change `CONFIG`. For example,
+   `configs/training/yolox-tiny-v2.yaml` (Stage 8 experiment 3: the same training at a
+   1280 × 640 input) has about twice the pixels per image, so expect training to take
+   about twice as long. Its run directory is `runs/yolox-tiny-v2/`.
+
 4. Click **Save Version** → **Save & Run All (Commit)** → **Save**. The notebook now runs
    in the background, so you can close the browser. Follow it under the notebook's
    **Versions** (the log shows streaming and training progress).
