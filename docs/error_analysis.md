@@ -210,4 +210,4 @@ experiments so far changed counts by 0–3 errors. The remaining budget therefor
 | 1 | Extra duplicate suppression | Not adopted (confirmation failed); kept available |
 | 2 | Tracker gate | Not adopted (no gain on either partition) |
 | 3 | Higher detector input resolution | `configs/training/yolox-tiny-v2.yaml` (1280 × 640): awaiting a Kaggle run |
-| 4 | Temporal input channels | Pending: needs a Kaggle retrain |
+| 4 | Temporal input channels | `letterbox-temporal3-v1` implemented; its training config follows the experiment 3 result, and then needs a Kaggle run |
