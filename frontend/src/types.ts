@@ -4,6 +4,8 @@
 export type ImageDirection = "right" | "left";
 export type ReviewState = "automatic" | "accepted" | "rejected" | "corrected" | "unresolved";
 export type JobStatus = "queued" | "running" | "succeeded" | "failed";
+/** Automatic triage from the release's calibration version (null without one). */
+export type Triage = "suggested" | "needs_review" | "unresolved";
 
 export interface Counting {
   policy: string;
@@ -90,6 +92,10 @@ export interface Track {
   min_score: number;
   review_state: ReviewState;
   final_direction: ImageDirection | null;
+  /** Heuristic review score in [0, 1]: a ranking aid, not a probability. */
+  review_score: number | null;
+  triage: Triage | null;
+  review_reasons: string[] | null;
 }
 
 export interface TracksPage {
@@ -111,7 +117,13 @@ export interface Box {
   score: number;
 }
 
-export type ReviewAction = "accept" | "reject" | "set_direction" | "mark_unresolved" | "add_passage";
+export type ReviewAction =
+  | "accept"
+  | "reject"
+  | "set_direction"
+  | "mark_unresolved"
+  | "add_passage"
+  | "mark_audited";
 
 export interface ReviewRequest {
   base_revision: number;
@@ -120,6 +132,7 @@ export interface ReviewRequest {
   passage_id?: string;
   direction?: ImageDirection;
   frame_index?: number;
+  audit_window?: number;
   reason?: string;
 }
 
@@ -139,4 +152,23 @@ export interface AddedPassage {
   river_direction: "upstream" | "downstream" | null;
   frame_index: number;
   time_s: number;
+}
+
+/** A random window of unflagged footage, frames [start_frame, stop_frame). */
+export interface AuditWindow {
+  index: number;
+  start_frame: number;
+  stop_frame: number;
+  start_time_s: number;
+  stop_time_s: number;
+  state: "pending" | "checked";
+  passages_added: number;
+}
+
+export interface Audit {
+  job_id: string;
+  revision: number;
+  calibration_version: string | null;
+  unflagged_frames: number;
+  windows: AuditWindow[];
 }
