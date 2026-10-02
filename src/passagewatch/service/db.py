@@ -17,7 +17,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 # Version 2: workers report readiness (model loaded) and liveness for /health/ready.
 _SCHEMA_V2 = """
@@ -28,6 +28,11 @@ CREATE TABLE workers (
     heartbeat_at      TEXT NOT NULL,
     current_job       TEXT
 );
+"""
+
+# Version 3: each result revision stores its review decisions (per track and added passages).
+_SCHEMA_V3 = """
+ALTER TABLE result_revisions ADD COLUMN decisions_json TEXT NOT NULL DEFAULT '{}';
 """
 
 _SCHEMA_V1 = """
@@ -165,6 +170,7 @@ def _migrate(conn: sqlite3.Connection) -> None:
             if "already exists" not in str(exc) or _version(conn) < 1:
                 raise
     _apply(conn, 2, _SCHEMA_V2)
+    _apply(conn, 3, _SCHEMA_V3)
 
 
 def _apply(conn: sqlite3.Connection, version: int, script: str) -> None:
@@ -181,5 +187,6 @@ def _apply(conn: sqlite3.Connection, version: int, script: str) -> None:
     except sqlite3.OperationalError as exc:
         if conn.in_transaction:
             conn.execute("ROLLBACK")
-        if "already exists" not in str(exc) or _version(conn) < version:
+        concurrent = "already exists" in str(exc) or "duplicate column" in str(exc)
+        if not concurrent or _version(conn) < version:
             raise

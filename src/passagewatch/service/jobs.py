@@ -118,6 +118,7 @@ class ResultRevision:
     counts: dict[str, Any]
     tracks_artifact: str
     created_at: str
+    decisions: dict[str, Any]
 
 
 class JobStore:
@@ -141,13 +142,9 @@ class JobStore:
         return None if row is None else Job.from_row(row)
 
     def result(self, job_id: str, revision: int | None = None) -> ResultRevision | None:
-        """The latest result revision of a job (or a given one); cached jobs share theirs."""
-        job = self.get(job_id)
-        if job is None:
-            return None
-        source = job.cached_from or job_id
+        """The latest result revision of a job, or a given one."""
         query = "SELECT * FROM result_revisions WHERE job_id = ?"
-        params: tuple[Any, ...] = (source,)
+        params: tuple[Any, ...] = (job_id,)
         if revision is not None:
             query += " AND revision = ?"
             params += (revision,)
@@ -161,6 +158,7 @@ class JobStore:
             counts=json.loads(row["counts_json"]),
             tracks_artifact=row["tracks_artifact"],
             created_at=row["created_at"],
+            decisions=json.loads(row["decisions_json"]),
         )
 
     # -- creation ------------------------------------------------------------------
@@ -222,6 +220,15 @@ class JobStore:
                         iso(now),
                         iso(now),
                     ),
+                )
+                # The cached job gets its own copy of the automatic result, so its reviews
+                # (later revisions) are its own and never mix with the original's.
+                self.conn.execute(
+                    "INSERT INTO result_revisions (job_id, revision, kind, created_at, counts_json,"
+                    " tracks_artifact, decisions_json) SELECT ?, 0, 'automatic', ?, counts_json,"
+                    " tracks_artifact, decisions_json FROM result_revisions"
+                    " WHERE job_id = ? AND revision = 0",
+                    (job_id, iso(now), cached["job_id"]),
                 )
             else:
                 active = self.conn.execute(
