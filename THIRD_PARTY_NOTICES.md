@@ -18,6 +18,11 @@ repository.
   evaluator (`CFC/evaluate.py`). No CFC code is vendored. The per-clip reference in
   `tests/regression/cfc_official_nmae_eccv22.json` was computed by running that evaluator
   on the published results.
+- **Baseline++ input (method only):** the optional temporal input
+  (`passagewatch.preprocessing.temporal`, `letterbox-temporal3-v1`) follows the 3-channel
+  Baseline++ encoding of the CFC paper and `CFC/convert.py` (frame, background-subtracted
+  frame, frame difference). It is reimplemented with documented differences; no CFC code is
+  copied.
 - **TrackEval** (<https://github.com/JonathonLuiten/TrackEval>, MIT, commit `bcd03a6`) is
   used only offline, by `tools/cfc_official_nmae/`, to produce that reference. It is not a
   dependency and is not distributed.

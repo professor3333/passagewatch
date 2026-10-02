@@ -127,6 +127,17 @@ See the docstring of `passagewatch.training.yolox_train` for details.
 - **Augmentation (modest):** horizontal flip, contrast/brightness, Gaussian noise and
   slight blur. There are no rotations, crops or color changes. Detection labels carry no
   direction of travel, so a flip has no left/right label to swap.
+- **Temporal input (optional, `preprocessing: letterbox-temporal3-v1`):** three channels
+  per frame: the frame, the frame minus the clip's mean background, and the motion to the
+  next frame. The design follows the CFC authors' Baseline++; the docstring of
+  `passagewatch.preprocessing.temporal` lists how it differs. Each clip's background is
+  computed once and cached under `data/cache/backgrounds/` (`--background-cache`).
+  Contrast and brightness changes are applied to the frames *and* the background, so the
+  background-subtracted channel stays consistent; a flip is applied to the finished
+  3-channel image and its boxes. The first layer keeps its COCO weights, with the three
+  channels in place of red, green and blue. Re-initializing it instead is a separate
+  experiment, not an assumption. Tests check that training samples equal the serving input
+  and that the worker and offline evaluation encode clips the same way.
 - **Reproducibility:** fixed seeds for Python, NumPy and PyTorch, plus a seeded per-epoch
   sample order. Augmentation is seeded per (seed, epoch, sample). A resumed run is
   bit-identical to an uninterrupted one on CPU (tested).
