@@ -46,6 +46,7 @@ for _ in $(seq 1 60); do
 done
 curl -fsS "$URL/health/ready"; echo
 curl -fsS "$URL/v1/model-info" | grep -q '"pipeline_version":"smoke-0"'
+curl -fsS "$URL/" | grep -q "<title>PassageWatch Review</title>"
 
 echo "== job"
 CLIP=$(curl -fsS -F "file=@$WORK/clip.zip" -F framerate=10 -F x_meter_start=-1 \
