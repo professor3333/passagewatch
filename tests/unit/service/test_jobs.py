@@ -362,7 +362,7 @@ def test_a_version_1_database_is_upgraded_in_place(tmp_path: Path) -> None:
 
     conn = connect(tmp_path / "v1.db")
 
-    assert conn.execute("SELECT version FROM schema_version").fetchone()[0] == 2
+    assert conn.execute("SELECT version FROM schema_version").fetchone()[0] == SCHEMA_VERSION
     assert conn.execute("SELECT COUNT(*) FROM pipeline_versions").fetchone()[0] == 1
     assert conn.execute("SELECT COUNT(*) FROM workers").fetchone()[0] == 0
 
