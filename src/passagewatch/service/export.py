@@ -5,7 +5,9 @@ recording identity, the counting configuration (line and orientation), the autom
 and, after review, the reviewed counts, the unresolved cases, the model and pipeline
 versions, and evidence frames and times for every track and added passage. JSON keeps the
 full structure; CSV puts the same metadata and counts in ``#`` header lines above one row
-per track and added passage.
+per track and added passage. With a calibration version, every track also carries its
+heuristic review score and triage state, and the report lists the random audit windows with
+which ones a reviewer checked and the passages found in them.
 """
 
 from __future__ import annotations
@@ -17,12 +19,17 @@ from pathlib import Path
 from typing import Any
 
 from passagewatch.counting.policy import Direction, DirectionalCounts, to_river_directions
-from passagewatch.service.artifacts import read_all_tracks
+from passagewatch.service.artifacts import read_all_tracks, read_audit
 from passagewatch.service.catalog import get_clip, get_pipeline_version
 from passagewatch.service.jobs import JobStore, iso, utc_now
-from passagewatch.service.reviews import AutomaticTrack, review_history, track_outcome
+from passagewatch.service.reviews import (
+    AutomaticTrack,
+    audit_view,
+    review_history,
+    track_outcome,
+)
 
-REPORT_VERSION = 1
+REPORT_VERSION = 2
 
 
 def automatic_tracks(rows: list[dict[str, Any]]) -> dict[int, AutomaticTrack]:
@@ -81,6 +88,9 @@ def build_report(
             "final_direction": final,
             "final_river_direction": river_direction(final, upstream),
             "mean_score": row["mean_score"],
+            "triage": row["triage"],
+            "review_score": row["review_score"],
+            "review_reasons": row["review_reasons"],
         }
         track_rows.append(entry)
         if state == "unresolved":
@@ -137,6 +147,7 @@ def build_report(
         "unresolved": unresolved,
         "tracks": track_rows,
         "added_passages": passages,
+        "audit": audit_view(read_audit(artifacts_dir / chosen.tracks_artifact), chosen.decisions),
         "review_events": history,
     }
 
@@ -152,6 +163,8 @@ CSV_COLUMNS = [
     "review_state",
     "final_direction",
     "final_river_direction",
+    "triage",
+    "review_score",
 ]
 
 
@@ -170,9 +183,17 @@ def to_csv(report: dict[str, Any]) -> str:
         ("pipeline_config_sha256", pipeline["config_sha256"]),
         ("detector_checkpoint_sha256", pipeline["detector"]["checkpoint_sha256"]),
         ("preprocessing_version", pipeline["preprocessing_version"]),
+        ("calibration_version", pipeline.get("calibration_version") or "none"),
         ("revision", report["revision"]),
         ("revision_kind", report["revision_kind"]),
     ]
+    audit = report["audit"]
+    if audit is not None:
+        meta += [
+            ("audit_windows", len(audit["windows"])),
+            ("audit_windows_checked", audit["windows_checked"]),
+            ("audit_passages_added", audit["passages_added_in_audits"]),
+        ]
     for label in ("automatic", "reviewed"):
         counts = report["counts"][label]
         for key in ("right", "left", "upstream", "downstream", "net_upstream", "unresolved"):
@@ -205,6 +226,8 @@ def to_csv(report: dict[str, Any]) -> str:
                 "final_river_direction": (p["river_direction"] or "")
                 if p["state"] == "added"
                 else "",
+                "triage": "",
+                "review_score": "",
             }
         )
     return out.getvalue()
