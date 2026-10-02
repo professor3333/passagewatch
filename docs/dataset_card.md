@@ -139,6 +139,27 @@ Facts verified while streaming it (2026-10-01):
 
 `make data-kenai-dev` reproduces the subset, and `full-v2` records it (see below).
 
+## Kenai internal holdout (`kenai-holdout-v1`)
+
+Detectors train on the kenai-train days of `kenai-dev-v1`, and settings are chosen on
+kenai-val. A choice made on kenai-val cannot be confirmed on kenai-val without bias, and
+kenai-train is in-sample for the detector. So a second subset of kenai-train
+([`configs/data/kenai_holdout.yaml`](../configs/data/kenai_holdout.yaml)) is kept for
+confirmation only. It is **every third kenai-train day, starting from the second**:
+2018-05-27, 05-30, 06-02, 06-06 and 06-09 (174 clips, 69,659 frames). It shares no day with
+`kenai-dev-v1`, so it is disjoint from both the training clips and kenai-val. A test checks
+this.
+
+Its clips have partition `holdout` and `tuning_allowed = false`, and their official split
+stays `train`. Training selects partition `train`, so it never sees them. The holdout can
+only be selected on its own. On it, the evaluation scripts evaluate one already chosen
+configuration (one epoch and threshold, or one declared variant against the current
+pipeline) and never choose among several. `make data-kenai-holdout` streams it and builds
+`full-v3`.
+
+Being days of the training period, the holdout measures generalization to new recordings
+and days of the same cameras. It says nothing about other cameras or rivers.
+
 ## Validation
 
 `scripts/validate_data.py` (`make validate-tiny`) parses every clip, converts it to the
@@ -214,7 +235,8 @@ What these groups mean for later claims:
   same river and days, not to a new time period.
 - **Internal holdouts** (for example, the data used to fit a confidence calibrator) must be
   carved out of `train` by `recording_date` or at least by `recording_id`, never by clip.
-  Back-to-back clips from one recording must stay together.
+  Back-to-back clips from one recording must stay together. The confirmation holdout
+  `kenai-holdout-v1` is carved out by whole days (see above).
 
 **Manifests.** `scripts/build_manifest.py --version <subset>-v<N>` (`make manifest-tiny`)
 validates the clips and writes `data/manifests/splits/cfc/<version>.parquet` plus a JSON
@@ -229,6 +251,7 @@ versions:
 | `tiny-v1` | 120 | 120 | yes (6,000 frames) | train 20, val 20, test 80 clips |
 | `full-v1` | 1,567 | 1,567 | no | annotations and metadata only |
 | `full-v2` | 1,567 | 1,567 | 247 clips | as `full-v1`, plus the frames of the `kenai-dev-v1` subset (183 train, 64 val clips) |
+| `full-v3` | 1,567 | see sidecar | 421 clips | as `full-v2`, plus the `kenai-holdout-v1` frames; those 174 kenai-train clips have partition `holdout` |
 
 Columns (schema version 1):
 
@@ -236,8 +259,8 @@ Columns (schema version 1):
 |---|---|
 | `location`, `clip_name` | Clip identity |
 | `recording_id`, `recording_date`, `recording_frame_start`, `recording_frame_stop` | Source recording and the clip's frame range in it, parsed from the clip name |
-| `official_split`, `partition` | Publisher split, and the partition PassageWatch uses (identical in v1) |
-| `tuning_allowed` | `false` for test locations |
+| `official_split`, `partition` | Publisher split, and the partition PassageWatch uses: identical, except `holdout` for internal-holdout clips (from `full-v3`) |
+| `tuning_allowed` | `false` for test locations and the internal holdout |
 | `status`, `usable`, `quarantine_reasons`, `warning_codes` | Validation outcome (see [Validation](#validation)) |
 | `frames_validated` | Whether the frames were decoded and checked |
 | `num_frames`, `width`, `height`, `framerate` | Clip metadata |

@@ -1,4 +1,4 @@
-.PHONY: install lint format typecheck test check data-tiny validate-tiny manifest-tiny data-kenai-dev
+.PHONY: install lint format typecheck test check data-tiny validate-tiny manifest-tiny data-kenai-dev data-kenai-holdout
 
 install:
 	uv sync
@@ -31,3 +31,9 @@ manifest-tiny:
 data-kenai-dev:
 	uv run python scripts/stream_subset.py --config configs/data/kenai_subset.yaml
 	uv run python scripts/build_manifest.py --version full-v2 --frames-subset configs/data/kenai_subset.yaml
+
+data-kenai-holdout:
+	uv run python scripts/stream_subset.py --config configs/data/kenai_holdout.yaml
+	uv run python scripts/build_manifest.py --version full-v3 \
+		--frames-subset configs/data/kenai_subset.yaml \
+		--frames-subset configs/data/kenai_holdout.yaml
