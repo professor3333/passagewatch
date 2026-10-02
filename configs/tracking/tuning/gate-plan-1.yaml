@@ -1,0 +1,23 @@
+# Stage 8 experiment 2: the Kalman tracker's association gate for neural detections.
+# The error analysis (docs/error_analysis.md) found merged tracks that jump 0.3-0.5 m in one
+# frame from one fish to another, which the 0.5 m gate allows; reference fish move a median
+# 0.044 m per frame (99th percentile 0.195 m) on kenai-val. The values below were chosen
+# after seeing those kenai-val cases, so the kenai-val result carries selection bias. Only
+# gate_m changes; detector, threshold, suppression (none), other tracker settings and
+# counting are fixed.
+#
+# Declared before any run: the variant selected on kenai-val (lowest nMAE; ties keep
+# `current`) is adopted only if, on kenai-train (183 clips; in-sample for the detector but
+# not used for this choice), its paired-clip-bootstrap 95% CI for the nMAE difference
+# against `current` lies entirely below zero. Otherwise the pipeline is unchanged.
+
+name: gate-plan-1
+base:
+  tracking_config: configs/tracking/classical-v2.yaml
+  score_threshold: 0.2
+variants:
+  current: {}
+  gate-0.4: {tracker: {gate_m: 0.4}}
+  gate-0.3: {tracker: {gate_m: 0.3}}
+  gate-0.25: {tracker: {gate_m: 0.25}}
+  gate-0.2: {tracker: {gate_m: 0.2}}
