@@ -25,15 +25,15 @@ from pathlib import Path
 from typing import Any
 
 from passagewatch.counting.policy import CFC_COMPATIBLE_V1
-from passagewatch.detection.classical import Scale, boxes_in_meters
+from passagewatch.detection.classical import Scale
 from passagewatch.evaluation.errors import analyze_clip, combine, recall_by_size
 from passagewatch.evaluation.nmae import ClipCountError, count_clip, summarize
 from passagewatch.inference.batch import make_layout, select_rows
 from passagewatch.inference.classical import load_classical_config
-from passagewatch.inference.neural import above, load_detections
+from passagewatch.inference.neural import above, load_detections, track_clip
 from passagewatch.ingestion.cfc import load_clip
 from passagewatch.ingestion.mot import BoxAnnotations, read_mot
-from passagewatch.tracking.kalman import KalmanTracker, trajectories_to_annotations
+from passagewatch.tracking.kalman import trajectories_to_annotations
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SIZE_BINS_M2 = (0.02, 0.05, 0.1)
@@ -85,9 +85,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.detections is not None:
             _, cached = load_detections(args.detections / row["location"] / f"{clip.name}.npz")
             detections = above(cached, args.threshold)
-            centers = [boxes_in_meters(d.boxes, scale) for d in detections]
             predicted: BoxAnnotations = trajectories_to_annotations(
-                KalmanTracker(tracker).run(detections, centers, frame_offset=clip.frame_start)
+                track_clip(clip, detections, tracker)
             )
             total, found = recall_by_size(
                 clip.annotations,
