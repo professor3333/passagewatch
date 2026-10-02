@@ -22,6 +22,8 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
+from passagewatch.calibration.audit import seed_from
+from passagewatch.calibration.versions import ClipReview, get_calibration, review_clip
 from passagewatch.counting.policy import (
     CFC_COMPATIBLE_V1,
     TrajectoryCount,
@@ -33,6 +35,7 @@ from passagewatch.inference.neural import detect_frames, file_sha256, load_detec
 from passagewatch.preprocessing.temporal import PREPROCESSING_VERSIONS, encode_frames
 from passagewatch.service.bundle import ReleaseBundle, load_bundle
 from passagewatch.service.catalog import ClipRecord
+from passagewatch.service.jobs import canonical_json
 from passagewatch.service.media import iter_frames
 from passagewatch.tracking.kalman import (
     KalmanTracker,
@@ -68,6 +71,7 @@ class PipelineResult:
     right: int
     left: int
     frames: int
+    review: ClipReview | None = None  # when the bundle declares a calibration version
 
     def summary(self) -> dict[str, Any]:
         return {"right": self.right, "left": self.left, "tracks": len(self.trajectories)}
@@ -80,6 +84,10 @@ class InferencePipeline:
         self.bundle = bundle
         self.detector = detector
         self.tracker = TrackerConfig.model_validate(bundle.tracker.config)
+        try:
+            self.calibration = get_calibration(bundle.calibration_version)
+        except ValueError as exc:
+            raise BundleMismatchError(str(exc)) from None
         self.batch_size = batch_size
 
     @property
@@ -133,9 +141,27 @@ class InferencePipeline:
             trajectories_to_annotations(trajectories), clip.width, clip.height, policy
         )
         total = tally(counts)
+        review = None
+        if self.calibration is not None:
+            # Seeded by the result cache key's parts, so a cached result keeps its windows.
+            seed = seed_from(
+                canonical_json([clip.sha256, self.bundle.config_sha256(), canonical_json(counting)])
+            )
+            review = review_clip(
+                self.calibration,
+                trajectories,
+                counts,
+                meters_per_px=(scale.meters_per_px_x, scale.meters_per_px_y),
+                line_x_normalized=policy.line_x_normalized,
+                num_frames=clip.num_frames,
+                framerate=clip.framerate,
+                seed=seed,
+            )
         if progress is not None:
             progress(1.0)
-        return PipelineResult(trajectories, counts, total.right, total.left, len(detections))
+        return PipelineResult(
+            trajectories, counts, total.right, total.left, len(detections), review
+        )
 
     def _detect(
         self,

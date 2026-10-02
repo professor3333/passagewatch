@@ -107,6 +107,8 @@ def process_job(
             result.trajectories,
             result.counts,
             clip.framerate,
+            result.review,
+            pipeline.bundle.calibration_version,
         )
         heartbeat.stop()
         store.publish_result(
