@@ -1,0 +1,21 @@
+# Stage 8 experiment 1: extra duplicate suppression after the detector's NMS (IoU 0.65).
+# The error analysis (docs/error_analysis.md) found duplicate tracks from a part-of-fish box
+# kept beside the whole-fish box: IoU 0.4-0.65, containment 0.7-0.9. The values below were
+# chosen after seeing those kenai-val cases, so the selected result carries selection bias
+# on kenai-val. Only suppression changes; detector, threshold, tracker and counting are fixed.
+
+name: suppression-plan-1
+base:
+  tracking_config: configs/tracking/classical-v2.yaml
+  score_threshold: 0.2
+variants:
+  current: {}
+  nms-iou-0.5: {suppression: {iou: 0.5}}
+  nms-iou-0.4: {suppression: {iou: 0.4}}
+  containment-0.8: {suppression: {containment: 0.8}}
+  containment-0.7: {suppression: {containment: 0.7}}
+#
+# Confirmation, declared after the kenai-val run and before any kenai-train result: the
+# variant selected on kenai-val is adopted only if, on kenai-train (183 clips; in-sample for
+# the detector but not used for this choice), its paired-clip-bootstrap 95% CI for the nMAE
+# difference against `current` lies entirely below zero. Otherwise the pipeline is unchanged.

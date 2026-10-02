@@ -120,3 +120,51 @@ as the main error.
 Every experiment selects on kenai-val, one day of 64 clips, which makes the val numbers
 increasingly optimistic. The unbiased comparison is the frozen evaluation on the test
 locations in Stage 11.
+
+## Experiment 1: extra duplicate suppression
+
+Plan: `configs/tracking/tuning/suppression-plan-1.yaml`. A second greedy suppression pass
+(`passagewatch.detection.suppression`) runs after the detector's NMS. It drops a box that a
+higher-scoring box overlaps by IoU above a threshold, or by *containment* (intersection over
+the smaller box's area) above a threshold. Detector, score threshold (0.2), tracker
+(`classical-v2`) and counting are unchanged. Run with `scripts/compare_pipelines.py`.
+
+The four settings were chosen after inspecting the kenai-val duplicates, so kenai-val results
+carry selection bias:
+
+| Variant | nMAE | Count errors | Passage errors | Missed | Merged | Split | Duplicate |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| current (NMS 0.65 only) | 0.120 | 22 | 30 | 5 | 6 | 5 | 7 |
+| + NMS IoU 0.5 | 0.120 | 22 | 28 | 5 | 7 | 5 | 3 |
+| + NMS IoU 0.4 | 0.109 | 20 | 24 | 5 | 4 | 4 | 2 |
+| **+ containment 0.8** (selected) | **0.104** | 19 | 25 | 4 | 5 | 5 | 3 |
+| + containment 0.7 | 0.115 | 21 | 23 | 4 | 6 | 4 | 1 |
+
+Selected minus current on kenai-val: **−0.016 [−0.042, +0.006]** (95% CI, paired clip
+bootstrap), P(better) = 0.88. Every setting removes duplicates, but the nMAE gain is not
+established on kenai-val. Its interval includes zero, and the selection was made on the same
+clips.
+
+**Confirmation on kenai-train (declared before it was run; see the plan file).** The detector
+was trained on these 183 clips, so their detections are in-sample (recall 0.92). But they
+were not used to choose the suppression setting. The rule: adopt the val-selected variant
+only if its 95% CI against `current` on kenai-train lies entirely below zero.
+
+| Variant | kenai-train nMAE | Passage errors | Duplicate | Difference vs current, train | Difference vs current, val |
+|---|---:|---:|---:|---:|---:|
+| current | 0.097 | 52 | 14 | | |
+| + NMS IoU 0.5 | 0.071 | 34 | 1 | −0.027 [−0.049, −0.008] | +0.000 [−0.017, +0.014] |
+| + NMS IoU 0.4 | 0.073 | 35 | 1 | −0.024 [−0.047, −0.006] | −0.011 [−0.034, +0.009] |
+| + containment 0.8 | 0.086 | 45 | 9 | **−0.011 [−0.028, +0.004]** | −0.016 [−0.042, +0.006] |
+| + containment 0.7 | 0.073 | 35 | 1 | −0.024 [−0.047, −0.006] | −0.006 [−0.027, +0.011] |
+
+**Decision: the pipeline is unchanged.** The val-selected variant (containment 0.8) fails
+the declared confirmation: its train interval includes zero. The suppression step stays
+available and tested, but the release does not use it.
+
+What the experiment did establish: every setting removes most duplicate tracks on both
+partitions (val 7 → 1–3, train 14 → 1–9), and none makes nMAE worse by more than noise.
+NMS IoU 0.4 and containment 0.7 improve on train and lean the right way on val. Adopting
+either now would be a choice made after seeing both partitions. A new plan that declares
+one of them in advance needs clips that neither training nor this selection has used: the
+kenai-train days outside `kenai-dev-v1`.
