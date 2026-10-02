@@ -2,7 +2,8 @@
 
 Writes MOT-format tracks (1-based, CFC layout ``<location>/classical/data/<clip>.txt``) and
 ``report.json`` with per-location nMAE, detection recall/precision, per-clip counts, the
-config and its hash, and runtimes. Only train and val partitions can be run.
+config and its hash, and runtimes. Train, val or (on its own) the internal holdout can be
+run; the test partition cannot.
 
 Examples:
     uv run python scripts/run_classical.py --manifest tiny-v1 --partitions val
@@ -52,7 +53,9 @@ def print_summary(title: str, summary: dict[str, Any]) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--manifest", required=True, help="manifest version, e.g. tiny-v1")
-    parser.add_argument("--partitions", nargs="+", choices=["train", "val"], default=["val"])
+    parser.add_argument(
+        "--partitions", nargs="+", choices=["train", "val", "holdout"], default=["val"]
+    )
     parser.add_argument(
         "--config", type=Path, default=REPO_ROOT / "configs/tracking/classical-v1.yaml"
     )

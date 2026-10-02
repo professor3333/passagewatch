@@ -126,6 +126,14 @@ Where `classical-v2`'s 43 errors on kenai-val come from:
 while 6 worker processes shared an 8-core Apple Silicon laptop. This is a development
 measurement, not a serving benchmark.
 
+### Unbiased check on `kenai-holdout-v1` (Stage 8)
+
+Evaluated once, with the same settings, on five unseen kenai-train days (174 clips, 580
+passages): **nMAE 0.369 [0.316, 0.430]**, detection recall 0.30, precision 0.35, and 37 ms
+per frame on the development Mac's CPU. This is worse than on kenai-val (0.235), although
+kenai-val was never used to choose these settings: the holdout days are harder. The
+comparison with the neural system is in `docs/neural_baseline.md`.
+
 ### Limitations of this result
 
 - Tuned on 183 of the 482 kenai-train clips (5 of 15 days). Full-train tuning could differ.
