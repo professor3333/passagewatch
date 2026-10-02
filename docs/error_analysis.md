@@ -168,3 +168,46 @@ NMS IoU 0.4 and containment 0.7 improve on train and lean the right way on val. 
 either now would be a choice made after seeing both partitions. A new plan that declares
 one of them in advance needs clips that neither training nor this selection has used: the
 kenai-train days outside `kenai-dev-v1`.
+
+## Experiment 2: the tracker's association gate
+
+Plan: `configs/tracking/tuning/gate-plan-1.yaml`. Merged tracks on kenai-val jump 0.3–0.5 m
+in one frame from one fish to another. Reference fish move a median 0.044 m per frame (99th
+percentile 0.195 m). Only `gate_m` changes, from 0.5 m. The selection and confirmation rules
+are the same as in experiment 1, and both were declared before either run.
+
+| Variant | val nMAE | val passage errors (merged / split / duplicate) | train nMAE | train passage errors (merged / split / duplicate) |
+|---|---:|---|---:|---|
+| current (0.5 m) | 0.120 | 30 (6 / 5 / 7) | 0.097 | 52 (12 / 10 / 14) |
+| **0.4 m** (selected on val) | 0.115 | 25 (3 / 7 / 2) | 0.097 | 46 (9 / 12 / 6) |
+| 0.3 m | 0.120 | 26 (4 / 8 / 2) | 0.095 | 43 (4 / 15 / 3) |
+| 0.25 m | 0.142 | 28 (3 / 10 / 1) | 0.113 | 51 (3 / 20 / 1) |
+| 0.2 m | 0.159 | 31 (3 / 12 / 1) | 0.117 | 53 (2 / 23 / 1) |
+
+The 0.4 m gate against `current`: val −0.006 [−0.025, +0.012], train **+0.000 [−0.017,
++0.016]**. **Decision: the pipeline is unchanged.**
+
+A tighter gate turns merges into splits almost one for one. A new track starts with zero
+velocity, so a tight gate loses a fast fish before the filter has learned its speed.
+Passage-level errors fall at 0.3–0.4 m, which means less review work, but the counts do not
+improve. Fixing this needs a tracker change rather than a different value, for example a
+gate that scales with the filter's uncertainty, or bridging short gaps. Either would be a
+new tracker version, tested as its own experiment.
+
+## What the experiments say about the evaluation
+
+kenai-val has 183 passages. Its paired-bootstrap intervals are about ±0.02 nMAE wide, so a
+post-processing change worth less than about 2 points cannot be confirmed on it. Both
+experiments so far changed counts by 0–3 errors. The remaining budget therefore goes to:
+
+- changes with larger expected effects: detector retraining at a higher input resolution,
+  and temporal channels, which target the 36% recall on small fish;
+- a larger confirmation set that no training or selection has used: kenai-train days
+  outside `kenai-dev-v1`.
+
+| # | Experiment | Status |
+|---|---|---|
+| 1 | Extra duplicate suppression | Not adopted (confirmation failed); kept available |
+| 2 | Tracker gate | Not adopted (no gain on either partition) |
+| 3 | Higher detector input resolution | Pending: needs a Kaggle retrain |
+| 4 | Temporal input channels | Pending: needs a Kaggle retrain |
