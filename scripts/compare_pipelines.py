@@ -3,7 +3,8 @@
 Runs every variant of a plan (``configs/tracking/tuning/*-plan-*.yaml``), reports counting
 nMAE and passage-level errors, selects by nMAE (ties keep the current pipeline), and
 compares the selected variant with the current one by a paired clip bootstrap. The test
-partition cannot be selected.
+partition cannot be selected; on the internal holdout, a plan may hold only ``current`` and
+the one variant being confirmed.
 
 Example:
     uv run python scripts/compare_pipelines.py \\
@@ -35,7 +36,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--plan", type=Path, required=True)
     parser.add_argument("--detections", type=Path, required=True, help="cache directory")
     parser.add_argument("--manifest", required=True)
-    parser.add_argument("--partition", choices=["train", "val"], default="val")
+    parser.add_argument(
+        "--partition",
+        choices=["train", "val", "holdout"],
+        default="val",
+        help="holdout: the plan must name only `current` and one declared variant",
+    )
     parser.add_argument("--extract-dir", type=Path, default=REPO_ROOT / "data/extracted/cfc")
     parser.add_argument("--frames-dir", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)
@@ -43,6 +49,8 @@ def main(argv: list[str] | None = None) -> int:
 
     plan = yaml.safe_load(args.plan.read_text(encoding="utf-8"))
     variants = plan_variants(plan, REPO_ROOT)
+    if args.partition == "holdout" and len(variants) != 2:
+        parser.error("on the holdout, a plan confirms one declared variant against `current`")
     manifest_path = REPO_ROOT / f"data/manifests/splits/cfc/{args.manifest}.parquet"
     rows = select_rows(manifest_path, [args.partition])
     layout = make_layout(args.manifest.split("-")[0], args.extract_dir, args.frames_dir, rows)

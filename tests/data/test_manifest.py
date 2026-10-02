@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -13,7 +14,7 @@ from passagewatch.ingestion.manifest import (
     read_manifest,
     write_manifest,
 )
-from passagewatch.validation.cfc import validate_dataset
+from passagewatch.validation.cfc import ValidationReport, merge_frame_reports, validate_dataset
 
 from .conftest import LOCATION, FakeCfc, clip_name, mot_line
 
@@ -100,3 +101,52 @@ def test_tampered_manifest_fails_its_hash_check(fake_cfc: FakeCfc, tmp_path: Pat
 def test_version_names_are_checked(tmp_path: Path, version: str) -> None:
     with pytest.raises(ValueError, match="manifest version"):
         write_manifest([], tmp_path, version, inputs=INPUTS)
+
+
+def test_holdout_clips_get_their_own_partition(fake_cfc: FakeCfc) -> None:
+    fake_cfc.add_clip(clip_name("kept"), ROWS)
+    fake_cfc.add_clip(clip_name("held"), ROWS)
+    layout = CfcLayout.tiny(fake_cfc.root)
+    report = validate_dataset(layout, locations=[LOCATION])
+
+    rows = {r["clip_name"]: r for r in build_rows(layout, report, frozenset({clip_name("held")}))}
+
+    held, kept = rows[clip_name("held")], rows[clip_name("kept")]
+    assert (held["partition"], held["official_split"], held["tuning_allowed"]) == (
+        "holdout",
+        "train",
+        False,
+    )
+    assert (kept["partition"], kept["tuning_allowed"]) == ("train", True)
+
+
+def test_only_train_clips_can_be_held_out(fake_cfc: FakeCfc) -> None:
+    fake_cfc.add_clip(clip_name("test", 500), ROWS, location="elwha")
+    layout = CfcLayout.tiny(fake_cfc.root)
+    report = validate_dataset(layout, locations=["elwha"])
+
+    with pytest.raises(ValueError, match="not a kenai-train clip"):
+        build_rows(layout, report, frozenset({clip_name("test", 500)}))
+
+
+def test_frame_reports_merge_by_the_subset_that_checked_each_clip(fake_cfc: FakeCfc) -> None:
+    fake_cfc.add_clip(clip_name("a"), ROWS)
+    fake_cfc.add_clip(clip_name("b"), ROWS)
+    a, b = clip_name("a"), clip_name("b")
+    frames = CfcLayout.tiny(fake_cfc.root).frames_dir
+    annotations = CfcLayout.tiny(fake_cfc.root).annotations_dir
+
+    def checked(only: str) -> ValidationReport:
+        layout = dataclasses.replace(
+            CfcLayout.tiny(fake_cfc.root), frames_dir=frames, frame_clips=frozenset({only})
+        )
+        assert layout.annotations_dir == annotations
+        return validate_dataset(layout, locations=[LOCATION])
+
+    merged = merge_frame_reports([(checked(a), frozenset({a})), (checked(b), frozenset({b}))])
+
+    stats = {c.clip_name: c.stats for c in merged.clips}
+    assert stats[a] is not None and stats[a].frames_checked > 0
+    assert stats[b] is not None and stats[b].frames_checked > 0
+    with pytest.raises(ValueError, match="more than one frames subset"):
+        merge_frame_reports([(checked(a), frozenset({a})), (checked(a), frozenset({a}))])

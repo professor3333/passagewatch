@@ -27,6 +27,7 @@ from passagewatch.ingestion.cfc import CfcLayout, load_clip
 from passagewatch.ingestion.manifest import read_manifest
 from passagewatch.ingestion.metadata import ClipMetadata
 from passagewatch.ingestion.mot import write_mot
+from passagewatch.ingestion.splits import HOLDOUT
 
 TRACKER = "classical"
 
@@ -183,16 +184,26 @@ def clip_records(outcomes: Sequence[ClipOutcome]) -> list[dict[str, Any]]:
 def select_rows(
     manifest_path: Path, partitions: Sequence[str], limit: int | None = None
 ) -> list[dict[str, Any]]:
-    """Usable manifest rows with validated frames in ``partitions`` (never test)."""
+    """Usable manifest rows with validated frames in ``partitions`` (never test).
+
+    The internal holdout can only be selected on its own (``["holdout"]``), so it is never
+    mixed into training or tuning data. Callers that select it must evaluate a fixed,
+    already chosen configuration on it, never choose one.
+    """
     if "test" in partitions:
         raise ValueError("the test partition cannot be run for development or tuning")
+    holdout = HOLDOUT in partitions
+    if holdout and list(partitions) != [HOLDOUT]:
+        raise ValueError("the holdout partition can only be selected on its own")
     rows = [
         r
         for r in read_manifest(manifest_path)
         if r["partition"] in partitions and r["usable"] and r["frames_validated"]
     ]
-    if not all(r["tuning_allowed"] for r in rows):
+    if not holdout and not all(r["tuning_allowed"] for r in rows):
         raise RuntimeError("selected rows include clips that are not allowed for tuning")
+    if holdout and any(r["official_split"] != "train" for r in rows):
+        raise RuntimeError("holdout rows must come from the official train split")
     return rows[:limit] if limit else rows
 
 

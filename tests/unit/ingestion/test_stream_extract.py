@@ -222,3 +222,26 @@ def test_training_subset_is_the_train_half_of_kenai_dev_v1() -> None:
     assert [i.location for i in train.include] == ["kenai-train"]
     full_train = next(i for i in full.include if i.location == "kenai-train")
     assert train.include[0].days == full_train.days
+
+
+def test_holdout_days_are_kenai_train_days_that_no_detector_trains_on() -> None:
+    from passagewatch.ingestion.subsets import load_subset_config
+
+    root = Path(__file__).resolve().parents[3] / "configs/data"
+    dev = load_subset_config(root / "kenai_subset.yaml")
+    holdout = load_subset_config(root / "kenai_holdout.yaml")
+
+    assert holdout.partition == "holdout" and dev.partition is None
+    assert [i.location for i in holdout.include] == ["kenai-train"]
+    dev_days = {d for i in dev.include if i.days for d in i.days}
+    assert holdout.include[0].days and not dev_days & set(holdout.include[0].days)
+
+
+def test_a_holdout_subset_takes_whole_kenai_train_days_only() -> None:
+    from passagewatch.ingestion.subsets import SubsetConfig
+
+    base = {"name": "h", "archive": "a", "member_prefix": "p/", "partition": "holdout"}
+    with pytest.raises(ValueError, match="whole days of kenai-train"):
+        SubsetConfig.model_validate({**base, "include": [{"location": "kenai-val"}]})
+    with pytest.raises(ValueError, match="whole days of kenai-train"):
+        SubsetConfig.model_validate({**base, "include": [{"location": "kenai-train"}]})

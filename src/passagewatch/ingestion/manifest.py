@@ -22,7 +22,13 @@ import pyarrow.parquet as pq
 
 from passagewatch.ingestion.cfc import LOCATIONS, CfcLayout
 from passagewatch.ingestion.inventory import sha256_of
-from passagewatch.ingestion.splits import official_split, parse_clip_name, tuning_allowed
+from passagewatch.ingestion.splits import (
+    HOLDOUT,
+    Split,
+    official_split,
+    parse_clip_name,
+    tuning_allowed,
+)
 from passagewatch.validation.cfc import Severity, ValidationReport
 
 SCHEMA_VERSION = 1
@@ -65,13 +71,27 @@ class ManifestVersionError(ValueError):
     """A manifest version already exists with different content."""
 
 
-def build_rows(layout: CfcLayout, report: ValidationReport) -> list[dict[str, Any]]:
-    """One row per clip in the validation report, ordered by location then clip name."""
+HOLDOUT_RULE = (
+    "; clips of an internal holdout subset (whole kenai-train recording days) -> holdout, "
+    "tuning_allowed = false"
+)
+
+
+def build_rows(
+    layout: CfcLayout, report: ValidationReport, holdout: frozenset[str] = frozenset()
+) -> list[dict[str, Any]]:
+    """One row per clip in the validation report, ordered by location then clip name.
+
+    Clips named in ``holdout`` get partition ``holdout``; they must be kenai-train clips.
+    """
     order = {loc: i for i, loc in enumerate(LOCATIONS)}
     metadata = {loc: layout.metadata(loc).clips for loc in {c.location for c in report.clips}}
     rows: list[dict[str, Any]] = []
     for clip in sorted(report.clips, key=lambda c: (order[c.location], c.clip_name)):
         split = official_split(clip.location)
+        in_holdout = clip.clip_name in holdout
+        if in_holdout and split is not Split.TRAIN:
+            raise ValueError(f"holdout clip {clip.clip_name} is not a kenai-train clip")
         try:
             name = parse_clip_name(clip.clip_name)
         except ValueError:
@@ -88,8 +108,8 @@ def build_rows(layout: CfcLayout, report: ValidationReport) -> list[dict[str, An
                 "recording_frame_start": name.start if name else None,
                 "recording_frame_stop": name.stop if name else None,
                 "official_split": split.value,
-                "partition": split.value,
-                "tuning_allowed": tuning_allowed(split),
+                "partition": HOLDOUT if in_holdout else split.value,
+                "tuning_allowed": tuning_allowed(split) and not in_holdout,
                 "status": clip.status,
                 "usable": clip.status != "quarantined",
                 "quarantine_reasons": clip.quarantine_reasons,
@@ -156,6 +176,7 @@ def write_manifest(
     version: str,
     *,
     inputs: dict[str, str],
+    split_rule: str = SPLIT_RULE,
 ) -> ManifestPaths:
     """Write ``rows`` as manifest ``version``; refuse to change an existing version.
 
@@ -180,7 +201,7 @@ def write_manifest(
         "subset": version.split("-")[0],
         "rows": len(rows),
         "content_sha256": digest,
-        "split_rule": SPLIT_RULE,
+        "split_rule": split_rule,
         "inputs": inputs,
         "partitions": _totals(rows),
     }

@@ -1,0 +1,16 @@
+# Internal holdout from kenai-train, for confirming changes that kenai-val selected. The
+# detectors are trained on kenai-dev-v1, which takes every third kenai-train day starting
+# from the first. This set takes every third day starting from the second, so no detector
+# has trained on it and no setting has been chosen on it. Whole recording days only.
+# Manifest full-v3 gives these clips partition `holdout` (their official split stays
+# `train`), so training never selects them. See docs/dataset_card.md.
+#
+# Changing this selection means a new name: extractions and manifests are keyed by it.
+
+name: kenai-holdout-v1
+archive: g945x-41103/kenai.tar
+member_prefix: kenai/
+include:
+  - location: kenai-train
+    days: [2018-05-27, 2018-05-30, 2018-06-02, 2018-06-06, 2018-06-09]
+partition: holdout

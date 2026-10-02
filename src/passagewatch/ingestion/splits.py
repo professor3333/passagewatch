@@ -9,6 +9,9 @@ Rules (``docs/dataset_card.md``, "Splits"):
 - Every CFC clip name is ``<recording>_<start>_<stop>``: frames ``[start, stop)`` of one
   source recording whose name ends in ``YYYY-MM-DD_HHMMSS``. Internal holdouts carved out
   of a partition must group clips by ``recording_id`` or ``recording_date``, never by clip.
+- The internal holdout (partition ``holdout``) is whole kenai-train days that no detector is
+  trained on and no setting is chosen on. It only confirms choices made on ``val``, so it
+  also has ``tuning_allowed = False``; its ``official_split`` stays ``train``.
 """
 
 from __future__ import annotations
@@ -23,6 +26,9 @@ class Split(StrEnum):
     TRAIN = "train"
     VAL = "val"
     TEST = "test"
+
+
+HOLDOUT = "holdout"  # a manifest partition, not an official split
 
 
 OFFICIAL_SPLITS: dict[str, Split] = {
