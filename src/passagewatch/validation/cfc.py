@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from pathlib import Path
@@ -518,6 +518,38 @@ def validate_clip(
         image_sizes=tuple(sorted(sizes)),
     )
     return report(stats)
+
+
+def merge_frame_reports(
+    reports: Sequence[tuple[ValidationReport, frozenset[str]]],
+) -> ValidationReport:
+    """One report from several validations of the same clips, each checking the frames of
+    a different subset (``(report, clips whose frames it checked)``). Each clip's entry comes
+    from the report that checked its frames, or from the first report if none did.
+    """
+    if not reports:
+        raise ValueError("no reports to merge")
+    first = reports[0][0]
+    keys = [(c.location, c.clip_name) for c in first.clips]
+    for report, _ in reports[1:]:
+        if [(c.location, c.clip_name) for c in report.clips] != keys:
+            raise ValueError("merged reports must cover the same clips")
+        if report.image_size_tolerance_px != first.image_size_tolerance_px:
+            raise ValueError("merged reports must use the same image size tolerance")
+    claimed: dict[str, int] = {}
+    for i, (_, clips) in enumerate(reports):
+        for name in clips:
+            if name in claimed:
+                raise ValueError(f"clip {name} is in more than one frames subset")
+            claimed[name] = i
+    by_report = [{c.clip_name: c for c in r.clips} for r, _ in reports]
+    return ValidationReport(
+        subset=first.subset,
+        images_checked=any(r.images_checked for r, _ in reports),
+        image_size_tolerance_px=first.image_size_tolerance_px,
+        clips=[by_report[claimed.get(c.clip_name, 0)][c.clip_name] for c in first.clips],
+        location_issues=first.location_issues,
+    )
 
 
 def validate_dataset(

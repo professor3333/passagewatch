@@ -10,6 +10,7 @@ from __future__ import annotations
 import datetime as dt
 from collections import Counter
 from pathlib import Path, PurePosixPath
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
@@ -38,6 +39,15 @@ class SubsetConfig(_Frozen):
     archive: str
     member_prefix: str
     include: tuple[Include, ...] = Field(min_length=1)
+    # "holdout": an internal holdout carved out of kenai-train by whole recording days. Its
+    # clips get partition `holdout` in manifests, so training and tuning never select them.
+    partition: Literal["holdout"] | None = None
+
+    def model_post_init(self, _context: object) -> None:
+        if self.partition == "holdout" and any(
+            i.location != "kenai-train" or i.days is None for i in self.include
+        ):
+            raise ValueError("a holdout subset takes whole days of kenai-train only")
 
     def describe(self) -> dict[str, object]:
         return self.model_dump(mode="json")

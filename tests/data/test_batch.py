@@ -105,6 +105,20 @@ def test_test_partition_is_refused(manifest: Path) -> None:
         select_rows(manifest, ["val", "test"])
 
 
+def test_the_holdout_is_selected_only_on_its_own(fake_cfc: FakeCfc, tmp_path: Path) -> None:
+    held = add_passage_clip(fake_cfc, "held")
+    add_passage_clip(fake_cfc, "kept")
+    layout = CfcLayout.tiny(fake_cfc.root)
+    report = validate_dataset(layout, locations=[LOCATION])
+    rows = build_rows(layout, report, frozenset({held}))
+    path = write_manifest(rows, tmp_path, "tiny-v2", inputs={"x": "0" * 64}).parquet
+
+    assert [r["clip_name"] for r in select_rows(path, ["holdout"])] == [held]
+    assert held not in {r["clip_name"] for r in select_rows(path, ["train", "val"])}
+    with pytest.raises(ValueError, match="on its own"):
+        select_rows(path, ["train", "holdout"])
+
+
 def test_full_manifests_need_a_frames_directory(fake_cfc: FakeCfc) -> None:
     with pytest.raises(ValueError, match="frames-dir"):
         make_layout("full", fake_cfc.root, None, [])

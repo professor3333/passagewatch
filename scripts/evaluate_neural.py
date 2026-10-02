@@ -48,7 +48,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--epochs", type=int, nargs="+", required=True)
     parser.add_argument("--thresholds", type=float, nargs="+", default=[0.1, 0.2, 0.3, 0.4, 0.5])
     parser.add_argument("--manifest", required=True)
-    parser.add_argument("--partition", choices=["train", "val"], default="val")
+    parser.add_argument(
+        "--partition",
+        choices=["train", "val", "holdout"],
+        default="val",
+        help="holdout: evaluates one already chosen epoch and threshold, never selects them",
+    )
     parser.add_argument("--extract-dir", type=Path, default=REPO_ROOT / "data/extracted/cfc")
     parser.add_argument("--frames-dir", type=Path, default=None)
     parser.add_argument(
@@ -60,6 +65,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--device", default="auto")
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
+    if args.partition == "holdout" and (len(args.epochs) != 1 or len(args.thresholds) != 1):
+        parser.error("on the holdout, pass exactly one --epochs and one --thresholds value")
 
     manifest_path = REPO_ROOT / f"data/manifests/splits/cfc/{args.manifest}.parquet"
     rows = select_rows(manifest_path, [args.partition])
