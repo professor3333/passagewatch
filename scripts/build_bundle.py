@@ -14,6 +14,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from passagewatch.calibration.versions import CALIBRATIONS
 from passagewatch.inference.classical import load_classical_config
 from passagewatch.service.bundle import activate, build_bundle, load_bundle
 
@@ -27,6 +28,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--score-threshold", type=float, required=True)
     parser.add_argument("--tracking-config", type=Path, required=True)
     parser.add_argument("--selection", default=None, help="where the selection is documented")
+    parser.add_argument(
+        "--calibration-version",
+        choices=sorted(CALIBRATIONS),
+        default=None,
+        help="review scores, triage and audits (docs/review.md); none by default",
+    )
     parser.add_argument("--bundles-dir", type=Path, default=REPO_ROOT / "bundles")
     parser.add_argument("--activate", action="store_true", help="make it the active release")
     args = parser.parse_args(argv)
@@ -42,6 +49,7 @@ def main(argv: list[str] | None = None) -> int:
         version=args.version,
         bundles_dir=args.bundles_dir,
         provenance=provenance,
+        calibration_version=args.calibration_version,
     )
     bundle = load_bundle(path)
     print(f"{bundle.pipeline_version}: config {bundle.config_sha256()[:12]} -> {path}")
