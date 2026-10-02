@@ -28,6 +28,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from passagewatch.counting.policy import Direction, DirectionalCounts, to_river_directions
 from passagewatch.service import artifacts, media, reviews
 from passagewatch.service.api.schemas import (
+    AuditOut,
     ClipOut,
     DirectionalCountsOut,
     JobAccepted,
@@ -378,15 +379,21 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         conn: Db,
         offset: Annotated[int, Query(ge=0)] = 0,
         limit: Annotated[int, Query(ge=1)] = 50,
+        order: Annotated[str, Query(pattern="^(track|queue)$")] = "track",
     ) -> TracksOut:
+        """Tracks by ID, or in review-queue order (``order=queue``): unresolved, then needs
+        review, then suggested; passages before other tracks; lowest review score first."""
         if limit > settings.tracks_page_limit:
             raise HTTPException(422, f"limit must be at most {settings.tracks_page_limit}")
         require_succeeded(conn, job_id)
         result = store(conn).result(job_id)
         assert result is not None
-        page = artifacts.read_tracks(
-            settings.artifacts_dir / result.tracks_artifact, offset=offset, limit=limit
-        )
+        job_dir = settings.artifacts_dir / result.tracks_artifact
+        if order == "queue":
+            ranked = sorted(artifacts.read_all_tracks(job_dir), key=reviews.queue_key)
+            page = artifacts.TrackPage(len(ranked), ranked[offset : offset + limit])
+        else:
+            page = artifacts.read_tracks(job_dir, offset=offset, limit=limit)
         tracks = []
         for track in page.tracks:
             state, final = reviews.track_outcome(
@@ -428,7 +435,9 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         clip = get_clip(conn, job.clip_id)
         result = store(conn).result(job_id, 0)
         assert clip is not None and result is not None
-        rows = artifacts.read_all_tracks(settings.artifacts_dir / result.tracks_artifact)
+        job_dir = settings.artifacts_dir / result.tracks_artifact
+        rows = artifacts.read_all_tracks(job_dir)
+        audit = artifacts.read_audit(job_dir)
         try:
             revision = reviews.submit_review(
                 conn,
@@ -437,6 +446,7 @@ def create_app(settings: ServiceSettings) -> FastAPI:
                 automatic=automatic_tracks(rows),
                 num_frames=clip.num_frames,
                 now=utc_now(),
+                audit_windows=0 if audit is None else len(audit["windows"]),
             )
         except reviews.StaleRevisionError as exc:
             raise HTTPException(409, str(exc)) from None
@@ -454,6 +464,27 @@ def create_app(settings: ServiceSettings) -> FastAPI:
             unresolved=counts["unresolved"],
             added_passages=counts["added_passages"],
             results_url=f"/v1/jobs/{job_id}/results",
+        )
+
+    @app.get("/v1/jobs/{job_id}/audit", response_model=AuditOut)
+    def get_audit(job_id: str, conn: Db) -> AuditOut:
+        """Random windows of unflagged footage to watch for fish the system missed, and
+        which of them a reviewer has checked. Empty without a calibration version."""
+        require_succeeded(conn, job_id)
+        result = store(conn).result(job_id)
+        assert result is not None
+        view = reviews.audit_view(
+            artifacts.read_audit(settings.artifacts_dir / result.tracks_artifact),
+            result.decisions,
+        )
+        if view is None:
+            return AuditOut(job_id=job_id, revision=result.revision, windows=[])
+        return AuditOut(
+            job_id=job_id,
+            revision=result.revision,
+            calibration_version=view["calibration_version"],
+            unflagged_frames=view["unflagged_frames"],
+            windows=view["windows"],
         )
 
     @app.get("/v1/jobs/{job_id}/reviews")

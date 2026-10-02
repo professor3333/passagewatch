@@ -20,6 +20,11 @@ A reviewer can also add a passage the model missed entirely (``add_passage``), w
 frame where it is visible as evidence; added passages count in the reviewed counts and can be
 rejected like tracks. Two fragments of one fish are fixed by rejecting one and correcting the
 other.
+
+Random audit windows (``audit.json``, when the release has a calibration version) are marked
+as checked with ``mark_audited``; a passage found while watching one is added with
+``add_passage`` and that window's ``audit_window`` index, so the export can say how many
+passages audits found. Marking a window does not change any count.
 """
 
 from __future__ import annotations
@@ -33,7 +38,9 @@ from typing import Any, Literal
 from passagewatch.service.db import transaction
 from passagewatch.service.jobs import canonical_json, iso
 
-Action = Literal["accept", "reject", "set_direction", "mark_unresolved", "add_passage"]
+Action = Literal[
+    "accept", "reject", "set_direction", "mark_unresolved", "add_passage", "mark_audited"
+]
 Direction = Literal["right", "left"]
 
 
@@ -59,11 +66,12 @@ class ReviewEvent:
     passage_id: str | None = None
     direction: Direction | None = None
     frame_index: int | None = None
+    audit_window: int | None = None
     reason: str = ""
 
 
 def empty_decisions() -> dict[str, Any]:
-    return {"tracks": {}, "passages": {}}
+    return {"tracks": {}, "passages": {}, "audits": {}}
 
 
 def apply_event(
@@ -72,11 +80,24 @@ def apply_event(
     automatic: dict[int, AutomaticTrack],
     num_frames: int,
     event_id: int,
+    audit_windows: int = 0,
 ) -> dict[str, Any]:
-    """Return the decisions after ``event``; raises :class:`InvalidReviewError`."""
+    """Return the decisions after ``event``; raises :class:`InvalidReviewError`.
+    ``audit_windows`` is the number of the job's audit windows."""
     new: dict[str, Any] = json.loads(json.dumps(decisions or empty_decisions()))
     new.setdefault("tracks", {})
     new.setdefault("passages", {})
+    new.setdefault("audits", {})
+    if event.audit_window is not None:
+        if event.action not in ("add_passage", "mark_audited"):
+            raise InvalidReviewError("audit_window goes with add_passage or mark_audited")
+        if not 0 <= event.audit_window < audit_windows:
+            raise InvalidReviewError(f"audit_window must be within [0, {audit_windows})")
+    if event.action == "mark_audited":
+        if event.audit_window is None:
+            raise InvalidReviewError("mark_audited needs an audit_window")
+        new["audits"][str(event.audit_window)] = {"state": "checked", "event_id": event_id}
+        return new
     if event.action == "add_passage":
         if event.direction is None or event.frame_index is None:
             raise InvalidReviewError("add_passage needs a direction and a frame_index")
@@ -88,7 +109,7 @@ def apply_event(
             "direction": event.direction,
             "frame_index": event.frame_index,
             "event_id": event_id,
-        }
+        } | ({} if event.audit_window is None else {"audit_window": event.audit_window})
         return new
 
     if event.passage_id is not None:
@@ -162,6 +183,7 @@ def submit_review(
     automatic: dict[int, AutomaticTrack],
     num_frames: int,
     now: datetime,
+    audit_windows: int = 0,
 ) -> int:
     """Store ``event`` and the revision it produces; returns the new revision number."""
     with transaction(conn):
@@ -186,7 +208,12 @@ def submit_review(
         )
         event_id = int(cursor.lastrowid or 0)
         decisions = apply_event(
-            json.loads(latest["decisions_json"]), event, automatic, num_frames, event_id
+            json.loads(latest["decisions_json"]),
+            event,
+            automatic,
+            num_frames,
+            event_id,
+            audit_windows,
         )
         conn.execute(
             "INSERT INTO result_revisions (job_id, revision, kind, created_at, counts_json,"
@@ -219,3 +246,50 @@ def review_history(conn: sqlite3.Connection, job_id: str) -> list[dict[str, Any]
         }
         for r in rows
     ]
+
+
+TRIAGE_RANK = {"unresolved": 0, "needs_review": 1, "suggested": 2}
+
+
+def queue_key(row: dict[str, Any]) -> tuple[int, int, float, int]:
+    """Review-queue order of a track row: unresolved, needs review, suggested (tracks
+    without triage last); passages before other tracks; lowest review score first."""
+    score = row.get("review_score")
+    return (
+        TRIAGE_RANK.get(row.get("triage") or "", len(TRIAGE_RANK)),
+        0 if row["direction"] is not None else 1,
+        float("inf") if score is None else float(score),
+        int(row["track_id"]),
+    )
+
+
+def audit_view(audit: dict[str, Any] | None, decisions: dict[str, Any]) -> dict[str, Any] | None:
+    """A job's audit windows with their review state under ``decisions``, and totals."""
+    if audit is None:
+        return None
+    checked = decisions.get("audits", {})
+    found: dict[int, int] = {}
+    for p in decisions.get("passages", {}).values():
+        if p["state"] == "added" and "audit_window" in p:
+            found[p["audit_window"]] = found.get(p["audit_window"], 0) + 1
+    windows = [
+        w
+        | {
+            "state": "checked" if str(w["index"]) in checked else "pending",
+            "passages_added": found.get(w["index"], 0),
+        }
+        for w in audit["windows"]
+    ]
+    done = [w for w in windows if w["state"] == "checked"]
+    checked_frames = sum(w["stop_frame"] - w["start_frame"] for w in done)
+    return {
+        "calibration_version": audit["calibration_version"],
+        "unflagged_frames": audit["unflagged_frames"],
+        "windows": windows,
+        "windows_checked": len(done),
+        "checked_frames": checked_frames,
+        "checked_fraction_of_unflagged": (
+            checked_frames / audit["unflagged_frames"] if audit["unflagged_frames"] else None
+        ),
+        "passages_added_in_audits": sum(found.values()),
+    }
