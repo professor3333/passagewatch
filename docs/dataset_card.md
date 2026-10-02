@@ -146,9 +146,13 @@ kenai-val. A choice made on kenai-val cannot be confirmed on kenai-val without b
 kenai-train is in-sample for the detector. So a second subset of kenai-train
 ([`configs/data/kenai_holdout.yaml`](../configs/data/kenai_holdout.yaml)) is kept for
 confirmation only. It is **every third kenai-train day, starting from the second**:
-2018-05-27, 05-30, 06-02, 06-06 and 06-09 (174 clips, 69,659 frames). It shares no day with
-`kenai-dev-v1`, so it is disjoint from both the training clips and kenai-val. A test checks
-this.
+2018-05-27, 05-30, 06-02, 06-06 and 06-09 (174 clips, 69,659 frames, 16.2 GB; 59,813 boxes
+and 580 passages under `cfc-compatible-v1`: 548 rightward, 32 leftward). It shares no day
+with `kenai-dev-v1`, so it is disjoint from both the training clips and kenai-val. A test
+checks this. Streamed on 2026-10-02 like `kenai-dev-v1` (MD5-verified stream, 69,659 frames
+written, none unexpected), with SHA-256 values in
+`data/manifests/inventory/cfc/kenai-holdout-v1.parquet`; all 174 clips validated without
+quarantine.
 
 Its clips have partition `holdout` and `tuning_allowed = false`, and their official split
 stays `train`. Training selects partition `train`, so it never sees them. The holdout can
@@ -251,7 +255,7 @@ versions:
 | `tiny-v1` | 120 | 120 | yes (6,000 frames) | train 20, val 20, test 80 clips |
 | `full-v1` | 1,567 | 1,567 | no | annotations and metadata only |
 | `full-v2` | 1,567 | 1,567 | 247 clips | as `full-v1`, plus the frames of the `kenai-dev-v1` subset (183 train, 64 val clips) |
-| `full-v3` | 1,567 | see sidecar | 421 clips | as `full-v2`, plus the `kenai-holdout-v1` frames; those 174 kenai-train clips have partition `holdout` |
+| `full-v3` | 1,567 | 1,567 | 421 clips | as `full-v2`, plus the `kenai-holdout-v1` frames; those 174 kenai-train clips have partition `holdout` (all other rows equal `full-v2`) |
 
 Columns (schema version 1):
 
