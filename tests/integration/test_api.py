@@ -389,3 +389,19 @@ def test_clip_with_active_jobs_cannot_be_deleted(
     assert client.delete("/v1/clips/clip_nope").status_code == 404
     assert not (settings.media_dir / clip_id).exists()
     assert client.get(f"/v1/jobs/{job_id}/results").status_code == 200  # provenance kept
+
+
+def test_the_review_interface_is_served_without_hiding_the_api(tmp_path: Path) -> None:
+    ui = tmp_path / "ui"
+    ui.mkdir()
+    (ui / "index.html").write_text("<title>PassageWatch Review</title>")
+    with TestClient(create_app(settings_for(tmp_path, frontend_dir=ui))) as c:
+        assert "PassageWatch Review" in c.get("/").text
+        assert c.get("/health/live").json() == {"status": "ok"}
+        assert c.get("/v1/jobs/job_nope").status_code == 404
+
+    (tmp_path / "other").mkdir()
+    with TestClient(
+        create_app(settings_for(tmp_path / "other", frontend_dir=tmp_path / "missing"))
+    ) as c:
+        assert c.get("/").status_code == 404

@@ -22,6 +22,7 @@ from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
 from fastapi.responses import JSONResponse, PlainTextResponse, Response
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from passagewatch.counting.policy import Direction, DirectionalCounts, to_river_directions
@@ -526,6 +527,10 @@ def create_app(settings: ServiceSettings) -> FastAPI:
             {"status": "ready" if ok else "not ready", "checks": checks},
             status_code=200 if ok else 503,
         )
+
+    # The review interface, mounted last so it never shadows an API route.
+    if (settings.frontend_dir / "index.html").is_file():
+        app.mount("/", StaticFiles(directory=settings.frontend_dir, html=True), name="ui")
 
     return app
 

@@ -19,6 +19,8 @@ class ServiceSettings(BaseModel):
 
     data_dir: Path = Path("var")
     bundle_dir: Path = Path("bundles/active")
+    # Built review interface (frontend/dist); served at / when the directory exists.
+    frontend_dir: Path = Path("frontend/dist")
     max_upload_bytes: int = Field(default=500 * 1024 * 1024, gt=0)
     max_frames: int = Field(default=6000, gt=0)
     upload_retention_hours: float = Field(default=24.0, gt=0)

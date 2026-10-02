@@ -26,6 +26,7 @@ flowchart LR
 | Media | `passagewatch.service.media` | Streamed uploads with a size limit, validation, bounded-memory frame reading |
 | Bundles | `passagewatch.service.bundle` | Immutable release bundles and the active-release pointer |
 | Artifacts | `passagewatch.service.artifacts` | Per-job Parquet files with trajectories and their boxes |
+| Review interface | `frontend/` (TypeScript, Vite) | Upload, progress, playback with overlays, review actions, export; built into the image and served by the API at `/` |
 
 ## Analysis flow
 
@@ -143,6 +144,7 @@ All settings are `PASSAGEWATCH_*` environment variables (`passagewatch.service.s
 |---|---|---|
 | `PASSAGEWATCH_DATA_DIR` | `var` (`/data` in the image) | Database, uploads, artifacts |
 | `PASSAGEWATCH_BUNDLE_DIR` | `bundles/active` (`/bundles/active`) | Active release bundle |
+| `PASSAGEWATCH_FRONTEND_DIR` | `frontend/dist` (`/app/frontend/dist`) | Built review interface, served at `/` if present |
 | `PASSAGEWATCH_MAX_UPLOAD_BYTES` | 524288000 (500 MiB) | Upload size limit (413 above) |
 | `PASSAGEWATCH_MAX_FRAMES` | 6000 | Frame limit per recording |
 | `PASSAGEWATCH_UPLOAD_RETENTION_HOURS` | 24 | Uploads are deleted after this |
@@ -172,5 +174,5 @@ result fields as top-level keys.
   647 MB of it PyTorch.
 - **One host, one worker.** SQLite and local volumes are deliberate for this scale (see
   [design](design.md) §17).
-- **Not yet built:** the review interface (Stage 7), the reverse proxy with HTTPS,
-  Prometheus metrics and alerts (Stage 11).
+- **Not yet built:** review prioritization by uncertainty and random audit sampling
+  (Stage 9), the reverse proxy with HTTPS, Prometheus metrics and alerts (Stage 11).
