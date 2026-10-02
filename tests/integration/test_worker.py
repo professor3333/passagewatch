@@ -15,6 +15,7 @@ import torch
 from fastapi.testclient import TestClient
 
 from passagewatch.detection.neural import build_yolox
+from passagewatch.preprocessing.temporal import GRAY3, TEMPORAL3
 from passagewatch.service.api.app import create_app
 from passagewatch.service.bundle import BundleExistsError, activate, build_bundle, load_bundle
 from passagewatch.service.db import connect
@@ -91,6 +92,37 @@ def test_upload_job_worker_results_end_to_end(
     assert tracks["tracks"][0]["observations"] == 20
     assert (settings.artifacts_dir / job_id / "observations.parquet").is_file()
     assert client.get("/health/ready").status_code == 200  # the worker reported itself ready
+
+
+def test_a_temporal_pipeline_encodes_every_frame_with_its_clip(tmp_path: Path) -> None:
+    settings = make_settings(tmp_path)
+    temporal = pipeline(preprocessing=TEMPORAL3)
+    with TestClient(create_app(settings)) as c:
+        job_id = submit(c, passage_zip())
+
+        assert run_worker(settings, temporal, "w-t", stop=threading.Event(), max_jobs=1) == 1
+
+        assert c.get(f"/v1/jobs/{job_id}").json()["status"] == "succeeded"
+        assert c.get(f"/v1/jobs/{job_id}/results").json()["automatic"]["right"] == 1
+        tracks = c.get(f"/v1/jobs/{job_id}/tracks").json()["tracks"]
+        assert tracks[0]["observations"] == 20  # every frame, including the last
+    assert temporal.detector.channels == {3}  # type: ignore[attr-defined]
+
+
+def test_a_bundle_must_declare_its_checkpoints_preprocessing(tmp_path: Path) -> None:
+    path = build_bundle(
+        checkpoint=checkpoint(tmp_path / "c.pt", preprocessing=TEMPORAL3),
+        tracker_config={},
+        score_threshold=0.2,
+        version="pw-1",
+        bundles_dir=tmp_path / "bundles",
+    )
+    assert InferencePipeline.load(path).bundle.preprocessing_version == TEMPORAL3
+    declared = json.loads((path / "bundle.json").read_text())
+    (path / "bundle.json").write_text(json.dumps(declared | {"preprocessing_version": GRAY3}))
+
+    with pytest.raises(BundleMismatchError, match="trained with letterbox-temporal3-v1"):
+        InferencePipeline.load(path)
 
 
 def test_a_moved_counting_line_is_applied(client: TestClient, settings: ServiceSettings) -> None:

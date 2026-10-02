@@ -43,12 +43,16 @@ class BrightBoxDetector:
 
     def __init__(self, delay: float = 0.0) -> None:
         self.delay = delay
+        self.channels: set[int] = set()  # channel counts of the images it was given
 
     def detect(self, frames: list[NDArray[np.uint8]]) -> list[FrameDetections]:
         time.sleep(self.delay)
         out = []
         for frame in frames:
-            ys, xs = np.nonzero(frame > 200)
+            self.channels.add(1 if frame.ndim == 2 else frame.shape[2])
+            # A temporal image's first channel is the frame itself.
+            gray = frame if frame.ndim == 2 else frame[..., 0]
+            ys, xs = np.nonzero(gray > 200)
             if len(xs):
                 box = np.array([[xs.min(), ys.min(), xs.max() + 1, ys.max() + 1]], dtype=np.float64)
                 out.append(FrameDetections(box, np.array([0.9])))
@@ -57,9 +61,10 @@ class BrightBoxDetector:
         return out
 
 
-def pipeline(delay: float = 0.0) -> InferencePipeline:
+def pipeline(delay: float = 0.0, preprocessing: str | None = None) -> InferencePipeline:
+    bundle = BUNDLE if preprocessing is None else BUNDLE | {"preprocessing_version": preprocessing}
     return InferencePipeline(
-        ReleaseBundle.model_validate(BUNDLE), BrightBoxDetector(delay), batch_size=4
+        ReleaseBundle.model_validate(bundle), BrightBoxDetector(delay), batch_size=4
     )
 
 

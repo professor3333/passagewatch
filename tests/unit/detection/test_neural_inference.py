@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import cv2
 import numpy as np
 import pytest
 import torch
@@ -12,6 +13,7 @@ from passagewatch.detection.neural import build_yolox
 from passagewatch.inference.neural import (
     LoadedDetector,
     above,
+    detect_clip,
     detect_frames,
     load_detections,
     load_detector,
@@ -125,3 +127,66 @@ def test_reference_boxes_as_detections_reproduce_the_reference_counts() -> None:
 
     assert evaluation.error.reference == evaluation.error.predicted == DirectionalCounts(right=1)
     assert evaluation.detection.recall == 1.0 and evaluation.tracks == 1
+
+
+class RecordingModel(torch.nn.Module):
+    """Stands in for YOLOX: no detections, but remembers every input batch."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.inputs: list[torch.Tensor] = []
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        self.inputs.append(x.clone())
+        return torch.zeros(x.shape[0], 1, 6)
+
+
+@pytest.mark.parametrize("preprocessing", ["letterbox-gray3-v1", "letterbox-temporal3-v1"])
+def test_clips_are_encoded_with_the_checkpoints_preprocessing(
+    tmp_path: Path, preprocessing: str
+) -> None:
+    rng = np.random.default_rng(0)
+    for i in range(5):
+        frame = rng.integers(30, 60, (48, 32), dtype=np.uint8)
+        frame[20:26, 4 + 4 * i : 12 + 4 * i] = 220
+        cv2.imwrite(str(tmp_path / f"{i}.jpg"), frame, [cv2.IMWRITE_JPEG_QUALITY, 100])
+    meta = ClipMetadata(
+        clip_name="c_2018-06-01_120000_0_5",
+        num_frames=5,
+        framerate=10.0,
+        width=32,
+        height=48,
+        x_meter_start=0.0,
+        x_meter_stop=2.0,
+        y_meter_start=1.0,
+        y_meter_stop=0.0,
+    )
+    clip = Clip("kenai-val", meta, 0, 5, BoxAnnotations.empty(), tmp_path)
+    model = RecordingModel()
+    detector = LoadedDetector(
+        model=model,  # type: ignore[arg-type]
+        input_size=InputSize(64, 32),
+        device=torch.device("cpu"),
+        checkpoint_sha256="0" * 64,
+        epoch=1,
+        run_name="t",
+        preprocessing=preprocessing,
+    )
+
+    detections = detect_clip(detector, clip, batch_size=2)
+
+    assert len(detections) == 5
+    inputs = torch.cat(model.inputs)
+    assert inputs.shape == (5, 3, 64, 32)
+    channels_equal = torch.equal(inputs[:, 0], inputs[:, 1]) and torch.equal(
+        inputs[:, 0], inputs[:, 2]
+    )
+    assert channels_equal == (preprocessing == "letterbox-gray3-v1")
+
+
+def test_temporal_checkpoints_load_with_their_preprocessing(tmp_path: Path) -> None:
+    save_checkpoint(tmp_path / "t.pt", preprocessing="letterbox-temporal3-v1")
+
+    assert load_detector(tmp_path / "t.pt", torch.device("cpu")).preprocessing == (
+        "letterbox-temporal3-v1"
+    )

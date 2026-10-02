@@ -15,12 +15,19 @@ from torchvision.ops import box_iou
 
 from passagewatch.detection.neural import build_yolox, decode_detections
 from passagewatch.ingestion.cfc import CfcLayout
-from passagewatch.preprocessing.letterbox import InputSize, preprocess_frame
+from passagewatch.preprocessing.letterbox import (
+    InputSize,
+    letterbox_image,
+    preprocess_frame,
+    to_network_input,
+)
+from passagewatch.preprocessing.temporal import TEMPORAL3, encode_frames, temporal_image
 from passagewatch.training.data import (
     AugmentConfig,
     FrameDataset,
     clip_boxes,
     flip_horizontal,
+    photometric_pair,
 )
 from passagewatch.training.yolox_train import TrainConfig, Trainer, learning_rate
 
@@ -84,6 +91,83 @@ def test_training_samples_match_serving_preprocessing(fake_cfc: FakeCfc) -> None
             rtol=1e-6,
         )
         assert not targets[n:].any()
+
+
+def test_temporal_samples_match_serving_preprocessing(fake_cfc: FakeCfc, tmp_path: Path) -> None:
+    data = dataset(
+        fake_cfc, ["temporal"], augment=None, preprocessing=TEMPORAL3, background_dir=tmp_path
+    )
+    clip = data.clips[0]
+    assert clip.frame_dir is not None
+    frames = [
+        np.asarray(cv2.imread(str(clip.frame_dir / f"{f}.jpg"), cv2.IMREAD_GRAYSCALE))
+        for f in range(clip.frame_start, clip.frame_stop)
+    ]
+    # Serving: the clip's frames, encoded in order, then letterboxed.
+    served = [
+        to_network_input(letterbox_image(image, SIZE)[0])[0]
+        for image in encode_frames(TEMPORAL3, lambda: iter(frames))
+    ]
+
+    assert len(data) == len(served)
+    for index in range(len(data)):
+        image, targets = data[index]
+        assert torch.equal(image, served[index])
+        _, boxes = data.raw(index)
+        assert int((targets[:, 3] > 0).sum()) == len(boxes)
+    # The background was cached once per clip and is reused.
+    assert len(list(tmp_path.rglob("*.npy"))) == 1
+
+
+def test_temporal_flip_mirrors_every_channel_with_its_boxes(fake_cfc: FakeCfc) -> None:
+    identity = AugmentConfig(
+        flip_probability=1.0,
+        contrast_range=(1.0, 1.0),
+        brightness_range=(0.0, 0.0),
+        noise_probability=0.0,
+        blur_probability=0.0,
+    )
+    data = dataset(fake_cfc, ["mirror"], augment=identity, preprocessing=TEMPORAL3)
+    index = 3  # frame 13, with a fish
+
+    image, targets = data[index]
+
+    frame, boxes = data.raw(index)
+    built = temporal_image(frame, data.following(index), data.background(0))
+    mirrored, mirrored_boxes = flip_horizontal(built, boxes)
+    canvas, letterbox = letterbox_image(mirrored, SIZE)
+    assert torch.equal(image, to_network_input(canvas)[0])
+    expected = letterbox.boxes_to_input(mirrored_boxes)
+    np.testing.assert_allclose(targets[0, 1].item(), (expected[0, 0] + expected[0, 2]) / 2)
+
+
+def test_brightness_shifts_cancel_in_the_background_channel() -> None:
+    rng = np.random.default_rng(0)
+    frame = rng.integers(60, 120, (20, 30), dtype=np.uint8)
+    following = rng.integers(60, 120, (20, 30), dtype=np.uint8)
+    background = np.full((20, 30), 90.0, dtype=np.float32)
+    shift = AugmentConfig(
+        contrast_range=(1.0, 1.0),
+        brightness_range=(25.0, 25.0),
+        noise_probability=0.0,
+        blur_probability=0.0,
+    )
+
+    f2, g2, b2 = photometric_pair(frame, following, background, shift, rng)
+
+    before = temporal_image(frame, following, background)
+    after = temporal_image(f2, g2, b2)
+    np.testing.assert_array_equal(after[..., 0].astype(int), before[..., 0].astype(int) + 25)
+    assert np.abs(after[..., 1:].astype(int) - before[..., 1:].astype(int)).max() <= 1
+
+
+def test_trainer_refuses_a_dataset_with_other_preprocessing(
+    fake_cfc: FakeCfc, tmp_path: Path
+) -> None:
+    data = dataset(fake_cfc, ["mismatch"], augment=None)
+
+    with pytest.raises(ValueError, match="needs letterbox-temporal3-v1"):
+        Trainer(config(preprocessing=TEMPORAL3), data, tmp_path / "run", device="cpu")
 
 
 def test_stride_keeps_frames_without_fish(fake_cfc: FakeCfc) -> None:

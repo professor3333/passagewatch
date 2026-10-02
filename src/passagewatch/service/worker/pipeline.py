@@ -30,7 +30,7 @@ from passagewatch.counting.policy import (
 )
 from passagewatch.detection.classical import FrameDetections, Scale, boxes_in_meters
 from passagewatch.inference.neural import detect_frames, file_sha256, load_detector
-from passagewatch.preprocessing.letterbox import PREPROCESSING_VERSION
+from passagewatch.preprocessing.temporal import PREPROCESSING_VERSIONS, encode_frames
 from passagewatch.service.bundle import ReleaseBundle, load_bundle
 from passagewatch.service.catalog import ClipRecord
 from passagewatch.service.media import iter_frames
@@ -92,12 +92,17 @@ class InferencePipeline:
         checkpoint = bundle_dir / bundle.detector.checkpoint
         if file_sha256(checkpoint) != bundle.detector.checkpoint_sha256:
             raise BundleMismatchError(f"{checkpoint} does not match the bundle's SHA-256")
-        if bundle.preprocessing_version != PREPROCESSING_VERSION:
+        if bundle.preprocessing_version not in PREPROCESSING_VERSIONS:
             raise BundleMismatchError(
                 f"bundle needs preprocessing {bundle.preprocessing_version}, "
-                f"this code implements {PREPROCESSING_VERSION}"
+                f"this code implements only {', '.join(PREPROCESSING_VERSIONS)}"
             )
         detector = YoloxDetector(checkpoint, bundle.detector.score_threshold, torch.device(device))
+        if detector.loaded.preprocessing != bundle.preprocessing_version:
+            raise BundleMismatchError(
+                f"{checkpoint} was trained with {detector.loaded.preprocessing}, but the bundle "
+                f"declares {bundle.preprocessing_version}"
+            )
         return cls(bundle, detector, batch_size=batch_size)
 
     def run(
@@ -107,7 +112,10 @@ class InferencePipeline:
         counting: dict[str, Any],
         progress: Progress | None = None,
     ) -> PipelineResult:
-        detections = self._detect(clip, iter_frames(media_path, clip.media_kind), progress)
+        images = encode_frames(
+            self.bundle.preprocessing_version, lambda: iter_frames(media_path, clip.media_kind)
+        )
+        detections = self._detect(clip, images, progress)
         scale = Scale(
             sx=1.0,
             sy=1.0,
@@ -138,7 +146,7 @@ class InferencePipeline:
         detections: list[FrameDetections] = []
         batch: list[NDArray[np.uint8]] = []
         for index, frame in enumerate(frames):
-            if frame.shape != (clip.height, clip.width):
+            if frame.shape[:2] != (clip.height, clip.width):
                 raise ValueError(
                     f"frame {index} is {frame.shape[1]}x{frame.shape[0]}, "
                     f"expected {clip.width}x{clip.height}"
