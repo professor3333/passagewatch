@@ -1,8 +1,9 @@
 """Neural detection for whole clips, with detections cached for cheap re-tracking.
 
-A trained checkpoint is loaded only if its preprocessing version matches this code's, so a
-model is never served with preprocessing it was not trained with. Frames go through the
-same :func:`letterbox_gray` as training; detections are mapped back to original-frame pixels
+A trained checkpoint records its preprocessing version, and frames are encoded with exactly
+that version (:func:`passagewatch.preprocessing.temporal.encode_frames`), so a model is never
+served with preprocessing it was not trained with. Encoded images go through the same
+:func:`letterbox_image` as training; detections are mapped back to original-frame pixels
 (divided by the letterbox scale) and clipped to the frame.
 
 Detection is the expensive step. :func:`detect_clip` runs it once at a low score threshold;
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import itertools
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -30,12 +32,8 @@ from passagewatch.detection.yolox.yolox import YOLOX
 from passagewatch.evaluation.detection import DetectionMatch, match_detections
 from passagewatch.evaluation.nmae import ClipCountError, count_clip
 from passagewatch.ingestion.cfc import Clip, frame_path
-from passagewatch.preprocessing.letterbox import (
-    PREPROCESSING_VERSION,
-    InputSize,
-    letterbox_gray,
-    to_network_input,
-)
+from passagewatch.preprocessing.letterbox import InputSize, letterbox_image, to_network_input
+from passagewatch.preprocessing.temporal import PREPROCESSING_VERSIONS, encode_frames
 from passagewatch.tracking.bytetrack import ByteTrackConfig, ByteTracker
 from passagewatch.tracking.kalman import (
     KalmanTracker,
@@ -57,6 +55,7 @@ class LoadedDetector:
     checkpoint_sha256: str
     epoch: int
     run_name: str
+    preprocessing: str = PREPROCESSING_VERSIONS[0]
 
 
 def file_sha256(path: Path) -> str:
@@ -69,10 +68,10 @@ def file_sha256(path: Path) -> str:
 
 def load_detector(checkpoint: Path, device: torch.device) -> LoadedDetector:
     payload: dict[str, Any] = torch.load(checkpoint, map_location="cpu", weights_only=False)
-    if payload["preprocessing_version"] != PREPROCESSING_VERSION:
+    if payload["preprocessing_version"] not in PREPROCESSING_VERSIONS:
         raise ValueError(
             f"{checkpoint} was trained with preprocessing {payload['preprocessing_version']}, "
-            f"but this code implements {PREPROCESSING_VERSION}"
+            f"but this code implements only {', '.join(PREPROCESSING_VERSIONS)}"
         )
     config = payload["config"]
     model = build_yolox(config["model_size"])
@@ -85,6 +84,7 @@ def load_detector(checkpoint: Path, device: torch.device) -> LoadedDetector:
         checkpoint_sha256=file_sha256(checkpoint),
         epoch=int(payload["state"]["epoch"]),
         run_name=config["name"],
+        preprocessing=payload["preprocessing_version"],
     )
 
 
@@ -94,9 +94,10 @@ def detect_frames(
     frames: list[NDArray[np.uint8]],
     score_threshold: float = CACHE_SCORE_THRESHOLD,
 ) -> list[FrameDetections]:
-    """Detect in grayscale frames; boxes in original-frame pixels, clipped to the frame."""
+    """Detect in encoded frames (grayscale, or 3-channel for temporal preprocessing); boxes
+    in original-frame pixels, clipped to the frame."""
     canvases, letterboxes = zip(
-        *(letterbox_gray(f, detector.input_size) for f in frames), strict=True
+        *(letterbox_image(f, detector.input_size) for f in frames), strict=True
     )
     batch = to_network_input(np.stack(canvases)).to(detector.device)
     outputs = detector.model(batch).float().cpu()
@@ -105,7 +106,7 @@ def detect_frames(
         decode_detections(outputs, score_threshold, NMS_IOU), letterboxes, frames, strict=True
     ):
         boxes = letterbox.boxes_to_frame(image.boxes.numpy().astype(np.float64))
-        h, w = frame.shape
+        h, w = frame.shape[:2]
         boxes[:, [0, 2]] = boxes[:, [0, 2]].clip(0, w)
         boxes[:, [1, 3]] = boxes[:, [1, 3]].clip(0, h)
         keep = (boxes[:, 2] > boxes[:, 0]) & (boxes[:, 3] > boxes[:, 1])
@@ -119,16 +120,24 @@ def detect_clip(detector: LoadedDetector, clip: Clip, batch_size: int = 8) -> li
     """Detections for every frame of the clip's window, in frame order."""
     if clip.frame_dir is None:
         raise ValueError(f"clip {clip.name} has no frames")
-    results: list[FrameDetections] = []
-    indices = list(range(clip.frame_start, clip.frame_stop))
-    for start in range(0, len(indices), batch_size):
-        frames = []
-        for i in indices[start : start + batch_size]:
-            gray = cv2.imread(str(frame_path(clip.frame_dir, i)), cv2.IMREAD_GRAYSCALE)
+    frame_dir = clip.frame_dir
+
+    def frames() -> Iterator[NDArray[np.uint8]]:
+        for i in range(clip.frame_start, clip.frame_stop):
+            gray = cv2.imread(str(frame_path(frame_dir, i)), cv2.IMREAD_GRAYSCALE)
             if gray is None:
                 raise ValueError(f"cannot decode frame {i} of {clip.name}")
-            frames.append(np.asarray(gray, dtype=np.uint8))
-        results.extend(detect_frames(detector, frames))
+            yield np.asarray(gray, dtype=np.uint8)
+
+    results: list[FrameDetections] = []
+    batch: list[NDArray[np.uint8]] = []
+    for image in encode_frames(detector.preprocessing, frames):
+        batch.append(image)
+        if len(batch) == batch_size:
+            results.extend(detect_frames(detector, batch))
+            batch = []
+    if batch:
+        results.extend(detect_frames(detector, batch))
     return results
 
 

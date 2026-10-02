@@ -31,6 +31,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--device", default="auto", help="auto, cuda, mps or cpu")
     parser.add_argument("--resume", action="store_true", help="continue from <out>/latest.pt")
     parser.add_argument("--max-iters", type=int, default=None, help="stop early (smoke runs)")
+    parser.add_argument(
+        "--background-cache",
+        type=Path,
+        default=REPO_ROOT / "data/cache/backgrounds",
+        help="where temporal preprocessing caches each clip's background",
+    )
     parser.add_argument("--pretrained-dir", type=Path, default=REPO_ROOT / "models/pretrained")
     args = parser.parse_args(argv)
 
@@ -51,6 +57,8 @@ def main(argv: list[str] | None = None) -> int:
         augment=config.augment,
         max_labels=config.max_labels,
         seed=config.seed,
+        preprocessing=config.preprocessing,
+        background_dir=args.background_cache,
     )
     weights = None
     if config.pretrained is not None:

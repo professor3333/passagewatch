@@ -45,7 +45,8 @@ from torch import nn
 from torch.utils.data import DataLoader, Sampler
 
 from passagewatch.detection.neural import build_yolox, load_coco_weights, select_device
-from passagewatch.preprocessing.letterbox import PREPROCESSING_VERSION, InputSize
+from passagewatch.preprocessing.letterbox import InputSize
+from passagewatch.preprocessing.temporal import GRAY3
 from passagewatch.training.data import AugmentConfig, FrameDataset
 
 
@@ -76,6 +77,8 @@ class TrainConfig(BaseModel):
     # Keep an epoch snapshot and refresh latest.pt every N epochs (and after the last one).
     save_every_epochs: int = Field(default=1, ge=1)
     augment: AugmentConfig = AugmentConfig()
+    # Input encoding (passagewatch.preprocessing.temporal); recorded in every checkpoint.
+    preprocessing: Literal["letterbox-gray3-v1", "letterbox-temporal3-v1"] = "letterbox-gray3-v1"
 
     @property
     def input_size(self) -> InputSize:
@@ -206,6 +209,12 @@ class Trainer:
         init_weights: Path | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
+        encoding = getattr(dataset, "preprocessing", GRAY3)
+        if encoding != config.preprocessing:
+            raise ValueError(
+                f"the dataset encodes {encoding}, but config {config.name} needs "
+                f"{config.preprocessing}"
+            )
         self.config = config
         self.dataset = dataset
         self.out_dir = out_dir
@@ -236,7 +245,7 @@ class Trainer:
         return {
             "format": 1,
             "config": self.config.model_dump(mode="json"),
-            "preprocessing_version": PREPROCESSING_VERSION,
+            "preprocessing_version": self.config.preprocessing,
             "model": self.model.state_dict(),
             "state": vars(self.state).copy(),
             "metadata": self.metadata,
@@ -286,9 +295,9 @@ class Trainer:
         )
 
     def _write_run_info(self) -> None:
-        info = {
+        info: dict[str, Any] = {
             "config": self.config.model_dump(mode="json"),
-            "preprocessing_version": PREPROCESSING_VERSION,
+            "preprocessing_version": self.config.preprocessing,
             "samples": len(self.dataset),
             "clips": len(self.dataset.clips),
             "iters_per_epoch": self.iters_per_epoch,
