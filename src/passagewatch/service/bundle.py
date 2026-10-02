@@ -75,6 +75,7 @@ def build_bundle(
     version: str,
     bundles_dir: Path,
     provenance: dict[str, Any] | None = None,
+    calibration_version: str | None = None,
 ) -> Path:
     """Create ``bundles_dir/<version>/`` from a training checkpoint; versions are immutable.
 
@@ -104,6 +105,7 @@ def build_bundle(
         preprocessing_version=payload["preprocessing_version"],
         tracker=TrackerSpec(config=tracker_config),
         counting_policy="cfc-compatible-v1",
+        calibration_version=calibration_version,
         provenance={"training_metadata": payload.get("metadata", {}), **(provenance or {})},
     )
     target = bundles_dir / version
