@@ -173,3 +173,27 @@ def iter_frames(path: Path, kind: str) -> Iterator[NDArray[np.uint8]]:
             i += 1
     finally:
         capture.release()
+
+
+def read_frame(path: Path, kind: str, index: int) -> tuple[bytes, str]:
+    """One frame as image bytes and its media type (for display, not for analysis)."""
+    if kind == "frames":
+        with zipfile.ZipFile(path) as archive:
+            members = frame_members(archive)
+            if not 0 <= index < len(members):
+                raise IndexError(f"frame {index} is outside [0, {len(members)})")
+            name = members[index]
+            media_type = "image/png" if name.lower().endswith(".png") else "image/jpeg"
+            return archive.read(name), media_type
+    capture = cv2.VideoCapture(str(path))
+    try:
+        count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        if not 0 <= index < max(count, 1):
+            raise IndexError(f"frame {index} is outside [0, {count})")
+        capture.set(cv2.CAP_PROP_POS_FRAMES, index)
+        ok, frame = capture.read()
+    finally:
+        capture.release()
+    if not ok:
+        raise IndexError(f"frame {index} cannot be read")
+    return bytes(cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 90])[1]), "image/jpeg"

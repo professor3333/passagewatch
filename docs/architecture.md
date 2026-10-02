@@ -44,6 +44,43 @@ flowchart LR
 5. `GET /v1/jobs/{id}`, `/results` and `/tracks` serve status, counts and trajectories.
    Results keep automatic and reviewed counts in separate fields.
 
+## Review and export
+
+Revision 0 of a result is the automatic one and never changes. A reviewer submits
+corrections with `POST /v1/jobs/{id}/reviews`. Each correction names the revision it was
+based on, is stored as an append-only `review_events` row, and produces a new
+`result_revisions` row with the decisions so far and the reviewed counts. If the base
+revision is not the latest, because another reviewer saved first, the correction is refused
+with **409 Conflict**. Automatic and reviewed counts are always separate fields.
+
+| Action | Effect on the reviewed counts |
+|---|---|
+| `accept` (track) | Counts with its automatic direction (confirmed) |
+| `reject` (track or added passage) | Does not count (not a fish, a duplicate fragment, a mistaken addition) |
+| `set_direction` (track) | Counts with the reviewer's direction |
+| `mark_unresolved` (track) | Excluded from the counts and listed as unresolved |
+| `add_passage` (direction, frame) | A fish the model missed; counts, with that frame as evidence |
+
+`GET /v1/jobs/{id}/export?format=json|csv&revision=N` produces a report for any revision. It
+contains:
+- the recording ID and SHA-256;
+- the counting policy, line and orientation;
+- the automatic and reviewed counts (upstream/downstream when an orientation is set);
+- the unresolved cases;
+- the pipeline version, config hash and detector checkpoint hash;
+- every track and added passage with its evidence frames and times, review state and final
+  direction;
+- the review history up to that revision.
+
+The CSV has the metadata and counts as `# key,value` lines above one row per case.
+
+For the review interface:
+- `GET /v1/clips/{id}` returns the clip metadata;
+- `GET /v1/clips/{id}/frames/{n}` returns a frame as an image;
+- `GET /v1/jobs/{id}/observations?start=&stop=` returns every tracked box in a window of up
+  to 500 frames, for overlays;
+- `/tracks` also returns each track's review state and final direction.
+
 ## Job lifecycle
 
 ```mermaid
@@ -71,7 +108,7 @@ stateDiagram-v2
 
 | Path (inside `/data`) | Contents |
 |---|---|
-| `service.db` | SQLite (WAL): `clips`, `jobs`, `pipeline_versions`, `result_revisions`, `review_events`, `workers` |
+| `service.db` | SQLite (WAL, schema v3): `clips`, `jobs`, `pipeline_versions`, `result_revisions` (with each revision's review decisions), `review_events`, `workers` |
 | `media/<clip_id>/` | Uploaded recording; deleted after its retention period unless a job needs it |
 | `artifacts/<job_id>/` | `tracks.parquet` (one row per trajectory), `observations.parquet` (every box) |
 
@@ -135,5 +172,5 @@ result fields as top-level keys.
   647 MB of it PyTorch.
 - **One host, one worker.** SQLite and local volumes are deliberate for this scale (see
   [design](design.md) §17).
-- **Not yet built:** reviews and export (Stage 7), the reverse proxy with HTTPS and
-  frontend, Prometheus metrics and alerts (Stage 11).
+- **Not yet built:** the review interface (Stage 7), the reverse proxy with HTTPS,
+  Prometheus metrics and alerts (Stage 11).
