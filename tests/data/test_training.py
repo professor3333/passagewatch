@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools
 import json
 import math
+import re
 import zlib
 from pathlib import Path
 
@@ -242,23 +243,24 @@ def _tiny_set() -> tuple[list[torch.Tensor], list[torch.Tensor]]:
     return images, targets
 
 
-def _train_tiny_set(tmp_path: Path, steps: int, seed: int) -> tuple[Trainer, list[float]]:
-    images, targets = _tiny_set()
+class _TinyFrames(torch.utils.data.Dataset[tuple[torch.Tensor, torch.Tensor]]):
+    """The six frames of :func:`_tiny_set`; one batch of all of them per epoch."""
 
-    class Frames(torch.utils.data.Dataset[tuple[torch.Tensor, torch.Tensor]]):
-        # One batch of all six frames per epoch.
-        def __init__(self) -> None:
-            self.clips: list[object] = []
+    def __init__(self) -> None:
+        self.images, self.targets = _tiny_set()
+        self.clips: list[object] = []
 
-        def __len__(self) -> int:
-            return len(images)
+    def __len__(self) -> int:
+        return len(self.images)
 
-        def __getitem__(self, i: int) -> tuple[torch.Tensor, torch.Tensor]:
-            return images[i], targets[i]
+    def __getitem__(self, i: int) -> tuple[torch.Tensor, torch.Tensor]:
+        return self.images[i], self.targets[i]
 
-        def set_epoch(self, epoch: int) -> None:
-            pass
+    def set_epoch(self, epoch: int) -> None:
+        pass
 
+
+def _tiny_trainer(tmp_path: Path, steps: int, seed: int) -> Trainer:
     cfg = config(
         epochs=steps,
         batch_size=6,
@@ -270,7 +272,11 @@ def _train_tiny_set(tmp_path: Path, steps: int, seed: int) -> tuple[Trainer, lis
         save_every_epochs=steps,
         seed=seed,
     )
-    trainer = Trainer(cfg, Frames(), tmp_path / "run", device="cpu")  # type: ignore[arg-type]
+    return Trainer(cfg, _TinyFrames(), tmp_path / "run", device="cpu")  # type: ignore[arg-type]
+
+
+def _train_tiny_set(tmp_path: Path, steps: int, seed: int) -> tuple[Trainer, list[float]]:
+    trainer = _tiny_trainer(tmp_path, steps, seed)
     # YOLOX's BatchNorm momentum (0.03) makes eval-mode statistics lag training by a few
     # hundred steps; a faster momentum lets this tiny run be judged in eval mode.
     for module in trainer.model.modules():
@@ -286,15 +292,29 @@ def _train_tiny_set(tmp_path: Path, steps: int, seed: int) -> tuple[Trainer, lis
     return trainer, [json.loads(line)["total_loss"] for line in metrics]
 
 
-def test_training_reduces_the_loss(tmp_path: Path) -> None:
-    """Fast check that the pipeline learns at all: targets, gradients and optimizer work.
+def test_one_iteration_updates_every_trainable_parameter(tmp_path: Path) -> None:
+    """Fast, deterministic check that the loss reaches every layer and the optimizer steps.
 
-    Over 100 steps the loss fell by 19-53% for each of 8 seeds checked, so this holds on any
-    hardware; a pipeline that cannot learn stays near its initial loss.
+    Whether training *lowers* the loss is left to the slow test below. YOLOX reassigns its
+    positive predictions as they change and normalizes by their number, so its loss is not
+    smooth. Even one small step raised the loss for some seeds, and over 100 steps the drop
+    ranged from 9% to 70% across 40 seeds. A short run's loss curve also depends on the
+    CPU's floating-point details, so it cannot be a reliable CI gate.
     """
-    _, losses = _train_tiny_set(tmp_path, steps=100, seed=0)
+    trainer = _tiny_trainer(tmp_path, steps=1, seed=0)
+    before = {name: p.detach().clone() for name, p in trainer.model.named_parameters()}
 
-    assert np.mean(losses[-3:]) < 0.9 * np.mean(losses[:3])
+    trainer.train(max_iters=1)
+
+    params = dict(trainer.model.named_parameters())
+    assert all(p.requires_grad for p in params.values())
+    assert all(torch.isfinite(p).all() for p in params.values())
+    unchanged = [name for name, p in params.items() if torch.equal(p.detach(), before[name])]
+    # The 24 x 12 px targets are assigned only at stride 8 (level 0). Classification and box
+    # losses train only assigned predictions, so the classification and box branches of
+    # levels 1 and 2 legitimately get no gradient. Everything else must have moved.
+    assert unchanged
+    assert all(re.match(r"head\.(cls_convs|cls_preds|reg_preds)\.[12]\.", n) for n in unchanged)
 
 
 @pytest.mark.slow
@@ -329,9 +349,18 @@ def test_epoch_snapshots_follow_save_every_epochs(fake_cfc: FakeCfc, tmp_path: P
 def test_repository_training_config_is_valid() -> None:
     from passagewatch.training.yolox_train import load_train_config
 
-    path = Path(__file__).resolve().parents[2] / "configs/training/yolox-tiny-v1.yaml"
-    cfg = load_train_config(path)
+    configs = Path(__file__).resolve().parents[2] / "configs/training"
+    v1 = load_train_config(configs / "yolox-tiny-v1.yaml")
+    v2 = load_train_config(configs / "yolox-tiny-v2.yaml")
 
-    assert (cfg.model_size, cfg.pretrained) == ("tiny", "yolox-tiny")
-    assert cfg.input_size == InputSize(960, 416)
-    assert cfg.head_only_epochs >= 1 and cfg.backbone_lr_factor < 1
+    assert (v1.model_size, v1.pretrained) == ("tiny", "yolox-tiny")
+    assert v1.input_size == InputSize(960, 416)
+    assert v1.head_only_epochs >= 1 and v1.backbone_lr_factor < 1
+    # Experiment 3 changes the input size and nothing else.
+    assert v2.input_size == InputSize(1280, 640)
+    changed = {k for k, v in v2.model_dump().items() if v != v1.model_dump()[k]} - {
+        "name",
+        "input_height",
+        "input_width",
+    }
+    assert changed == set()
