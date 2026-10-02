@@ -96,6 +96,12 @@ class ClipErrors:
     predicted: Counter[str] = field(default_factory=Counter)
     confusion: Counter[tuple[str, str]] = field(default_factory=Counter)
     examples: list[dict[str, object]] = field(default_factory=list)
+    # Per trajectory, for review-prioritization studies: each reference passage's outcome,
+    # each predicted passage's outcome, and which reference trajectories each predicted
+    # trajectory (passage or not) follows.
+    reference_outcomes: dict[int, str] = field(default_factory=dict)
+    predicted_outcomes: dict[int, str] = field(default_factory=dict)
+    follows: dict[int, frozenset[int]] = field(default_factory=dict)
 
 
 def analyze_clip(
@@ -160,6 +166,7 @@ def analyze_clip(
         else:
             outcome = "partial_track"
         result.reference[outcome] += 1
+        result.reference_outcomes[ref_id] = outcome
         if outcome != "counted":
             result.examples.append(
                 {
@@ -189,6 +196,7 @@ def analyze_clip(
         else:
             outcome = "non_passing_fish"
         result.predicted[outcome] += 1
+        result.predicted_outcomes[pred_id] = outcome
         if outcome in ("duplicate", "background", "non_passing_fish"):
             result.examples.append(
                 {
@@ -200,6 +208,8 @@ def analyze_clip(
                     "direction": _direction(pred),
                 }
             )
+
+    result.follows = {p: frozenset(followed.get(p, ())) for p in pred_counts}
 
     # Direction confusion over reference trajectories (each with its best-matching
     # predicted trajectory), plus predicted passages that follow no reference trajectory.
