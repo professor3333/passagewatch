@@ -36,6 +36,23 @@ calibrator has been fitted on separate training groups and validated.
 Triage never changes the automatic counts, which come only from the counting policy. A
 reviewer's decisions are separate, append-only review events.
 
+## Calibration version `review-v0`
+
+A release bundle declares `calibration_version: review-v0` to switch all of this on:
+`review-score-v0` with the thresholds above, and `audit-v0` windows of 5 s covering at least
+10% of the unflagged frames, kept 1 s away from flagged trajectories
+(`passagewatch.calibration.versions`). The version is part of the pipeline's config hash, so
+it is part of every result's cache key and every export. The worker computes scores,
+triage and audit windows with the predictions, and they are stored with them, never
+recomputed. A bundle without a calibration version (such as `passagewatch-0.2.0`) gives
+tracks without scores and jobs without audit windows.
+
+In the API, `GET /v1/jobs/{id}/tracks?order=queue` lists tracks in review-queue order, and
+`GET /v1/jobs/{id}/audit` lists the audit windows with their state. A reviewer marks a window
+with the review action `mark_audited`, and records a fish found there with `add_passage` and
+its `audit_window`. Exports (report version 2) add each track's triage and review score, and
+the audit windows, how many were checked, and the passages found in them.
+
 ## Random audits (`audit-v0`)
 
 A queue built from predicted trajectories cannot show a fish that was never tracked. So each
@@ -86,7 +103,9 @@ random order. Without audits the ceiling is 0.83 (25 of 30).
 
 Several trajectories can lead to the same error, so the last column sums to more than 25.
 
-Audits covering 14.6% of the frames showed 3 of the 5 fish that nothing tracked.
+With `review-v0`'s audit settings (windows of 5 s covering at least 10% of the unflagged
+frames, 1 s away from flagged trajectories), audits covering 12.2% of all frames showed 2 of
+the 5 fish that nothing tracked.
 
 What this shows, with the caution that 64 clips and 30 errors are a small sample:
 
@@ -100,6 +119,5 @@ What this shows, with the caution that 64 clips and 30 errors are a small sample
 - **Audits are needed** to approach the 80%-of-all-errors target, because a sixth of the
   errors are fish the queue cannot reach.
 
-Next: wire scores, triage and audit windows into the API, the review UI and exports; then,
-once the detector is fixed, choose the thresholds on kenai-val and confirm them once on
+Next: once the detector is fixed, choose the thresholds on kenai-val and confirm them once on
 `kenai-holdout-v1`.

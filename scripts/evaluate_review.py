@@ -23,13 +23,9 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from passagewatch.calibration.audit import AUDIT_VERSION, audit_windows, seed_from
-from passagewatch.calibration.review_score import (
-    REVIEW_SCORE_VERSION,
-    ReviewConfig,
-    review,
-    track_features,
-)
+from passagewatch.calibration.audit import AUDIT_VERSION, seed_from
+from passagewatch.calibration.review_score import REVIEW_SCORE_VERSION
+from passagewatch.calibration.versions import CALIBRATIONS, REVIEW_V0, review_clip
 from passagewatch.counting.policy import CFC_COMPATIBLE_V1, count_trajectories
 from passagewatch.evaluation.errors import analyze_clip
 from passagewatch.evaluation.prioritization import (
@@ -62,8 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--tracking-config", type=Path, default=REPO_ROOT / "configs/tracking/classical-v2.yaml"
     )
-    parser.add_argument("--audit-fraction", type=float, default=0.1)
-    parser.add_argument("--audit-window-s", type=float, default=5.0)
+    parser.add_argument("--calibration", choices=sorted(CALIBRATIONS), default=REVIEW_V0)
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
 
@@ -73,7 +68,7 @@ def main(argv: list[str] | None = None) -> int:
     metadata = {loc: layout.metadata(loc).clips for loc in {r["location"] for r in rows}}
     tracker = load_classical_config(args.tracking_config).tracker
     policy = CFC_COMPATIBLE_V1
-    config = ReviewConfig()
+    calibration = CALIBRATIONS[args.calibration]
 
     items: list[QueueItem] = []
     reachable: set[str] = set()
@@ -99,10 +94,18 @@ def main(argv: list[str] | None = None) -> int:
             abs(meta.x_meter_stop - meta.x_meter_start) / meta.width,
             abs(meta.y_meter_stop - meta.y_meter_start) / meta.height,
         )
-        reviews = {
-            f.track_id: review(f, config)
-            for f in track_features(trajectories, counts, mpp, policy.line_x_normalized)
-        }
+        clip_review = review_clip(
+            calibration,
+            trajectories,
+            counts,
+            meters_per_px=mpp,
+            line_x_normalized=policy.line_x_normalized,
+            num_frames=clip.num_window_frames,
+            framerate=meta.framerate,
+            frame_offset=clip.frame_start,
+            seed=seed_from(clip.name),
+        )
+        reviews = clip_review.tracks
         analysis = analyze_clip(
             clip.name, clip.annotations, predicted, meta.width, meta.height, policy
         )
@@ -119,18 +122,7 @@ def main(argv: list[str] | None = None) -> int:
             triage_errors[(r.triage, bool(item.reveals))] += 1
 
         # Random audits of unflagged footage: do they land on the fish nothing tracked?
-        flagged = [
-            (int(t.frames.min()) - clip.frame_start, int(t.frames.max()) - clip.frame_start)
-            for t in trajectories
-            if reviews[t.track_id].features.is_passage or reviews[t.track_id].triage != "suggested"
-        ]
-        windows = audit_windows(
-            clip.num_window_frames,
-            flagged,
-            window_frames=max(1, round(args.audit_window_s * meta.framerate)),
-            fraction=args.audit_fraction,
-            seed=seed_from(clip.name),
-        )
+        windows = clip_review.audit
         audit_frames += sum(w.frames for w in windows)
         total_frames += clip.num_window_frames
         ann = clip.annotations
@@ -151,8 +143,9 @@ def main(argv: list[str] | None = None) -> int:
         "random": random_order_curve(items, errors, BUDGETS),
     }
     report: dict[str, Any] = {
+        "calibration_version": calibration.version,
         "review_score_version": REVIEW_SCORE_VERSION,
-        "review_config": config.model_dump(),
+        "review_config": calibration.review.model_dump(),
         "audit_version": AUDIT_VERSION,
         "detections": str(args.detections),
         "threshold": args.threshold,
