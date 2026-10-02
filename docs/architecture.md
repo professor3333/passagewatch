@@ -60,7 +60,8 @@ with **409 Conflict**. Automatic and reviewed counts are always separate fields.
 | `reject` (track or added passage) | Does not count (not a fish, a duplicate fragment, a mistaken addition) |
 | `set_direction` (track) | Counts with the reviewer's direction |
 | `mark_unresolved` (track) | Excluded from the counts and listed as unresolved |
-| `add_passage` (direction, frame) | A fish the model missed; counts, with that frame as evidence |
+| `add_passage` (direction, frame) | A fish the model missed; counts, with that frame as evidence (optionally tied to an `audit_window`) |
+| `mark_audited` (`audit_window`) | None; records that a random audit window was watched |
 
 `GET /v1/jobs/{id}/export?format=json|csv&revision=N` produces a report for any revision. It
 contains:
@@ -70,7 +71,8 @@ contains:
 - the unresolved cases;
 - the pipeline version, config hash and detector checkpoint hash;
 - every track and added passage with its evidence frames and times, review state and final
-  direction;
+  direction, and (with a calibration version) its triage state and review score;
+- the random audit windows, which were checked, and the passages found in them;
 - the review history up to that revision.
 
 The CSV has the metadata and counts as `# key,value` lines above one row per case.
@@ -80,7 +82,13 @@ For the review interface:
 - `GET /v1/clips/{id}/frames/{n}` returns a frame as an image;
 - `GET /v1/jobs/{id}/observations?start=&stop=` returns every tracked box in a window of up
   to 500 frames, for overlays;
-- `/tracks` also returns each track's review state and final direction.
+- `/tracks` also returns each track's review state and final direction, and its triage,
+  review score and reasons; `?order=queue` lists tracks in review-queue order;
+- `GET /v1/jobs/{id}/audit` returns the job's random audit windows and their state.
+
+Triage, review scores and audit windows exist when the release declares a calibration
+version (`review-v0`); they are computed by the worker and stored with the predictions. See
+[review.md](review.md).
 
 ## Job lifecycle
 
@@ -111,7 +119,7 @@ stateDiagram-v2
 |---|---|
 | `service.db` | SQLite (WAL, schema v3): `clips`, `jobs`, `pipeline_versions`, `result_revisions` (with each revision's review decisions), `review_events`, `workers` |
 | `media/<clip_id>/` | Uploaded recording; deleted after its retention period unless a job needs it |
-| `artifacts/<job_id>/` | `tracks.parquet` (one row per trajectory), `observations.parquet` (every box) |
+| `artifacts/<job_id>/` | `tracks.parquet` (one row per trajectory), `observations.parquet` (every box), `audit.json` (audit windows, with a calibration version) |
 
 ## Release bundles
 

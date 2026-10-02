@@ -7,14 +7,18 @@ import { FrameCache, ObservationCache } from "./player";
 import {
   STATE_COLORS,
   STATE_LABELS,
+  TRIAGE_COLORS,
+  TRIAGE_LABELS,
+  auditWindowAt,
   countRows,
   directionLabel,
   formatTime,
   newIdempotencyKey,
   nextUnreviewed,
+  reasonText,
   reviewOrder,
 } from "./review";
-import type { AddedPassage, Clip, ImageDirection, Job, Results, ReviewRequest, Track } from "./types";
+import type { AddedPassage, Audit, Clip, ImageDirection, Job, Results, ReviewRequest, Track } from "./types";
 
 const api = new PassageWatchApi();
 const app = document.getElementById("app") as HTMLElement;
@@ -195,6 +199,7 @@ interface ReviewState {
   results: Results;
   tracks: Track[];
   passages: AddedPassage[];
+  audit: Audit;
   revision: number;
   frame: number;
   selected: number | null;
@@ -203,11 +208,12 @@ interface ReviewState {
 }
 
 async function reviewView(job: Job): Promise<void> {
-  const [clip, results, { revision, tracks }, passages] = await Promise.all([
+  const [clip, results, { revision, tracks }, passages, audit] = await Promise.all([
     api.getClip(job.clip_id),
     api.getResults(job.job_id),
     api.getAllTracks(job.job_id),
     api.getAddedPassages(job.job_id),
+    api.getAudit(job.job_id),
   ]);
   const state: ReviewState = {
     job,
@@ -215,6 +221,7 @@ async function reviewView(job: Job): Promise<void> {
     results,
     tracks,
     passages,
+    audit,
     revision,
     frame: 0,
     selected: null,
@@ -242,6 +249,7 @@ async function reviewView(job: Job): Promise<void> {
   const revisionLabel = el("span", { class: "badge" });
   const selectedPanel = el("div");
   const trackBody = el("tbody");
+  const auditPanel = el("div");
 
   const header = el(
     "section",
@@ -250,7 +258,7 @@ async function reviewView(job: Job): Promise<void> {
     el(
       "p",
       { class: "muted" },
-      `Recording ${clip.clip_id} (sha256 ${clip.sha256.slice(0, 12)}…), ${clip.num_frames} frames at ${clip.framerate} fps · `,
+      `Recording ${clip.clip_id} (sha256 ${clip.sha256.slice(0, 12)}…), ${clip.num_frames} frames at ${Number(clip.framerate.toFixed(3))} fps · `,
       `pipeline ${job.pipeline_version} · counting line at ${job.counting.line_x_normalized} · `,
       upstream ? `upstream is to the ${upstream}` : "orientation not set",
       " ",
@@ -312,12 +320,22 @@ async function reviewView(job: Job): Promise<void> {
           el(
             "thead",
             {},
-            el("tr", {}, el("th", {}, "#"), el("th", {}, "time"), el("th", {}, "automatic"), el("th", {}, "review"), el("th", {}, "final")),
+            el(
+              "tr",
+              {},
+              el("th", {}, "#"),
+              el("th", {}, "time"),
+              el("th", {}, "automatic"),
+              el("th", { title: "Automatic triage and heuristic review score (not a probability)" }, "triage"),
+              el("th", {}, "review"),
+              el("th", {}, "final"),
+            ),
           ),
           trackBody,
         ),
       ),
     ),
+    el("section", { class: "panel" }, el("h2", {}, "Random audit"), auditPanel),
   );
   app.append(header, el("div", { class: "review" }, stage, side));
 
@@ -392,6 +410,20 @@ async function reviewView(job: Job): Promise<void> {
     return el("span", { class: "state", style: `background:${STATE_COLORS[track.review_state]}` }, STATE_LABELS[track.review_state]);
   }
 
+  function triageBadge(track: Track): HTMLElement | string {
+    if (!track.triage) return "—";
+    const score = track.review_score === null ? "" : ` ${track.review_score.toFixed(2)}`;
+    return el(
+      "span",
+      {
+        class: "state",
+        style: `background:${TRIAGE_COLORS[track.triage]}`,
+        title: reasonText(track.review_reasons) || "no weak evidence",
+      },
+      `${TRIAGE_LABELS[track.triage]}${score}`,
+    );
+  }
+
   function renderTracks(): void {
     const rows = reviewOrder(state.tracks).map((track) => {
       const row = el(
@@ -400,6 +432,7 @@ async function reviewView(job: Job): Promise<void> {
         el("td", {}, String(track.track_id)),
         el("td", {}, `${formatTime(track.start_time_s)}–${formatTime(track.end_time_s)}`),
         el("td", {}, directionLabel(track.direction, upstream)),
+        el("td", {}, triageBadge(track)),
         el("td", {}, stateBadge(track)),
         el("td", {}, directionLabel(track.final_direction, upstream)),
       );
@@ -416,6 +449,7 @@ async function reviewView(job: Job): Promise<void> {
         el("td", {}, passage.passage_id),
         el("td", {}, formatTime(passage.time_s)),
         el("td", {}, "missed by the model"),
+        el("td", {}, ""),
         el("td", {}, passage.state),
         el("td", {}, passage.state === "added" ? directionLabel(passage.direction, upstream) : "—", " ", reject),
       );
@@ -427,8 +461,8 @@ async function reviewView(job: Job): Promise<void> {
     const track = state.tracks.find((t) => t.track_id === state.selected);
     const addRight = el("button", { type: "button" }, `Add missed fish here ${directionLabel("right", upstream)}`);
     const addLeft = el("button", { type: "button" }, `Add missed fish here ${directionLabel("left", upstream)}`);
-    addRight.addEventListener("click", () => void act({ action: "add_passage", direction: "right", frame_index: state.frame }));
-    addLeft.addEventListener("click", () => void act({ action: "add_passage", direction: "left", frame_index: state.frame }));
+    addRight.addEventListener("click", () => void addPassage("right"));
+    addLeft.addEventListener("click", () => void addPassage("left"));
     const addMissing = el("div", { class: "actions" }, addRight, addLeft);
     if (!track) {
       selectedPanel.replaceChildren(el("p", { class: "muted" }, "Select a track in the list, or press n for the next unreviewed one."), addMissing);
@@ -447,6 +481,17 @@ async function reviewView(job: Job): Promise<void> {
         `Automatic: ${directionLabel(track.direction, upstream)}. Review: `,
         stateBadge(track),
       ),
+      ...(track.triage
+        ? [
+            el(
+              "p",
+              { class: "muted" },
+              `Triage: ${TRIAGE_LABELS[track.triage]}, review score ${track.review_score?.toFixed(2) ?? "—"} `,
+              "(a heuristic ranking, not a probability)",
+              track.review_reasons && track.review_reasons.length ? `. Why: ${reasonText(track.review_reasons)}.` : ".",
+            ),
+          ]
+        : []),
       el(
         "div",
         { class: "actions" },
@@ -460,11 +505,61 @@ async function reviewView(job: Job): Promise<void> {
     );
   }
 
+  function renderAudit(): void {
+    const windows = state.audit.windows;
+    if (state.audit.calibration_version === null) {
+      auditPanel.replaceChildren(el("p", { class: "muted" }, "This release has no audit windows (no calibration version)."));
+      return;
+    }
+    if (windows.length === 0) {
+      auditPanel.replaceChildren(el("p", { class: "muted" }, "No unflagged footage to audit in this recording."));
+      return;
+    }
+    const checked = windows.filter((w) => w.state === "checked").length;
+    const rows = windows.map((w) => {
+      const go = el("button", { type: "button" }, "Go");
+      go.addEventListener("click", () => seek(w.start_frame));
+      const mark = el("button", { type: "button" }, w.state === "checked" ? "Checked" : "Mark checked");
+      mark.disabled = w.state === "checked";
+      mark.addEventListener("click", () => void act({ action: "mark_audited", audit_window: w.index }));
+      return el(
+        "tr",
+        {},
+        el("td", {}, String(w.index + 1)),
+        el("td", {}, `${formatTime(w.start_time_s)}–${formatTime(w.stop_time_s)}`),
+        el("td", {}, w.passages_added ? `${w.passages_added} added` : ""),
+        el("td", {}, go, " ", mark),
+      );
+    });
+    auditPanel.replaceChildren(
+      el(
+        "p",
+        { class: "muted" },
+        "Random stretches of footage the system did not flag. Watch each one for fish it missed entirely; ",
+        "add any you find, then mark the window checked. ",
+        `${checked} of ${windows.length} checked.`,
+      ),
+      el("table", {}, el("tbody", {}, ...rows)),
+    );
+  }
+
   function renderAll(): void {
     renderCounts();
     renderTracks();
     renderSelected();
+    renderAudit();
     void draw();
+  }
+
+  /** Adds a missed fish at the current frame, tied to the audit window it is in (if any). */
+  async function addPassage(direction: ImageDirection): Promise<void> {
+    const audited = auditWindowAt(state.audit.windows, state.frame);
+    await act({
+      action: "add_passage",
+      direction,
+      frame_index: state.frame,
+      ...(audited ? { audit_window: audited.index } : {}),
+    });
   }
 
   // Interaction -----------------------------------------------------------------------
@@ -490,15 +585,17 @@ async function reviewView(job: Job): Promise<void> {
   }
 
   async function reload(): Promise<void> {
-    const [results, page, passages] = await Promise.all([
+    const [results, page, passages, audit] = await Promise.all([
       api.getResults(job.job_id),
       api.getAllTracks(job.job_id),
       api.getAddedPassages(job.job_id),
+      api.getAudit(job.job_id),
     ]);
     state.results = results;
     state.tracks = page.tracks;
     state.revision = page.revision;
     state.passages = passages;
+    state.audit = audit;
     renderAll();
   }
 

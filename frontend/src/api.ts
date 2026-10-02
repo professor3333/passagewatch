@@ -2,6 +2,7 @@
 
 import type {
   AddedPassage,
+  Audit,
   Box,
   Clip,
   Counting,
@@ -112,6 +113,10 @@ export class PassageWatchApi {
       `/v1/jobs/${encodeURIComponent(jobId)}/observations?start=${start}&stop=${stop}`,
     );
     return body.boxes;
+  }
+
+  getAudit(jobId: string): Promise<Audit> {
+    return this.request<Audit>(`/v1/jobs/${encodeURIComponent(jobId)}/audit`);
   }
 
   submitReview(jobId: string, review: ReviewRequest): Promise<ReviewResponse> {

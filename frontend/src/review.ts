@@ -1,10 +1,61 @@
 // Review logic that does not touch the DOM: ordering, labels, colors, and counts.
 
-import type { Counts, ImageDirection, ReviewState, Track } from "./types";
+import type { AuditWindow, Counts, ImageDirection, ReviewState, Track, Triage } from "./types";
 
-/** Tracks in the order a reviewer goes through them: by start time, then ID. */
+const TRIAGE_RANK: Record<Triage, number> = { unresolved: 0, needs_review: 1, suggested: 2 };
+
+/**
+ * Tracks in the order a reviewer goes through them. With a calibration version (tracks
+ * have a triage state), this is the review queue, as the API's order=queue: unresolved,
+ * needs review, suggested; passages before other tracks; lowest review score first.
+ * Without one, by start time. Ties go by track ID.
+ */
 export function reviewOrder(tracks: Track[]): Track[] {
-  return [...tracks].sort((a, b) => a.start_frame - b.start_frame || a.track_id - b.track_id);
+  const queued = tracks.some((t) => t.triage !== null && t.triage !== undefined);
+  return [...tracks].sort((a, b) => {
+    if (queued) {
+      const rank = (t: Track): number => (t.triage ? TRIAGE_RANK[t.triage] : 3);
+      const passage = (t: Track): number => (t.direction === null ? 1 : 0);
+      const score = (t: Track): number => t.review_score ?? Number.POSITIVE_INFINITY;
+      return rank(a) - rank(b) || passage(a) - passage(b) || score(a) - score(b) || a.track_id - b.track_id;
+    }
+    return a.start_frame - b.start_frame || a.track_id - b.track_id;
+  });
+}
+
+export const TRIAGE_LABELS: Record<Triage, string> = {
+  unresolved: "unresolved",
+  needs_review: "needs review",
+  suggested: "suggested",
+};
+
+export const TRIAGE_COLORS: Record<Triage, string> = {
+  unresolved: "#d16dff",
+  needs_review: "#ff9f1c",
+  suggested: "#d5dbe3",
+};
+
+/** Plain-language reasons behind a triage state. */
+export const REASON_LABELS: Record<string, string> = {
+  back_and_forth: "moves back and forth",
+  endpoint_on_line: "starts or ends on the counting line",
+  possible_missed_passage: "may be part of a missed passage",
+  detection: "weak detections",
+  duration: "short track",
+  continuity: "gaps in the track",
+  motion: "irregular motion",
+  separation: "overlaps another track",
+  line_distance: "starts or ends near the line",
+};
+
+export function reasonText(reasons: string[] | null): string {
+  if (!reasons || reasons.length === 0) return "";
+  return reasons.map((r) => REASON_LABELS[r] ?? r).join(", ");
+}
+
+/** The audit window containing a frame, if any. */
+export function auditWindowAt(windows: AuditWindow[], frame: number): AuditWindow | null {
+  return windows.find((w) => w.start_frame <= frame && frame < w.stop_frame) ?? null;
 }
 
 /** The first track at or after `afterTrackId` (in review order) that nobody reviewed yet. */
