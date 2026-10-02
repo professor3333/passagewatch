@@ -106,3 +106,23 @@ def read_tracks(job_dir: Path, *, offset: int, limit: int) -> TrackPage:
     table = pq.read_table(job_dir / TRACKS_FILE, schema=TRACKS_SCHEMA)
     rows = table.slice(offset, limit).to_pylist()
     return TrackPage(total=table.num_rows, tracks=rows)
+
+
+def read_all_tracks(job_dir: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = pq.read_table(
+        job_dir / TRACKS_FILE, schema=TRACKS_SCHEMA
+    ).to_pylist()
+    return rows
+
+
+def read_observations(job_dir: Path, *, start: int, stop: int) -> list[dict[str, Any]]:
+    """Every box with ``start <= frame_index < stop``, ordered by frame then track."""
+    table = pq.read_table(
+        job_dir / OBSERVATIONS_FILE,
+        schema=OBSERVATIONS_SCHEMA,
+        filters=[("frame_index", ">=", start), ("frame_index", "<", stop)],
+    )
+    rows: list[dict[str, Any]] = table.sort_by(
+        [("frame_index", "ascending"), ("track_id", "ascending")]
+    ).to_pylist()
+    return rows

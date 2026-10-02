@@ -21,11 +21,11 @@ from pathlib import Path, PurePath
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, PlainTextResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from passagewatch.counting.policy import Direction, DirectionalCounts, to_river_directions
-from passagewatch.service import artifacts, media
+from passagewatch.service import artifacts, media, reviews
 from passagewatch.service.api.schemas import (
     ClipOut,
     DirectionalCountsOut,
@@ -33,7 +33,10 @@ from passagewatch.service.api.schemas import (
     JobIn,
     JobOut,
     ModelInfoOut,
+    ObservationsOut,
     ResultsOut,
+    ReviewIn,
+    ReviewOut,
     ReviewStateOut,
     TracksOut,
 )
@@ -48,6 +51,7 @@ from passagewatch.service.catalog import (
     register_pipeline_version,
 )
 from passagewatch.service.db import connect
+from passagewatch.service.export import automatic_tracks, build_report, to_csv
 from passagewatch.service.jobs import (
     QUEUED,
     RUNNING,
@@ -64,6 +68,7 @@ from passagewatch.service.settings import ServiceSettings
 
 API_VERSION = "v1"
 MAX_IDEMPOTENCY_KEY = 200
+MAX_OBSERVATION_FRAMES = 500
 
 
 class _UploadSizeLimit(BaseHTTPMiddleware):
@@ -230,6 +235,34 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         mark_clip_deleted(conn, clip_id, now=utc_now())
         return Response(status_code=204)
 
+    def require_clip_media(conn: sqlite3.Connection, clip_id: str) -> ClipRecord:
+        clip = get_clip(conn, clip_id)
+        if clip is None:
+            raise HTTPException(404, f"unknown clip {clip_id}")
+        if clip.deleted_at is not None:
+            raise HTTPException(410, f"clip {clip_id} was deleted")
+        return clip
+
+    @app.get("/v1/clips/{clip_id}", response_model=ClipOut)
+    def get_clip_info(clip_id: str, conn: Db) -> ClipOut:
+        return clip_out(require_clip_media(conn, clip_id))
+
+    @app.get("/v1/clips/{clip_id}/frames/{index}")
+    def get_frame(clip_id: str, index: int, conn: Db) -> Response:
+        clip = require_clip_media(conn, clip_id)
+        if not 0 <= index < clip.num_frames:
+            raise HTTPException(404, f"frame {index} is outside [0, {clip.num_frames})")
+        try:
+            data, media_type = media.read_frame(
+                settings.media_dir / clip.media_path, clip.media_kind, index
+            )
+        except IndexError as exc:
+            raise HTTPException(404, str(exc)) from None
+        # A recording never changes after upload, so its frames can be cached.
+        return Response(
+            data, media_type=media_type, headers={"Cache-Control": "private, max-age=86400"}
+        )
+
     # -- jobs ----------------------------------------------------------------------
 
     def job_out(job: Job) -> JobOut:
@@ -353,13 +386,101 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         page = artifacts.read_tracks(
             settings.artifacts_dir / result.tracks_artifact, offset=offset, limit=limit
         )
+        tracks = []
+        for track in page.tracks:
+            state, final = reviews.track_outcome(
+                reviews.AutomaticTrack(track["track_id"], track["direction"]), result.decisions
+            )
+            tracks.append(track | {"review_state": state, "final_direction": final})
         return TracksOut(
             job_id=job_id,
             revision=result.revision,
             total=page.total,
             offset=offset,
             limit=limit,
-            tracks=page.tracks,
+            tracks=tracks,
+        )
+
+    @app.get("/v1/jobs/{job_id}/observations", response_model=ObservationsOut)
+    def get_observations(
+        job_id: str,
+        conn: Db,
+        start: Annotated[int, Query(ge=0)],
+        stop: Annotated[int, Query(ge=1)],
+    ) -> ObservationsOut:
+        """Every tracked box in frames ``[start, stop)``, for overlays."""
+        if not 0 < stop - start <= MAX_OBSERVATION_FRAMES:
+            raise HTTPException(422, f"stop - start must be in [1, {MAX_OBSERVATION_FRAMES}]")
+        require_succeeded(conn, job_id)
+        result = store(conn).result(job_id)
+        assert result is not None
+        boxes = artifacts.read_observations(
+            settings.artifacts_dir / result.tracks_artifact, start=start, stop=stop
+        )
+        return ObservationsOut(job_id=job_id, start=start, stop=stop, boxes=boxes)
+
+    # -- review and export -----------------------------------------------------------
+
+    @app.post("/v1/jobs/{job_id}/reviews", status_code=201, response_model=ReviewOut)
+    def post_review(job_id: str, review: ReviewIn, conn: Db) -> ReviewOut:
+        job = require_succeeded(conn, job_id)
+        clip = get_clip(conn, job.clip_id)
+        result = store(conn).result(job_id, 0)
+        assert clip is not None and result is not None
+        rows = artifacts.read_all_tracks(settings.artifacts_dir / result.tracks_artifact)
+        try:
+            revision = reviews.submit_review(
+                conn,
+                job_id,
+                reviews.ReviewEvent(**review.model_dump()),
+                automatic=automatic_tracks(rows),
+                num_frames=clip.num_frames,
+                now=utc_now(),
+            )
+        except reviews.StaleRevisionError as exc:
+            raise HTTPException(409, str(exc)) from None
+        except reviews.InvalidReviewError as exc:
+            raise HTTPException(422, str(exc)) from None
+        latest = store(conn).result(job_id, revision)
+        assert latest is not None
+        counts = latest.counts
+        return ReviewOut(
+            job_id=job_id,
+            revision=revision,
+            reviewed=counts_out(
+                counts["right"], counts["left"], job.counting.get("upstream_direction")
+            ),
+            unresolved=counts["unresolved"],
+            added_passages=counts["added_passages"],
+            results_url=f"/v1/jobs/{job_id}/results",
+        )
+
+    @app.get("/v1/jobs/{job_id}/reviews")
+    def get_reviews(job_id: str, conn: Db) -> dict[str, Any]:
+        require_job(conn, job_id)
+        return {"job_id": job_id, "events": reviews.review_history(conn, job_id)}
+
+    @app.get("/v1/jobs/{job_id}/export")
+    def export(
+        job_id: str,
+        conn: Db,
+        format: Annotated[str, Query(pattern="^(json|csv)$")] = "json",
+        revision: Annotated[int | None, Query(ge=0)] = None,
+    ) -> Response:
+        require_succeeded(conn, job_id)
+        try:
+            report = build_report(conn, settings.artifacts_dir, job_id, revision)
+        except KeyError:
+            raise HTTPException(404, f"job {job_id} has no revision {revision}") from None
+        name = f"passagewatch_{job_id}_r{report['revision']}"
+        if format == "csv":
+            return PlainTextResponse(
+                to_csv(report),
+                media_type="text/csv",
+                headers={"Content-Disposition": f'attachment; filename="{name}.csv"'},
+            )
+        return JSONResponse(
+            report, headers={"Content-Disposition": f'attachment; filename="{name}.json"'}
         )
 
     # -- release and health ----------------------------------------------------------

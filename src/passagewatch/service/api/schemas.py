@@ -112,3 +112,31 @@ class ModelInfoOut(_Model):
     counting_policy: str
     calibration_version: str | None
     provenance: dict[str, Any]
+
+
+class ReviewIn(_Model):
+    """One correction. ``base_revision`` must be the job's latest revision (else 409)."""
+
+    base_revision: int = Field(ge=0)
+    action: Literal["accept", "reject", "set_direction", "mark_unresolved", "add_passage"]
+    track_id: int | None = None
+    passage_id: str | None = None
+    direction: Literal["right", "left"] | None = None
+    frame_index: int | None = Field(default=None, ge=0)
+    reason: str = Field(default="", max_length=500)
+
+
+class ReviewOut(_Model):
+    job_id: str
+    revision: int
+    reviewed: DirectionalCountsOut
+    unresolved: int
+    added_passages: int
+    results_url: str
+
+
+class ObservationsOut(_Model):
+    job_id: str
+    start: int
+    stop: int
+    boxes: list[dict[str, Any]]
