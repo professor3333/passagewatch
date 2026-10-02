@@ -211,3 +211,24 @@ experiments so far changed counts by 0–3 errors. The remaining budget therefor
 | 2 | Tracker gate | Not adopted (no gain on either partition) |
 | 3 | Higher detector input resolution | `configs/training/yolox-tiny-v2.yaml` (1280 × 640): awaiting a Kaggle run |
 | 4 | Temporal input channels | `letterbox-temporal3-v1` implemented; its training config follows the experiment 3 result, and then needs a Kaggle run |
+
+## Experiment 3 protocol (declared before any result)
+
+Written on 2026-10-02 while `yolox-tiny-v2` (1280 × 640 input; everything else as
+`yolox-tiny-v1`) trains, before any of its results exist:
+
+1. **Selection, as for v1:** epochs 20, 25 and 30 × score thresholds 0.1–0.5, with the
+   same tracker (`classical-v2`) and counting. The lowest counting nMAE on kenai-val wins.
+2. **Confirmation on `kenai-holdout-v1`:** the selected v2 epoch and threshold, and v1's
+   released setting (epoch 25, threshold 0.2), are each evaluated once on the holdout's 174
+   clips (580 passages).
+3. **Decision:** v2 replaces v1 only if the paired-clip-bootstrap 95% CI of
+   nMAE(v2) − nMAE(v1) on the holdout lies entirely below zero. Otherwise v1 stays. The
+   holdout and val numbers are both reported, as are passage-level errors on val and
+   detection recall by fish size.
+4. **Cost:** the larger input roughly doubles detection time per frame. CPU time per frame
+   is measured and reported with the decision. It does not change the decision, because
+   Stage 10 is where speed is optimized.
+
+The same protocol then applies to experiment 4 (temporal channels), against whichever
+detector this one keeps.
