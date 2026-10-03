@@ -1,0 +1,25 @@
+# Stage 8 experiment 5: an uncertainty-scaled (Mahalanobis) association gate for the
+# released detector's tracks. On kenai-val, 135 identity switches occur inside predicted
+# tracks; 76% are in established tracks (5+ observations), with a median jump of 0.31 m,
+# while reference fish move a median 0.044 m per frame. With classical-v2's noise settings an
+# established track's innovation SD settles near 0.12 m per axis, so these values span gates
+# of about 0.18-0.36 m for established tracks; new tracks keep the 0.5 m distance gate. The
+# values were chosen after this kenai-val analysis, so the kenai-val result carries selection
+# bias. Only gate_sigma changes; detector, threshold, other tracker settings and counting are
+# fixed.
+#
+# Declared before any run: the variant selected on kenai-val (lowest nMAE; ties keep
+# `current`) is adopted only if, on kenai-holdout-v1 (sigma-gate-plan-1-confirm.yaml, with
+# that variant), its paired-clip-bootstrap 95% CI for the nMAE difference against `current`
+# lies entirely below zero. Otherwise the pipeline is unchanged.
+
+name: sigma-gate-plan-1
+base:
+  tracking_config: configs/tracking/classical-v2.yaml
+  score_threshold: 0.2
+variants:
+  current: {}
+  sigma-1.5: {tracker: {gate_sigma: 1.5}}
+  sigma-2.0: {tracker: {gate_sigma: 2.0}}
+  sigma-2.5: {tracker: {gate_sigma: 2.5}}
+  sigma-3.0: {tracker: {gate_sigma: 3.0}}

@@ -211,6 +211,7 @@ experiments so far changed counts by 0–3 errors. The remaining budget therefor
 | 2 | Tracker gate | Not adopted (no gain on either partition) |
 | 3 | Higher detector input resolution | Not adopted: no confirmed gain on the holdout, 3.2× slower on CPU |
 | 4 | Temporal input channels | `configs/training/yolox-tiny-t1.yaml` (v1 + `letterbox-temporal3-v1`): awaiting a Kaggle run |
+| 5 | Uncertainty-scaled (Mahalanobis) association gate | Not adopted: fewer merges and duplicates, more splits, no count gain; kept available |
 
 ## Experiment 3 protocol (declared before any result)
 
@@ -299,3 +300,42 @@ Consequences for the remaining experiments:
   detector that was kept.
 - A tracker change for dense scenes (experiment 2 showed that the gate alone only trades
   merges for splits) is the most promising direction after that.
+
+## Experiment 5: an uncertainty-scaled association gate
+
+Experiment 3 left association in dense scenes as the main error. Inside the released
+detector's predicted tracks on kenai-val there are 135 identity switches (a track moving from
+one reference fish to another). 76% happen in established tracks (5+ observations, median
+14), with a median jump of 0.31 m. Reference fish move a median 0.044 m per frame. A fixed
+0.5 m gate lets a confident track take a neighbor; experiment 2 showed that tightening it for
+every track breaks young tracks instead.
+
+The tracker therefore gained an optional Mahalanobis gate (`TrackerConfig.gate_sigma`): a
+detection must also lie within `gate_sigma` standard deviations of the track's prediction,
+under the filter's innovation covariance. An established track's innovation SD settles near
+0.12 m per axis with `classical-v2`'s noise settings, so its gate tightens to about
+0.18–0.36 m. A new track, whose velocity is still uncertain, keeps the 0.5 m distance gate.
+It is off by default, and tests cover both cases.
+
+Plan `configs/tracking/tuning/sigma-gate-plan-1.yaml`, with the rules declared before any
+run. On kenai-val:
+
+| Variant | nMAE | Count errors | Passage errors | Merged | Split | Duplicate | Missed |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **current** (selected) | 0.120 | 22 | 30 | 6 | 5 | 7 | 5 |
+| gate_sigma 1.5 | 0.131 | 24 | 26 | 2 | 8 | 3 | 6 |
+| gate_sigma 2.0 | 0.126 | 23 | 25 | 2 | 7 | 3 | 5 |
+| gate_sigma 2.5 | 0.126 | 23 | 27 | 2 | 8 | 4 | 5 |
+| gate_sigma 3.0 | 0.126 | 23 | 27 | 2 | 8 | 4 | 5 |
+
+**Decision: the pipeline is unchanged.** No variant improves the count on kenai-val, so
+nothing goes to the holdout.
+
+The gate does what it was built for: merges fall from 6 to 2 and duplicates from 7 to 3,
+and passage-level errors, the reviewer's work, from 30 to 25. But a track whose fish is
+briefly missed, or moves abruptly, now ends instead of jumping, and the fish restarts as a
+new track, so splits rise and the count does not improve. Fixing that needs a second step:
+joining a track that ends to one that starts shortly after near its predicted position, which
+batch analysis allows. That is a new tracker design, and with experiments 1–5 the planned
+budget of about six substantive experiments is nearly used. It is recorded here as the next
+hypothesis rather than run now.
