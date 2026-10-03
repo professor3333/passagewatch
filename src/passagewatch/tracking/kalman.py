@@ -5,7 +5,11 @@ association gate means the same distance on every camera. Every frame:
 
 1. all tracks predict one frame ahead;
 2. detections are assigned to tracks by minimum total distance (Hungarian), but only pairs
-   closer than ``gate_m`` are allowed;
+   closer than ``gate_m`` are allowed. With ``gate_sigma`` set, a pair must also lie within
+   ``gate_sigma`` standard deviations of the track's prediction (Mahalanobis distance under
+   the filter's innovation covariance). An established track, whose motion the filter knows,
+   then gets a much tighter gate than ``gate_m`` and cannot jump to a neighboring fish, while
+   a new track, whose velocity is still uncertain, keeps the full ``gate_m``;
 3. matched tracks are corrected; unmatched detections start new tentative tracks;
 4. a track that has missed more than ``max_age`` consecutive frames ends.
 
@@ -33,6 +37,8 @@ class TrackerConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     gate_m: float = Field(default=0.5, gt=0)
+    # Optional Mahalanobis gate (standard deviations); None keeps the distance gate alone.
+    gate_sigma: float | None = Field(default=None, gt=0)
     max_age: int = Field(default=3, ge=0)
     min_hits: int = Field(default=3, ge=1)
     min_length: int = Field(default=3, ge=1)
@@ -145,11 +151,26 @@ class KalmanTracker:
             return [], list(range(len(centers)))
         predicted = np.stack([t.position for t in tracks])
         cost = np.linalg.norm(predicted[:, None, :] - centers[None, :, :], axis=2)
-        gated = np.where(cost <= self.config.gate_m, cost, 1e6)
+        allowed = cost <= self.config.gate_m
+        if self.config.gate_sigma is not None:
+            allowed &= self._mahalanobis(tracks, centers) <= self.config.gate_sigma
+        gated = np.where(allowed, cost, 1e6)
         rows, cols = linear_sum_assignment(gated)
         matches = [(int(r), int(c)) for r, c in zip(rows, cols, strict=True) if gated[r, c] < 1e6]
         matched = {c for _, c in matches}
         return matches, [i for i in range(len(centers)) if i not in matched]
+
+    def _mahalanobis(
+        self, tracks: list[_Track], centers: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """``(tracks, detections)`` Mahalanobis distances under each track's innovation
+        covariance ``H P H^T + R`` (after this frame's prediction)."""
+        out = np.empty((len(tracks), len(centers)))
+        for i, track in enumerate(tracks):
+            s = _H @ track.covariance @ _H.T + self._R
+            diff = centers - _H @ track.state
+            out[i] = np.sqrt(np.einsum("nj,jk,nk->n", diff, np.linalg.inv(s), diff))
+        return out
 
 
 def trajectories_to_annotations(trajectories: list[Trajectory]) -> BoxAnnotations:
