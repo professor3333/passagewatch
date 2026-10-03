@@ -116,11 +116,11 @@ What this shows:
 | Device | YOLOX-Tiny at 960 × 416, batch 8 |
 |---|---|
 | Apple GPU (MPS), kenai-val end to end with JPEG decoding | 28–31 ms/frame |
-| CPU, model only | 247 ms/frame |
+| CPU, model only (an early, unprofiled measurement) | 247 ms/frame |
 
-The serving target is CPU. At 247 ms per frame, a 10-minute recording at 8 frames/s would
-take about 20 minutes. Stage 10 profiles this and tries ONNX Runtime, a smaller input size
-and INT8, rerunning the full counting evaluation each time.
+The serving target is CPU. The Stage 10 profile of the worker's full path
+([operations.md](operations.md)) supersedes the CPU figure: about 104 ms per frame with four
+threads, 97% of it in the detector's forward pass.
 
 ### Tracker experiment (Stage 5): Kalman tracker versus ByteTrack
 
