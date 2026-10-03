@@ -70,7 +70,9 @@ def main(argv: list[str] | None = None) -> int:
     assert frame_dir is not None
 
     load_start = time.perf_counter()
-    pipeline = InferencePipeline.load(args.bundle, device=args.device, batch_size=args.batch_size)
+    pipeline = InferencePipeline.load(
+        args.bundle, device=args.device, batch_size=args.batch_size, threads=args.threads
+    )
     load_s = time.perf_counter() - load_start
     with tempfile.TemporaryDirectory() as tmp:
         media = Path(tmp) / "clip.zip"
