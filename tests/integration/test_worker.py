@@ -357,3 +357,24 @@ def _now() -> Any:
     from passagewatch.service.jobs import utc_now
 
     return utc_now()
+
+
+def test_worker_health_follows_its_heartbeat(tmp_path: Path) -> None:
+    from datetime import timedelta
+
+    from passagewatch.service.catalog import worker_heartbeat
+    from passagewatch.service.jobs import utc_now
+    from passagewatch.service.worker.health import is_healthy
+
+    settings = make_settings(tmp_path, worker_stale_seconds=60)
+    now = utc_now()
+    assert not is_healthy(settings, "box", now)  # no database yet
+    settings.data_dir.mkdir(parents=True)
+    conn = connect(settings.db_path)
+    worker_heartbeat(conn, "box-123", "pw-test-1", now=now)
+    worker_heartbeat(conn, "other-9", "pw-test-1", now=now)
+    conn.close()
+
+    assert is_healthy(settings, "box", now + timedelta(seconds=30))
+    assert not is_healthy(settings, "box", now + timedelta(seconds=90))  # stale
+    assert not is_healthy(settings, "elsewhere", now)  # another host's worker

@@ -77,3 +77,4 @@ def test_settings_come_from_the_environment() -> None:
     assert settings.upload_retention_hours == 24.0
     assert settings.torch_threads is None
     assert ServiceSettings.from_env({"PASSAGEWATCH_TORCH_THREADS": "4"}).torch_threads == 4
+    assert ServiceSettings.from_env({"PASSAGEWATCH_TORCH_THREADS": ""}).torch_threads is None

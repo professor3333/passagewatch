@@ -55,9 +55,10 @@ class ServiceSettings(BaseModel):
     @classmethod
     def from_env(cls, environ: dict[str, str] | None = None) -> ServiceSettings:
         env = os.environ if environ is None else environ
+        # An empty variable means "not set", so Compose can pass optional settings through.
         values = {
             name: env[PREFIX + name.upper()]
             for name in cls.model_fields
-            if PREFIX + name.upper() in env
+            if env.get(PREFIX + name.upper(), "") != ""
         }
         return cls.model_validate(values)
