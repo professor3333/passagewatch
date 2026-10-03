@@ -9,6 +9,9 @@
 
 name: passagewatch
 
+# Hardening (docs/operations.md): a read-only root filesystem with only /data (volume) and
+# /tmp (tmpfs) writable, no Linux capabilities, no privilege escalation, an init process
+# for signal handling, memory limits from the measured profile, and bounded log files.
 x-service: &service
   image: passagewatch:local
   build: .
@@ -18,6 +21,17 @@ x-service: &service
   environment:
     PASSAGEWATCH_DEVICE: cpu
   restart: unless-stopped
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
 
 services:
   api:
@@ -30,10 +44,25 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    # Measured at about 0.14 GB while serving uploads and frames.
+    mem_limit: 512m
 
   worker:
     <<: *service
     command: ["worker"]
+    environment:
+      PASSAGEWATCH_DEVICE: cpu
+      # Set to the host's performance-core count (docs/operations.md); empty = PyTorch default.
+      PASSAGEWATCH_TORCH_THREADS: ${PASSAGEWATCH_TORCH_THREADS:-}
+    # Healthy while the worker heartbeats (idle or mid-job) after loading its model.
+    healthcheck:
+      test: ["CMD", "python", "-m", "passagewatch.service.worker.health"]
+      interval: 15s
+      timeout: 10s
+      retries: 4
+      start_period: 120s
+    # Measured peak about 1.4 GB at the 6000-frame upload limit; the design budget is 4 GB.
+    mem_limit: 3g
     # A job interrupted by shutdown is recovered by the next worker after its lease expires.
     stop_grace_period: 30s
 
