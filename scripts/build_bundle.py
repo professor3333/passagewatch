@@ -29,6 +29,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--tracking-config", type=Path, required=True)
     parser.add_argument("--selection", default=None, help="where the selection is documented")
     parser.add_argument(
+        "--onnx",
+        type=Path,
+        default=None,
+        help="an ONNX export of the checkpoint (scripts/export_onnx.py); serve with ONNX Runtime",
+    )
+    parser.add_argument(
         "--calibration-version",
         choices=sorted(CALIBRATIONS),
         default=None,
@@ -50,6 +56,7 @@ def main(argv: list[str] | None = None) -> int:
         bundles_dir=args.bundles_dir,
         provenance=provenance,
         calibration_version=args.calibration_version,
+        onnx=args.onnx,
     )
     bundle = load_bundle(path)
     print(f"{bundle.pipeline_version}: config {bundle.config_sha256()[:12]} -> {path}")
