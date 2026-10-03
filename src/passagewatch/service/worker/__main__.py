@@ -11,6 +11,8 @@ import signal
 import sys
 import threading
 
+import torch
+
 from passagewatch.service.logs import configure_logging
 from passagewatch.service.settings import ServiceSettings
 from passagewatch.service.worker.loop import default_worker_id, run_worker
@@ -20,6 +22,8 @@ from passagewatch.service.worker.pipeline import InferencePipeline
 def main() -> int:
     configure_logging()
     settings = ServiceSettings.from_env()
+    if settings.torch_threads is not None:
+        torch.set_num_threads(settings.torch_threads)
     pipeline = InferencePipeline.load(
         settings.bundle_dir.resolve(), settings.device, settings.inference_batch
     )

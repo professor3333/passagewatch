@@ -75,3 +75,5 @@ def test_settings_come_from_the_environment() -> None:
 
     assert settings.db_path == Path("/srv/pw/service.db") and settings.max_queue == 5
     assert settings.upload_retention_hours == 24.0
+    assert settings.torch_threads is None
+    assert ServiceSettings.from_env({"PASSAGEWATCH_TORCH_THREADS": "4"}).torch_threads == 4
