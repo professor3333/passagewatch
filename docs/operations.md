@@ -104,3 +104,21 @@ synthetic fish):
 The last test covers the design target of at least 99% completion over 100 valid jobs with
 zero duplicated results after retries. With a stand-in detector it shows that the job
 machinery behaves; it does not show that the real model never fails.
+
+## Container hardening (Stage 10)
+
+`docker-compose.yml` runs the API and the worker from one image with:
+
+| Measure | Setting |
+|---|---|
+| Health checks | API: `/health/live`. Worker: `python -m passagewatch.service.worker.health`, healthy while a worker process on the container heartbeats (it does so idle and mid-job, after its model has loaded) |
+| Memory limits | API 512 MB (measured about 0.14 GB while serving uploads and frames); worker 3 GB (measured peak about 1.4 GB at the 6000-frame upload limit; design budget 4 GB) |
+| Filesystem | Read-only root; only the `/data` volume and a `/tmp` tmpfs are writable; release bundles are mounted read-only |
+| Privileges | Non-root user (image), all Linux capabilities dropped, `no-new-privileges` |
+| Processes | An init process forwards signals; the worker gets 30 s to stop gracefully, and an interrupted job is recovered from its lease |
+| Logs | JSON logs, rotated at 10 MB × 5 files per container |
+| CPU threads | `PASSAGEWATCH_TORCH_THREADS` (empty = PyTorch's default; set it to the host's performance cores) |
+
+The Compose smoke test in CI starts the stack with a random-weights bundle, waits for both
+health checks, checks that both containers are read-only and without capabilities, and runs
+a job end to end.

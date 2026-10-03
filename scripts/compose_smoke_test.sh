@@ -39,6 +39,15 @@ PY
 echo "== start"
 docker compose up -d --build --wait --wait-timeout 300 api worker
 
+echo "== hardening"
+for service in api worker; do
+  id=$(docker compose ps -q "$service")
+  [ "$(docker inspect -f '{{.State.Health.Status}}' "$id")" = "healthy" ]
+  [ "$(docker inspect -f '{{.HostConfig.ReadonlyRootfs}}' "$id")" = "true" ]
+  docker inspect -f '{{.HostConfig.CapDrop}}' "$id" | grep -q ALL
+done
+echo "api and worker are healthy, read-only and without capabilities"
+
 echo "== readiness"
 for _ in $(seq 1 60); do
   if curl -fsS "$URL/health/ready" >/dev/null 2>&1; then break; fi
