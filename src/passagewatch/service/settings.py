@@ -32,6 +32,9 @@ class ServiceSettings(BaseModel):
     # Worker
     device: str = "cpu"  # the serving target is CPU; "auto" also tries CUDA, then MPS
     inference_batch: int = Field(default=8, gt=0)
+    # PyTorch CPU threads for detection; None keeps PyTorch's default. Set it to the host's
+    # performance-core count (docs/operations.md: 4 on the development M1).
+    torch_threads: int | None = Field(default=None, gt=0)
     worker_poll_seconds: float = Field(default=2.0, gt=0)
     heartbeat_seconds: float = Field(default=20.0, gt=0)
     retention_sweep_seconds: float = Field(default=600.0, gt=0)
