@@ -440,6 +440,13 @@ def test_repository_training_config_is_valid() -> None:
     assert (v1.model_size, v1.pretrained) == ("tiny", "yolox-tiny")
     assert v1.input_size == InputSize(960, 416)
     assert v1.head_only_epochs >= 1 and v1.backbone_lr_factor < 1
+    t1 = load_train_config(configs / "yolox-tiny-t1.yaml")
+    # Experiment 4 changes the input encoding and nothing else.
+    assert t1.preprocessing == "letterbox-temporal3-v1"
+    assert {k for k, v in t1.model_dump().items() if v != v1.model_dump()[k]} == {
+        "name",
+        "preprocessing",
+    }
     # Experiment 3 changes the input size and nothing else.
     assert v2.input_size == InputSize(1280, 640)
     changed = {k for k, v in v2.model_dump().items() if v != v1.model_dump()[k]} - {
