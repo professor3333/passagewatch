@@ -13,6 +13,7 @@ completed trajectories.
 from __future__ import annotations
 
 import dataclasses
+import time
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,6 +33,7 @@ from passagewatch.counting.policy import (
 )
 from passagewatch.detection.classical import FrameDetections, Scale, boxes_in_meters
 from passagewatch.inference.neural import detect_frames, file_sha256, load_detector
+from passagewatch.monitoring.timing import StageTimes
 from passagewatch.preprocessing.temporal import PREPROCESSING_VERSIONS, encode_frames
 from passagewatch.service.bundle import ReleaseBundle, load_bundle
 from passagewatch.service.catalog import ClipRecord
@@ -59,9 +61,11 @@ class YoloxDetector:
     def __init__(self, checkpoint: Path, score_threshold: float, device: torch.device) -> None:
         self.loaded = load_detector(checkpoint, device)
         self.score_threshold = score_threshold
+        # Preprocess / detect / postprocess seconds; the pipeline resets and reads it per job.
+        self.times = StageTimes()
 
     def detect(self, frames: list[NDArray[np.uint8]]) -> list[FrameDetections]:
-        return detect_frames(self.loaded, frames, self.score_threshold)
+        return detect_frames(self.loaded, frames, self.score_threshold, self.times)
 
 
 @dataclass(frozen=True)
@@ -72,6 +76,7 @@ class PipelineResult:
     left: int
     frames: int
     review: ClipReview | None = None  # when the bundle declares a calibration version
+    stage_seconds: dict[str, float] = dataclasses.field(default_factory=dict)
 
     def summary(self) -> dict[str, Any]:
         return {"right": self.right, "left": self.left, "tracks": len(self.trajectories)}
@@ -120,28 +125,48 @@ class InferencePipeline:
         counting: dict[str, Any],
         progress: Progress | None = None,
     ) -> PipelineResult:
-        images = encode_frames(
-            self.bundle.preprocessing_version, lambda: iter_frames(media_path, clip.media_kind)
+        times = StageTimes()
+        breakdown: StageTimes | None = getattr(self.detector, "times", None)
+        if breakdown is not None:
+            breakdown.seconds.clear()
+        # "decode" covers reading frames and, for temporal preprocessing, building the
+        # temporal channels (including the background pass).
+        images = times.wrap(
+            "decode",
+            encode_frames(
+                self.bundle.preprocessing_version,
+                lambda: iter_frames(media_path, clip.media_kind),
+            ),
         )
-        detections = self._detect(clip, images, progress)
+        with times.stage("detector"):
+            detections = self._detect(clip, images, progress)
+        detector_seconds = times.seconds.pop("detector") - times.seconds.get("decode", 0.0)
+        if breakdown is not None and breakdown.seconds:
+            for name, seconds in breakdown.seconds.items():
+                times.add(name, seconds)
+        else:
+            times.add("detect", detector_seconds)
         scale = Scale(
             sx=1.0,
             sy=1.0,
             meters_per_px_x=abs(clip.x_meter_stop - clip.x_meter_start) / clip.width,
             meters_per_px_y=abs(clip.y_meter_stop - clip.y_meter_start) / clip.height,
         )
-        centers = [boxes_in_meters(d.boxes, scale) for d in detections]
-        raw = KalmanTracker(self.tracker).run(detections, centers)
-        # Number trajectories 1..n so artifacts, counts and the API agree on track IDs.
-        trajectories = [dataclasses.replace(t, track_id=i) for i, t in enumerate(raw, 1)]
+        with times.stage("track"):
+            centers = [boxes_in_meters(d.boxes, scale) for d in detections]
+            raw = KalmanTracker(self.tracker).run(detections, centers)
+            # Number trajectories 1..n so artifacts, counts and the API agree on track IDs.
+            trajectories = [dataclasses.replace(t, track_id=i) for i, t in enumerate(raw, 1)]
         policy = dataclasses.replace(
             CFC_COMPATIBLE_V1, line_x_normalized=float(counting["line_x_normalized"])
         )
-        counts = count_trajectories(
-            trajectories_to_annotations(trajectories), clip.width, clip.height, policy
-        )
-        total = tally(counts)
+        with times.stage("count"):
+            counts = count_trajectories(
+                trajectories_to_annotations(trajectories), clip.width, clip.height, policy
+            )
+            total = tally(counts)
         review = None
+        review_start = time.perf_counter()
         if self.calibration is not None:
             # Seeded by the result cache key's parts, so a cached result keeps its windows.
             seed = seed_from(
@@ -157,10 +182,17 @@ class InferencePipeline:
                 framerate=clip.framerate,
                 seed=seed,
             )
+            times.add("review", time.perf_counter() - review_start)
         if progress is not None:
             progress(1.0)
         return PipelineResult(
-            trajectories, counts, total.right, total.left, len(detections), review
+            trajectories,
+            counts,
+            total.right,
+            total.left,
+            len(detections),
+            review,
+            times.rounded(),
         )
 
     def _detect(
