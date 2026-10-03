@@ -122,3 +122,35 @@ machinery behaves; it does not show that the real model never fails.
 The Compose smoke test in CI starts the stack with a random-weights bundle, waits for both
 health checks, checks that both containers are read-only and without capabilities, and runs
 a job end to end.
+
+## ONNX Runtime (Stage 10)
+
+`scripts/export_onnx.py` exports a checkpoint's network to ONNX (opset 17, fixed input size,
+dynamic batch; YOLOX's grid decoding is part of the graph). `passagewatch.detection.onnx`
+runs it with ONNX Runtime on the CPU behind the same interface as the PyTorch model, so
+letterboxing, box decoding, NMS and the mapping back to frame pixels are the same code. A
+CI test compares the two on a random-weights model; `evaluate_neural.py --onnx` reruns the
+full counting evaluation with the exported network.
+
+**Counting parity on kenai-val** (64 clips, 183 passages; released YOLOX-Tiny, epoch 25,
+threshold 0.2):
+
+| Runtime | nMAE | Clips with different counts | Clips with different track numbers |
+|---|---:|---:|---:|
+| PyTorch, Apple GPU (MPS): the evaluated release | 0.1202 | — | — |
+| PyTorch, CPU: what the service runs today | 0.1202 | 0 of 64 vs MPS | — |
+| ONNX Runtime 1.30, CPU | 0.1202 | 0 of 64 vs PyTorch CPU | 0 of 64 |
+
+The raw network outputs differ by at most about 0.001 px in box coordinates and 1e-5 in
+scores. The service's CPU pipeline therefore counts exactly like the evaluated release, and
+ONNX Runtime keeps that, well inside the +1 point nMAE budget for optimizations.
+
+**Speed** (development M1, CPU, 4 threads, batch 8): on the same 64 frames, timed in five
+interleaved rounds, detection took a median **123 ms/frame with PyTorch and 103 ms/frame
+with ONNX Runtime** (about 17% less). Two full kenai-val runs at different times gave 111
+and 113 ms/frame including reading frames from disk, which is within the noise of a host
+under memory pressure. ONNX Runtime is a modest gain, not a large one, on this host.
+
+Serving does not use ONNX yet: that needs a release bundle that declares the runtime and
+the ONNX file's hash, which comes with the next release once the detector is final
+(experiment 4). Input-size and INT8 trade-offs follow, each with the same counting check.
