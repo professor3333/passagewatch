@@ -151,6 +151,16 @@ with ONNX Runtime** (about 17% less). Two full kenai-val runs at different times
 and 113 ms/frame including reading frames from disk, which is within the noise of a host
 under memory pressure. ONNX Runtime is a modest gain, not a large one, on this host.
 
-Serving does not use ONNX yet: that needs a release bundle that declares the runtime and
-the ONNX file's hash, which comes with the next release once the detector is final
-(experiment 4). Input-size and INT8 trade-offs follow, each with the same counting check.
+**Serving with ONNX Runtime.** A release bundle built with `build_bundle.py --onnx <export>`
+declares `detector.runtime: onnxruntime` and the ONNX file's SHA-256 (`detector.onnx` in the
+bundle). The worker checks that hash, runs ONNX Runtime on the CPU only (another device is
+refused, never silently replaced), and uses `PASSAGEWATCH_TORCH_THREADS` for its threads.
+PyTorch bundles are unchanged, and their config hashes do not include the new fields, so
+existing releases keep their identity. Through the worker's own path, on the same 541-frame
+clip with 4 threads and runs alternated, a bundle of the released checkpoint with its ONNX
+export gave **the same counts and identical trajectories** as `passagewatch-0.2.0`, at
+**89–98 ms/frame against 106–109 ms/frame** (about 12–16% faster end to end).
+
+The active release still uses PyTorch. The next release (once experiment 4 has decided the
+detector) is built with ONNX after rerunning the counting check on that detector.
+Input-size and INT8 trade-offs follow, each with the same check.
