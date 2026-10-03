@@ -1,0 +1,41 @@
+# Stage 8 experiment 4: yolox-tiny-v1 with temporal input channels (letterbox-temporal3-v1:
+# the frame, the frame minus the clip's background, and the motion to the next frame; after
+# the CFC authors' Baseline++, see passagewatch.preprocessing.temporal). Nothing else changes:
+# same 960 x 416 input (experiment 3 kept it), data, manifest, schedule, seed and
+# augmentation. The first layer keeps its COCO weights, with the three channels in place of
+# red, green and blue; re-initializing it would be a separate experiment. Selection and
+# confirmation follow the experiment 3 protocol in docs/error_analysis.md, against v1.
+#
+# Values here are planning choices, not tuned results. A changed value needs a new name.
+
+name: yolox-tiny-t1
+model_size: tiny
+pretrained: yolox-tiny
+input_height: 960      # ~0.4 MP, the compute of a 640 x 640 input; Kenai frames are tall
+input_width: 416
+frame_stride: 3        # every 3rd frame: ~19,000 samples per epoch from 183 clips
+batch_size: 16
+epochs: 30
+head_only_epochs: 1    # brief head-only phase, then full fine-tuning
+lr_per_image: 0.00015625   # YOLOX default 0.01 / 64
+backbone_lr_factor: 0.1    # backbone and neck learn 10x slower than the new head
+warmup_epochs: 1.0
+min_lr_ratio: 0.05
+momentum: 0.9
+weight_decay: 0.0005
+max_labels: 64
+num_workers: 4
+seed: 0
+amp: true              # CUDA only; ignored on CPU and MPS
+log_every_iters: 50
+checkpoint_every_iters: 500
+augment:
+  enabled: true
+  flip_probability: 0.5
+  contrast_range: [0.8, 1.2]
+  brightness_range: [-15.0, 15.0]
+  noise_probability: 0.3
+  noise_sigma: 6.0
+  blur_probability: 0.2
+  blur_sigma: 0.8
+preprocessing: letterbox-temporal3-v1

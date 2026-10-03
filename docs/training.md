@@ -48,6 +48,9 @@ Only the kenai-train partition is used. kenai-val and the test locations are nev
    `configs/training/yolox-tiny-v2.yaml` (Stage 8 experiment 3: the same training at a
    1280 × 640 input) has about twice the pixels per image, so expect training to take
    about twice as long. Its run directory is `runs/yolox-tiny-v2/`.
+   `configs/training/yolox-tiny-t1.yaml` (experiment 4: temporal input at v1's input size)
+   first computes each training clip's background once (a few minutes), then trains at
+   about v1's speed. Its run directory is `runs/yolox-tiny-t1/`.
 
 4. Click **Save Version** → **Save & Run All (Commit)** → **Save**. The notebook now runs
    in the background, so you can close the browser. Follow it under the notebook's
