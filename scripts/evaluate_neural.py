@@ -24,7 +24,10 @@ import time
 from pathlib import Path
 from typing import Any
 
+import torch
+
 from passagewatch.detection.neural import select_device
+from passagewatch.detection.onnx import onnx_detector
 from passagewatch.evaluation.detection import DetectionMatch
 from passagewatch.evaluation.nmae import macro_nmae, summarize
 from passagewatch.inference.batch import make_layout, select_rows
@@ -32,6 +35,7 @@ from passagewatch.inference.classical import load_classical_config
 from passagewatch.inference.neural import (
     above,
     detect_clip,
+    file_sha256,
     load_detections,
     load_detector,
     save_detections,
@@ -63,8 +67,20 @@ def main(argv: list[str] | None = None) -> int:
         help="its tracker section is used (same tracker as the classical baseline)",
     )
     parser.add_argument("--device", default="auto")
+    parser.add_argument(
+        "--onnx",
+        type=Path,
+        default=None,
+        help="run the network with ONNX Runtime from this export of the (single) epoch's "
+        "checkpoint; its detections are cached separately",
+    )
+    parser.add_argument("--threads", type=int, default=None, help="CPU threads (ONNX/torch)")
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
+    if args.onnx is not None and len(args.epochs) != 1:
+        parser.error("--onnx goes with exactly one --epochs value (the exported checkpoint)")
+    if args.threads is not None:
+        torch.set_num_threads(args.threads)
     if args.partition == "holdout" and (len(args.epochs) != 1 or len(args.thresholds) != 1):
         parser.error("on the holdout, pass exactly one --epochs and one --thresholds value")
 
@@ -83,7 +99,14 @@ def main(argv: list[str] | None = None) -> int:
     results: list[dict[str, Any]] = []
     for epoch in args.epochs:
         detector = load_detector(args.run / f"epoch-{epoch:03d}.pt", device)
-        cache = out / f"epoch-{epoch:03d}-{detector.checkpoint_sha256[:8]}" / args.partition
+        name = f"epoch-{epoch:03d}-{detector.checkpoint_sha256[:8]}"
+        if args.onnx is not None:
+            detector = onnx_detector(detector, args.onnx, args.threads)
+            name += f"-onnx-{file_sha256(args.onnx)[:8]}"
+        elif device.type != "mps":
+            # Devices can differ in the last digits of scores; MPS caches keep the plain name.
+            name += f"-{device.type}"
+        cache = out / name / args.partition
         started, computed = time.perf_counter(), 0
         for i, clip in enumerate(clips, 1):
             path = cache / clip.location / f"{clip.name}.npz"
@@ -116,6 +139,7 @@ def main(argv: list[str] | None = None) -> int:
                     "epoch": epoch,
                     "threshold": threshold,
                     "checkpoint_sha256": detector.checkpoint_sha256,
+                    "runtime": "onnxruntime" if args.onnx is not None else "torch",
                     "macro_nmae": macro_nmae(groups),
                     "locations": [
                         {
@@ -163,7 +187,10 @@ def main(argv: list[str] | None = None) -> int:
         "results": results,
     }
     out.mkdir(parents=True, exist_ok=True)
-    report_path = out / f"report-{args.partition}.json"
+    suffix = (
+        "-onnx" if args.onnx is not None else ("" if device.type == "mps" else f"-{device.type}")
+    )
+    report_path = out / f"report-{args.partition}{suffix}.json"
     report_path.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
     print(
         f"best: epoch {best['epoch']}, threshold {best['threshold']}, "
