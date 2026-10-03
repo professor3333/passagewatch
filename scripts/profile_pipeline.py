@@ -3,7 +3,9 @@
 Runs exactly the service path (``InferencePipeline`` from a release bundle, reading frames
 from an uploaded-style ZIP) on a CFC clip from a manifest, after one warm-up pass, and reports
 seconds and milliseconds per frame for decode, preprocess, detect, postprocess, track, count
-and review, plus the process's peak resident memory. The test partition cannot be selected.
+and review, plus the process's peak resident memory. ``--frames N`` builds a longer
+recording by cycling the clip's frames, to check memory on long uploads (the service's
+default upload limit is 6000 frames). The test partition cannot be selected.
 
 Example:
     uv run python scripts/profile_pipeline.py --bundle bundles/passagewatch-0.2.0 \\
@@ -50,6 +52,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--threads", type=int, default=None, help="torch CPU threads")
     parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--frames", type=int, default=None, help="cycle the clip to N frames")
+    parser.add_argument("--no-warmup", action="store_true", help="skip the warm-up pass")
     parser.add_argument("--out", type=Path, default=None, help="write the profile as JSON")
     args = parser.parse_args(argv)
 
@@ -70,16 +74,17 @@ def main(argv: list[str] | None = None) -> int:
     load_s = time.perf_counter() - load_start
     with tempfile.TemporaryDirectory() as tmp:
         media = Path(tmp) / "clip.zip"
+        num_frames = args.frames or meta.num_frames
         with zipfile.ZipFile(media, "w", zipfile.ZIP_STORED) as zf:
-            for i in range(meta.num_frames):
-                zf.write(frame_dir / f"{i}.jpg", f"{i}.jpg")
+            for i in range(num_frames):
+                zf.write(frame_dir / f"{i % meta.num_frames}.jpg", f"{i}.jpg")
         clip = ClipRecord(
             clip_id="profile",
             source="profile",
             sha256="0" * 64,
             media_kind="frames",
             media_path=str(media),
-            num_frames=meta.num_frames,
+            num_frames=num_frames,
             width=meta.width,
             height=meta.height,
             framerate=meta.framerate,
@@ -92,12 +97,13 @@ def main(argv: list[str] | None = None) -> int:
             deleted_at=None,
         )
         counting = {"policy": "cfc-compatible-v1", "line_x_normalized": 0.5}
-        pipeline.run(clip, media, counting)  # warm-up
+        if not args.no_warmup:
+            pipeline.run(clip, media, counting)
         start = time.perf_counter()
         result = pipeline.run(clip, media, counting)
         total_s = time.perf_counter() - start
 
-    frames = meta.num_frames
+    frames = num_frames
     report = {
         "bundle": pipeline.version,
         "preprocessing_version": pipeline.bundle.preprocessing_version,
