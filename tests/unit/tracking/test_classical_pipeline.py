@@ -137,6 +137,33 @@ def test_short_gaps_are_bridged_and_long_gaps_split() -> None:
     assert len(np.unique(split.track_id)) == 2
 
 
+def test_an_uncertainty_gate_stops_established_tracks_jumping_to_a_neighbor() -> None:
+    # Fish A is tracked for 20 frames, then lost; fish B swims on 0.3 m away (within the
+    # 0.5 m distance gate). Without the uncertainty gate, A's track takes over B. With the
+    # default noise settings an established track's innovation SD settles near 0.12 m per
+    # axis, so 2 SD is about 0.24 m.
+    frames = [det([box_at(10 + 3 * t, 20)]) for t in range(20)]
+    frames += [det([box_at(10 + 3 * t, 50)]) for t in range(20, 30)]
+
+    plain = track(frames, TrackerConfig(gate_m=0.5))
+    gated = track(frames, TrackerConfig(gate_m=0.5, gate_sigma=2.0))
+
+    def owners(tracks: BoxAnnotations, y: float) -> set[int]:
+        return set(tracks.track_id[tracks.boxes[:, 1] == y].tolist())
+
+    assert owners(plain, 20.0) == owners(plain, 50.0)  # one track jumped between fish
+    assert owners(gated, 20.0).isdisjoint(owners(gated, 50.0))
+
+
+def test_an_uncertainty_gate_still_lets_new_tracks_catch_fast_fish() -> None:
+    # 0.3 m per frame from the first frame: a new track's velocity is still uncertain.
+    frames = [det([box_at(10 + 30 * t, 40)]) for t in range(12)]
+
+    tracks = track(frames, TrackerConfig(gate_m=0.5, gate_sigma=2.0))
+
+    assert np.unique(tracks.track_id).tolist() == [1] and len(tracks) == 12
+
+
 def test_short_tracks_are_dropped() -> None:
     frames = [det([box_at(5 + 3 * t, 40)] if t < 2 else []) for t in range(10)]
 
