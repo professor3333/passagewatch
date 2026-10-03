@@ -25,7 +25,10 @@ def main() -> int:
     if settings.torch_threads is not None:
         torch.set_num_threads(settings.torch_threads)
     pipeline = InferencePipeline.load(
-        settings.bundle_dir.resolve(), settings.device, settings.inference_batch
+        settings.bundle_dir.resolve(),
+        settings.device,
+        settings.inference_batch,
+        threads=settings.torch_threads,
     )
     stop = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):

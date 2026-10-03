@@ -378,3 +378,64 @@ def test_worker_health_follows_its_heartbeat(tmp_path: Path) -> None:
     assert is_healthy(settings, "box", now + timedelta(seconds=30))
     assert not is_healthy(settings, "box", now + timedelta(seconds=90))  # stale
     assert not is_healthy(settings, "elsewhere", now)  # another host's worker
+
+
+def test_an_onnx_bundle_serves_the_exported_network(tmp_path: Path) -> None:
+    import numpy as np
+
+    from passagewatch.detection.onnx import OnnxModel, export_onnx
+
+    ckpt = checkpoint(tmp_path / "c.pt")
+    export_onnx(ckpt, tmp_path / "c.onnx")
+    torch_path = build_bundle(
+        checkpoint=ckpt,
+        tracker_config={},
+        score_threshold=0.2,
+        version="pw-t",
+        bundles_dir=tmp_path / "bundles",
+    )
+    onnx_path = build_bundle(
+        checkpoint=ckpt,
+        tracker_config={},
+        score_threshold=0.2,
+        version="pw-o",
+        bundles_dir=tmp_path / "bundles",
+        onnx=tmp_path / "c.onnx",
+    )
+
+    torch_pipeline = InferencePipeline.load(torch_path, threads=1)
+    onnx_pipeline = InferencePipeline.load(onnx_path, threads=1)
+
+    bundle = load_bundle(onnx_path)
+    assert bundle.detector.runtime == "onnxruntime" and (onnx_path / "detector.onnx").is_file()
+    assert bundle.config()["detector"]["onnx_sha256"] == bundle.detector.onnx_sha256
+    assert "runtime" not in load_bundle(torch_path).config()["detector"]  # stable old hashes
+    assert isinstance(onnx_pipeline.detector.loaded.model, OnnxModel)  # type: ignore[attr-defined]
+    frames = [
+        np.random.default_rng(i).integers(0, 255, (120, 80), dtype=np.uint8) for i in range(2)
+    ]
+    a = torch_pipeline.detector.detect(frames)
+    b = onnx_pipeline.detector.detect(frames)
+    assert [len(d.scores) for d in a] == [len(d.scores) for d in b]
+
+
+def test_an_onnx_bundle_is_checked_and_runs_on_the_cpu_only(tmp_path: Path) -> None:
+    from passagewatch.detection.onnx import export_onnx
+
+    ckpt = checkpoint(tmp_path / "c.pt")
+    export_onnx(ckpt, tmp_path / "c.onnx")
+    path = build_bundle(
+        checkpoint=ckpt,
+        tracker_config={},
+        score_threshold=0.2,
+        version="pw-o",
+        bundles_dir=tmp_path / "bundles",
+        onnx=tmp_path / "c.onnx",
+    )
+
+    with pytest.raises(BundleMismatchError, match="CPU"):
+        InferencePipeline.load(path, device="mps")
+    with (path / "detector.onnx").open("ab") as fh:
+        fh.write(b"tampered")
+    with pytest.raises(BundleMismatchError, match="SHA-256"):
+        InferencePipeline.load(path)

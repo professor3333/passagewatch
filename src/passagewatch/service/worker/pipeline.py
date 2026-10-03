@@ -32,6 +32,7 @@ from passagewatch.counting.policy import (
     tally,
 )
 from passagewatch.detection.classical import FrameDetections, Scale, boxes_in_meters
+from passagewatch.detection.onnx import onnx_detector
 from passagewatch.inference.neural import detect_frames, file_sha256, load_detector
 from passagewatch.monitoring.timing import StageTimes
 from passagewatch.preprocessing.temporal import PREPROCESSING_VERSIONS, encode_frames
@@ -58,8 +59,17 @@ class Detector(Protocol):
 
 
 class YoloxDetector:
-    def __init__(self, checkpoint: Path, score_threshold: float, device: torch.device) -> None:
+    def __init__(
+        self,
+        checkpoint: Path,
+        score_threshold: float,
+        device: torch.device,
+        onnx: Path | None = None,
+        threads: int | None = None,
+    ) -> None:
         self.loaded = load_detector(checkpoint, device)
+        if onnx is not None:
+            self.loaded = onnx_detector(self.loaded, onnx, threads)
         self.score_threshold = score_threshold
         # Preprocess / detect / postprocess seconds; the pipeline resets and reads it per job.
         self.times = StageTimes()
@@ -100,17 +110,35 @@ class InferencePipeline:
         return self.bundle.pipeline_version
 
     @classmethod
-    def load(cls, bundle_dir: Path, device: str = "cpu", batch_size: int = 8) -> InferencePipeline:
+    def load(
+        cls,
+        bundle_dir: Path,
+        device: str = "cpu",
+        batch_size: int = 8,
+        threads: int | None = None,
+    ) -> InferencePipeline:
         bundle = load_bundle(bundle_dir)
         checkpoint = bundle_dir / bundle.detector.checkpoint
         if file_sha256(checkpoint) != bundle.detector.checkpoint_sha256:
             raise BundleMismatchError(f"{checkpoint} does not match the bundle's SHA-256")
+        onnx = None
+        if bundle.detector.runtime == "onnxruntime":
+            assert bundle.detector.onnx_file is not None
+            onnx = bundle_dir / bundle.detector.onnx_file
+            if file_sha256(onnx) != bundle.detector.onnx_sha256:
+                raise BundleMismatchError(f"{onnx} does not match the bundle's SHA-256")
+            if device != "cpu":
+                raise BundleMismatchError(
+                    f"the bundle runs ONNX Runtime on the CPU, but device {device!r} was requested"
+                )
         if bundle.preprocessing_version not in PREPROCESSING_VERSIONS:
             raise BundleMismatchError(
                 f"bundle needs preprocessing {bundle.preprocessing_version}, "
                 f"this code implements only {', '.join(PREPROCESSING_VERSIONS)}"
             )
-        detector = YoloxDetector(checkpoint, bundle.detector.score_threshold, torch.device(device))
+        detector = YoloxDetector(
+            checkpoint, bundle.detector.score_threshold, torch.device(device), onnx, threads
+        )
         if detector.loaded.preprocessing != bundle.preprocessing_version:
             raise BundleMismatchError(
                 f"{checkpoint} was trained with {detector.loaded.preprocessing}, but the bundle "
