@@ -125,6 +125,33 @@ def test_a_bundle_must_declare_its_checkpoints_preprocessing(tmp_path: Path) -> 
         InferencePipeline.load(path)
 
 
+def test_pipeline_results_report_time_per_stage(tmp_path: Path) -> None:
+    from passagewatch.service.catalog import ClipRecord
+
+    media = tmp_path / "clip.zip"
+    media.write_bytes(passage_zip())
+    clip = ClipRecord(
+        clip_id="c",
+        source="test",
+        sha256="0" * 64,
+        media_kind="frames",
+        media_path=str(media),
+        num_frames=20,
+        width=40,
+        height=60,
+        framerate=10.0,
+        created_at="",
+        expires_at=None,
+        deleted_at=None,
+        **METERS,
+    )
+
+    result = pipeline().run(clip, media, {"line_x_normalized": 0.5})
+
+    assert {"decode", "detect", "track", "count"} <= set(result.stage_seconds)
+    assert all(seconds >= 0 for seconds in result.stage_seconds.values())
+
+
 def test_a_moved_counting_line_is_applied(client: TestClient, settings: ServiceSettings) -> None:
     # The target ends at x ~ 0.92 of the width: a line at 0.95 is never reached.
     job_id = submit(client, passage_zip(), line_x_normalized=0.95)

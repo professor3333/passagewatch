@@ -120,7 +120,13 @@ def process_job(
         )
         logger.info(
             "job succeeded",
-            extra={"job_id": job.job_id, "worker_id": worker_id, **result.summary()},
+            extra={
+                "job_id": job.job_id,
+                "worker_id": worker_id,
+                **result.summary(),
+                "frames": result.frames,
+                "stage_seconds": result.stage_seconds,
+            },
         )
         return "succeeded"
     except LeaseLostError:

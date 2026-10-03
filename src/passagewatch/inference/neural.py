@@ -32,6 +32,7 @@ from passagewatch.detection.yolox.yolox import YOLOX
 from passagewatch.evaluation.detection import DetectionMatch, match_detections
 from passagewatch.evaluation.nmae import ClipCountError, count_clip
 from passagewatch.ingestion.cfc import Clip, frame_path
+from passagewatch.monitoring.timing import StageTimes
 from passagewatch.preprocessing.letterbox import InputSize, letterbox_image, to_network_input
 from passagewatch.preprocessing.temporal import PREPROCESSING_VERSIONS, encode_frames
 from passagewatch.tracking.bytetrack import ByteTrackConfig, ByteTracker
@@ -93,14 +94,29 @@ def detect_frames(
     detector: LoadedDetector,
     frames: list[NDArray[np.uint8]],
     score_threshold: float = CACHE_SCORE_THRESHOLD,
+    times: StageTimes | None = None,
 ) -> list[FrameDetections]:
     """Detect in encoded frames (grayscale, or 3-channel for temporal preprocessing); boxes
-    in original-frame pixels, clipped to the frame."""
-    canvases, letterboxes = zip(
-        *(letterbox_image(f, detector.input_size) for f in frames), strict=True
-    )
-    batch = to_network_input(np.stack(canvases)).to(detector.device)
-    outputs = detector.model(batch).float().cpu()
+    in original-frame pixels, clipped to the frame. ``times`` (optional) accumulates the
+    preprocess, detect and postprocess stages."""
+    times = times or StageTimes()
+    with times.stage("preprocess"):
+        canvases, letterboxes = zip(
+            *(letterbox_image(f, detector.input_size) for f in frames), strict=True
+        )
+        batch = to_network_input(np.stack(canvases)).to(detector.device)
+    with times.stage("detect"):
+        outputs = detector.model(batch).float().cpu()
+    with times.stage("postprocess"):
+        return _to_frame_detections(outputs, letterboxes, frames, score_threshold)
+
+
+def _to_frame_detections(
+    outputs: torch.Tensor,
+    letterboxes: tuple[Any, ...],
+    frames: list[NDArray[np.uint8]],
+    score_threshold: float,
+) -> list[FrameDetections]:
     results = []
     for image, letterbox, frame in zip(
         decode_detections(outputs, score_threshold, NMS_IOU), letterboxes, frames, strict=True
