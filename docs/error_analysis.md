@@ -209,8 +209,8 @@ experiments so far changed counts by 0–3 errors. The remaining budget therefor
 |---|---|---|
 | 1 | Extra duplicate suppression | Not adopted (confirmation failed); kept available |
 | 2 | Tracker gate | Not adopted (no gain on either partition) |
-| 3 | Higher detector input resolution | `configs/training/yolox-tiny-v2.yaml` (1280 × 640): awaiting a Kaggle run |
-| 4 | Temporal input channels | `letterbox-temporal3-v1` implemented; its training config follows the experiment 3 result, and then needs a Kaggle run |
+| 3 | Higher detector input resolution | Not adopted: no confirmed gain on the holdout, 3.2× slower on CPU |
+| 4 | Temporal input channels | `configs/training/yolox-tiny-t1.yaml` (v1 + `letterbox-temporal3-v1`): awaiting a Kaggle run |
 
 ## Experiment 3 protocol (declared before any result)
 
@@ -232,3 +232,70 @@ Written on 2026-10-02 while `yolox-tiny-v2` (1280 × 640 input; everything else 
 
 The same protocol then applies to experiment 4 (temporal channels), against whichever
 detector this one keeps.
+
+## Experiment 3 result: 1280 × 640 input (`yolox-tiny-v2`)
+
+Trained on Kaggle (Tesla T4, about 36 images/s, 30 epochs) at commit `bc343b3`, which
+declared the protocol above, with no uncommitted changes. Everything except the input size
+equals `yolox-tiny-v1`.
+
+**1. Selection on kenai-val** (the same grid and rule as v1):
+
+| Epoch | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 |
+|---|---:|---:|---:|---:|---:|
+| 20 | 0.137 | **0.115** | 0.126 | 0.131 | 0.148 |
+| 25 | 0.120 | 0.120 | 0.126 | 0.142 | 0.148 |
+| 30 | 0.115 | 0.120 | 0.126 | 0.126 | 0.137 |
+
+Epoch 20 at threshold 0.2 and epoch 30 at threshold 0.1 tie at 0.115. `evaluate_neural.py`'s
+tie rule, fixed before v1 was selected (earlier epoch, then higher threshold), selects
+**epoch 20, threshold 0.2**.
+
+**2. Confirmation on `kenai-holdout-v1`** (174 clips, 580 passages; paired clip bootstrap,
+10,000 resamples, 95% CI):
+
+| | kenai-val | kenai-holdout-v1 |
+|---|---|---|
+| v1 (epoch 25, threshold 0.2) | 0.120 [0.078, 0.171] | 0.210 [0.166, 0.261] |
+| v2 (epoch 20, threshold 0.2) | 0.115 | 0.193 [0.154, 0.238] |
+| v2 − v1 | −0.006 [−0.040, +0.031] | **−0.017 [−0.054, +0.015]**, P(v2 better) = 0.83 |
+
+**3. Decision: v1 stays.** The holdout interval includes zero, so under the declared rule
+v2 does not replace v1. A real gain of a couple of nMAE points is possible, but it is not
+established.
+
+**4. Cost:** on the development Mac's CPU (Apple M1, 4 threads, batch 8, the same 40 frames
+for both, measured back to back), v1 needs 82 ms per frame and v2 265 ms per frame:
+**3.2× slower**. These are this benchmark's conditions, not the serving configuration,
+which Stage 10 profiles.
+
+**Why it does not help the counts** (kenai-val, threshold 0.2):
+
+| | v1 | v2 |
+|---|---:|---:|
+| Detection recall, fish < 0.02 m² | 0.36 | 0.40 |
+| Detection recall, 0.02–0.05 m² | 0.54 | 0.56 |
+| Detection recall, 0.05–0.1 m² | 0.76 | 0.79 |
+| Detection recall, ≥ 0.1 m² | 0.74 | 0.76 |
+| Reference passages: missed outright | 5 | 2 |
+| merged | 6 | 11 |
+| split | 5 | 2 |
+| ambiguous start/end | 2 | 5 |
+| partial | 3 | 1 |
+| Predicted passages: duplicate | 7 | 8 |
+| background / non-passing fish | 1 / 1 | 1 / 1 |
+| **Passage-level errors** | **30** | **31** |
+
+The larger input finds a few more fish (recall up by 2–4 points in every size class), and
+fewer fish are missed outright (5 → 2). In the dense near-range clips, though, the extra
+detections are merged by the tracker (6 → 11 merges), so the counts barely change. With
+this tracker, **detection resolution is no longer the bottleneck; association in dense
+scenes is.** Far-range stratum 2, the motivating slice, improves (nMAE 0.333 → 0.267 on its
+15 passages), but too few passages to confirm.
+
+Consequences for the remaining experiments:
+
+- Experiment 4 (temporal input) is built on v1's 960 × 416 input and compared with v1, the
+  detector that was kept.
+- A tracker change for dense scenes (experiment 2 showed that the gate alone only trades
+  merges for splits) is the most promising direction after that.
