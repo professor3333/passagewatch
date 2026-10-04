@@ -146,3 +146,64 @@ See the docstring of `passagewatch.training.yolox_train` for details.
   bit-identical to an uninterrupted one on CPU (tested).
 - **Not yet:** MLflow tracking. Metrics go to `metrics.jsonl` and `run.json`, which a later
   stage can import.
+
+## Evaluating a release on the test locations (Kaggle)
+
+The official test locations (kenai-rightbank, kenai-channel, elwha, nushagak) are evaluated
+**once, for a declared release**, with everything frozen. Their images (87 GB) do not fit on
+the development machine, so the evaluation runs on Kaggle with
+`tools/kaggle/evaluate_release_on_kaggle.sh`:
+
+- The release bundle you upload must match its committed manifest
+  (`releases/manifests/<release>.json`), or nothing runs.
+- Each location's archive interleaves all its clips, so it is streamed in chunks of whole
+  recording days that fit the disk. Frames are MD5-checked and SHA-256-inventoried, then
+  evaluated and deleted.
+- For every clip it records the counts of the release (PyTorch on the GPU), the baseline
+  release `passagewatch-0.2.0` and the classical pipeline. For a few clips per location it
+  also records the release's ONNX export on the CPU, which is the deployed runtime, to
+  confirm the counts match.
+- Nothing is chosen: no epoch, threshold or setting is looked at or changed.
+
+The script was rehearsed on 8 `kenai-holdout-v1` clips. Its release, baseline, classical and
+ONNX counts equalled the holdout reports exactly.
+
+**One-time setup: upload the release bundles.**
+
+1. On Kaggle: **Datasets** → **New Dataset** → upload `passagewatch-release-bundles.zip` (it
+   contains the folders `passagewatch-0.3.0/` and `passagewatch-0.2.0/`, about 61 MB).
+2. Give it a title such as `passagewatch-release-bundles`, keep it **Private**, and
+   **Create**.
+
+**Session 1: kenai-channel, nushagak and elwha** (about 36 GB to stream).
+
+1. **Create** → **New Notebook**; **Accelerator:** GPU T4 x2; **Internet:** on.
+2. **Add Input** → **Your Datasets** → `passagewatch-release-bundles`. The right-hand panel
+   shows its path (for example `/kaggle/input/passagewatch-release-bundles`).
+3. Replace the first cell with the following. Use the path from step 2 for `BUNDLES`, and the
+   folder that contains `passagewatch-0.3.0/`:
+
+   ```bash
+   %%bash
+   set -euo pipefail
+   git clone --quiet https://github.com/professor3333/passagewatch.git /tmp/passagewatch
+   cd /tmp/passagewatch
+   export BUNDLES=/kaggle/input/passagewatch-release-bundles
+   export LOCATIONS="kenai-channel nushagak elwha"
+   bash tools/kaggle/evaluate_release_on_kaggle.sh
+   ```
+
+4. **Save Version** → **Save & Run All (Commit)**. The log shows
+   `== chunk budget`, then for each location the streaming progress and
+   `<location>: N clips evaluated, 0 quarantined`.
+5. When it finishes, download the output (`release-eval/`).
+
+**Session 2: kenai-rightbank** (51 GB per streaming pass). Use the same notebook with
+`LOCATIONS="kenai-rightbank"` and save a new version. If a session stops early, add the
+stopped version's output as an input and set
+`export RESUME_FROM=/kaggle/input/<that output>/release-eval`. Clips already evaluated are
+skipped.
+
+Back on the development machine, the two downloads' `results/` files go into one directory,
+and `scripts/summarize_release_evaluation.py --results <dir>` computes the per-location and
+macro-average results. They are recorded in `releases/evaluations/`.
