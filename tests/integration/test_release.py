@@ -138,3 +138,37 @@ def test_rollback_restores_the_previous_release_and_old_jobs_keep_theirs(
     assert versions == {job_a: "pw-a", job_b: "pw-b", job_after: "pw-a"}
     assert export_b["pipeline"]["pipeline_version"] == "pw-b"
     assert export_b["pipeline"]["detector"]["score_threshold"] == 0.5
+
+
+def test_the_release_gate_requires_parity_and_a_merged_code_commit(
+    bundles: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "check_release", Path(__file__).resolve().parents[2] / "scripts/check_release.py"
+    )
+    assert spec is not None and spec.loader is not None
+    gate = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gate)
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)  # not a git repository: commit not found
+    manifest = manifest_for(bundles / "pw-a").model_copy(
+        update={
+            "evaluation": {
+                "reports": [
+                    {"partition": "val", "runtime": "torch", "nmae": 0.1, "nmae_95ci": [0, 1]}
+                ],
+                "parity": [{"report": "r-onnx.json", "clips_with_different_counts": 2}],
+            }
+        }
+    )
+    write_manifest(manifest, tmp_path / "releases/manifests/pw-a.json")
+
+    assert gate.main(["--release", "pw-a"]) == 1
+    out = capsys.readouterr().out
+    assert "parity with r-onnx.json: 2 clips differ" in out
+    assert "is not in this history" in out
+    assert gate.main(["--release", "pw-missing"]) == 1
