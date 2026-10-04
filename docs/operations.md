@@ -198,3 +198,31 @@ releases fail the start-up checks when their versions are incompatible. Jobs kee
 pipeline version recorded for them. `tests/integration/test_release.py` runs the procedure:
 release A, then B, then a rollback to A. `/v1/model-info` matches each manifest in turn,
 new jobs run the active release, and earlier jobs and their exports keep their own versions.
+
+## Monitoring (Stage 11)
+
+Docker Compose runs Prometheus (`prom/prometheus` v3.15.0, pinned by digest) on
+`http://127.0.0.1:9090`, scraping two targets every 15 s.
+
+| Target | Metrics |
+|---|---|
+| API `GET /metrics` (read from the database at scrape time) | `passagewatch_jobs{status}`, `passagewatch_queue_depth`, `passagewatch_oldest_queued_seconds`, `passagewatch_live_workers`, `passagewatch_review_events`, `passagewatch_release_info{pipeline_version, preprocessing_version, calibration_version, counting_policy, runtime}` |
+| Worker, port 9100 inside the Compose network (`PASSAGEWATCH_WORKER_METRICS_PORT`) | `passagewatch_worker_jobs_total{outcome}`, `passagewatch_worker_job_seconds` (histogram), `passagewatch_worker_stage_seconds_total{stage}`, `passagewatch_worker_frames_total` |
+
+The metrics carry counts and durations only: no recording content, identifiers or fish
+counts.
+
+**Alerts** (`deploy/prometheus/alerts.yml`, shown at `http://127.0.0.1:9090/alerts`; this
+single-host deployment has no Alertmanager):
+
+| Alert | Fires when | Severity |
+|---|---|---|
+| `PassageWatchApiDown` | Prometheus cannot scrape the API for 2 minutes | critical |
+| `PassageWatchNoLiveWorker` | no worker of the active release heartbeats for 2 minutes | critical |
+| `PassageWatchJobsFailing` | any job failed in the last 30 minutes | warning |
+| `PassageWatchQueueBacklog` | a job has waited more than 30 minutes for a worker, for 5 minutes | warning |
+
+CI checks the configuration with `promtool check config`, and tests each alert with
+`promtool test rules` (`deploy/prometheus/alerts_test.yml`): every alert must fire when it
+should and not before. The Compose smoke test requires both targets to be up in Prometheus
+and the rules to be loaded.

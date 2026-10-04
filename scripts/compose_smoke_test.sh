@@ -37,7 +37,9 @@ with zipfile.ZipFile(sys.argv[1], "w") as zf:
 PY
 
 echo "== start"
-docker compose up -d --build --wait --wait-timeout 300 api worker
+export PASSAGEWATCH_PROMETHEUS_PORT="${PASSAGEWATCH_PROMETHEUS_PORT:-19090}"
+PROM="http://127.0.0.1:${PASSAGEWATCH_PROMETHEUS_PORT}"
+docker compose up -d --build --wait --wait-timeout 300 api worker prometheus
 
 echo "== hardening"
 for service in api worker; do
@@ -79,4 +81,19 @@ echo "job $JOB: $STATUS"
 curl -fsS "$URL/v1/jobs/$JOB/results"; echo
 curl -fsS "$URL/v1/jobs/$JOB/audit" | grep -q '"calibration_version":"review-v0"'
 docker compose logs --no-color worker | grep -q '"message": "job succeeded"'
+
+echo "== monitoring"
+curl -fsS "$URL/metrics" | grep -q 'passagewatch_jobs{status="succeeded"} 1.0'
+UP=""
+for _ in $(seq 1 30); do
+  UP=$(curl -fsS "$PROM/api/v1/targets" | python3 -c '
+import json, sys
+targets = json.load(sys.stdin)["data"]["activeTargets"]
+print(" ".join(sorted(t["labels"]["job"] for t in targets if t["health"] == "up")))')
+  [ "$UP" = "api worker" ] && break
+  sleep 2
+done
+echo "prometheus targets up: $UP"
+[ "$UP" = "api worker" ]
+curl -fsS "$PROM/api/v1/rules" | grep -q PassageWatchNoLiveWorker
 echo "== smoke test passed"
