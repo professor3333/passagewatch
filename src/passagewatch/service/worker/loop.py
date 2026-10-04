@@ -31,6 +31,7 @@ from passagewatch.service.catalog import (
 )
 from passagewatch.service.db import connect
 from passagewatch.service.jobs import QUEUED, RUNNING, Job, JobStore, LeaseLostError, utc_now
+from passagewatch.service.metrics import WorkerMetrics
 from passagewatch.service.settings import ServiceSettings
 from passagewatch.service.worker.pipeline import InferencePipeline
 
@@ -86,9 +87,11 @@ def process_job(
     pipeline: InferencePipeline,
     job: Job,
     worker_id: str,
+    metrics: WorkerMetrics | None = None,
 ) -> str:
     """Run one leased job to completion; returns its final status from this worker's view."""
     store = JobStore(conn)
+    started = time.monotonic()
     heartbeat = _JobHeartbeat(settings, job.job_id, worker_id, pipeline.version)
     heartbeat.start()
 
@@ -128,6 +131,10 @@ def process_job(
                 "stage_seconds": result.stage_seconds,
             },
         )
+        if metrics is not None:
+            metrics.job_finished(
+                "succeeded", time.monotonic() - started, result.stage_seconds, result.frames
+            )
         return "succeeded"
     except LeaseLostError:
         logger.warning(
@@ -182,6 +189,7 @@ def run_worker(
     *,
     stop: threading.Event,
     max_jobs: int | None = None,
+    metrics: WorkerMetrics | None = None,
 ) -> int:
     """Lease and run jobs until ``stop`` is set (or ``max_jobs`` have run); returns jobs run."""
     settings.artifacts_dir.mkdir(parents=True, exist_ok=True)
@@ -213,7 +221,9 @@ def run_worker(
                 "job leased",
                 extra={"job_id": job.job_id, "worker_id": worker_id, "attempt": job.attempts},
             )
-            process_job(conn, settings, pipeline, job, worker_id)
+            outcome = process_job(conn, settings, pipeline, job, worker_id, metrics)
+            if metrics is not None and outcome != "succeeded":
+                metrics.job_finished(outcome)
             worker_heartbeat(conn, worker_id, pipeline.version, now=utc_now())
             done += 1
     finally:

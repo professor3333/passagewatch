@@ -12,8 +12,10 @@ import sys
 import threading
 
 import torch
+from prometheus_client import start_http_server
 
 from passagewatch.service.logs import configure_logging
+from passagewatch.service.metrics import WorkerMetrics
 from passagewatch.service.settings import ServiceSettings
 from passagewatch.service.worker.loop import default_worker_id, run_worker
 from passagewatch.service.worker.pipeline import InferencePipeline
@@ -30,10 +32,13 @@ def main() -> int:
         settings.inference_batch,
         threads=settings.torch_threads,
     )
+    metrics = WorkerMetrics()
+    if settings.worker_metrics_port is not None:
+        start_http_server(settings.worker_metrics_port, registry=metrics.registry)
     stop = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, lambda *_: stop.set())
-    run_worker(settings, pipeline, default_worker_id(), stop=stop)
+    run_worker(settings, pipeline, default_worker_id(), stop=stop, metrics=metrics)
     return 0
 
 
