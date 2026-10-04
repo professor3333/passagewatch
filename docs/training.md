@@ -178,17 +178,15 @@ ONNX counts equalled the holdout reports exactly.
 **Session 1: kenai-channel, nushagak and elwha** (about 36 GB to stream).
 
 1. **Create** → **New Notebook**; **Accelerator:** GPU T4 x2; **Internet:** on.
-2. **Add Input** → **Your Datasets** → `passagewatch-release-bundles`. The right-hand panel
-   shows its path (for example `/kaggle/input/passagewatch-release-bundles`).
-3. Replace the first cell with the following. Use the path from step 2 for `BUNDLES`, and the
-   folder that contains `passagewatch-0.3.0/`:
+2. **Add Input** → **Your Datasets** → `passagewatch-release-bundles`.
+3. Replace the first cell with the following. The script finds the release bundles anywhere
+   under `/kaggle/input`, so no path needs to be typed:
 
    ```bash
    %%bash
    set -euo pipefail
    git clone --quiet https://github.com/professor3333/passagewatch.git /tmp/passagewatch
    cd /tmp/passagewatch
-   export BUNDLES=/kaggle/input/passagewatch-release-bundles
    export LOCATIONS="kenai-channel nushagak elwha"
    bash tools/kaggle/evaluate_release_on_kaggle.sh
    ```
