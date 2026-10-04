@@ -51,7 +51,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--detections", type=Path, required=True, help="cache directory")
     parser.add_argument("--manifest", required=True)
-    parser.add_argument("--partition", choices=["train", "val"], default="val")
+    parser.add_argument(
+        "--partition",
+        choices=["train", "val", "holdout"],
+        default="val",
+        help="holdout: evaluates fixed review settings, never selects them",
+    )
     parser.add_argument("--extract-dir", type=Path, default=REPO_ROOT / "data/extracted/cfc")
     parser.add_argument("--frames-dir", type=Path, default=None)
     parser.add_argument("--threshold", type=float, default=0.2)
@@ -59,6 +64,12 @@ def main(argv: list[str] | None = None) -> int:
         "--tracking-config", type=Path, default=REPO_ROOT / "configs/tracking/classical-v2.yaml"
     )
     parser.add_argument("--calibration", choices=sorted(CALIBRATIONS), default=REVIEW_V0)
+    parser.add_argument(
+        "--suggest-threshold",
+        type=float,
+        default=None,
+        help="try another suggest_threshold than the calibration version's (an experiment)",
+    )
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
 
@@ -69,6 +80,15 @@ def main(argv: list[str] | None = None) -> int:
     tracker = load_classical_config(args.tracking_config).tracker
     policy = CFC_COMPATIBLE_V1
     calibration = CALIBRATIONS[args.calibration]
+    if args.suggest_threshold is not None:
+        review_config = calibration.review.model_copy(
+            update={"suggest_threshold": args.suggest_threshold}
+        )
+        calibration = dataclasses.replace(
+            calibration,
+            version=f"{calibration.version}+suggest-{args.suggest_threshold}",
+            review=review_config,
+        )
 
     items: list[QueueItem] = []
     reachable: set[str] = set()
@@ -171,7 +191,12 @@ def main(argv: list[str] | None = None) -> int:
             "missed_fish": len(unreachable),
         },
     }
-    out = args.out or args.detections.parent / f"review-{args.partition}.json"
+    name = calibration.version if args.suggest_threshold is not None else args.partition
+    out = args.out or args.detections.parent / (
+        f"review-{args.partition}.json"
+        if args.suggest_threshold is None
+        else f"review-{args.partition}-{name}.json"
+    )
     out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
 
     print(
