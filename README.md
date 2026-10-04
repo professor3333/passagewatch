@@ -79,20 +79,31 @@ The nMAE evaluator matches CFC's official evaluator exactly on its published bas
 uv run python scripts/evaluate_counts.py --tracker baseline++   # kenai-val only by default
 ```
 
-Measured on the 64 kenai-val clips, with 95% intervals from a paired bootstrap over clips:
+Measured on development data, with 95% intervals from a paired bootstrap over clips.
+Settings are selected on kenai-val (one day, 64 clips) and confirmed once on
+`kenai-holdout-v1` (five other kenai-train days, 174 clips, never used for training or
+selection):
 
-| System | kenai-val nMAE |
-|---|---|
-| Classical baseline `classical-v2` (tuned on kenai-train) | 0.235 [0.181, 0.300] |
-| YOLOX-Tiny + the same tracker (selected on kenai-val) | 0.120 [0.078, 0.171] |
-| CFC published Baseline / Baseline++ | 0.049 / 0.033 |
+| System | kenai-val nMAE | kenai-holdout-v1 nMAE |
+|---|---|---|
+| Classical baseline `classical-v2` (tuned on kenai-train) | 0.235 [0.181, 0.300] | 0.369 [0.316, 0.430] |
+| YOLOX-Tiny, single frame (`passagewatch-0.2.0`) | 0.120 [0.078, 0.171] | 0.210 [0.166, 0.261] |
+| **YOLOX-Tiny with temporal input (`passagewatch-0.3.0`)** | **0.066** [0.027, 0.111] | **0.117** [0.089, 0.149] |
+| CFC published Baseline / Baseline++ | 0.049 / 0.033 | — |
+
+The temporal input (the frame, the frame minus the recording's background, and the motion to
+the next frame, after CFC's Baseline++) cuts the holdout error by 44% against the
+single-frame model: −0.093 [−0.133, −0.057]
+([experiments](docs/error_analysis.md), [model card](docs/model_card.md)). The official
+test locations are evaluated once, for a declared release, in a later stage.
 
 ByteTrack, fed the same detections, was not measurably better than the Kalman tracker
 (−0.011 [−0.048, +0.021]), so the Kalman tracker is kept
 ([tracker experiment](docs/neural_baseline.md#tracker-experiment-stage-5-kalman-tracker-versus-bytetrack)).
-These are development numbers on a validation day, not test results. Details are in
-[classical baseline](docs/classical_baseline.md#results) and
-[neural baseline](docs/neural_baseline.md#results).
+These are development numbers, not test results. Details are in
+[classical baseline](docs/classical_baseline.md#results),
+[neural baseline](docs/neural_baseline.md#results) and
+[error analysis](docs/error_analysis.md).
 
 ```bash
 uv run python scripts/run_classical.py --manifest full-v2 --partitions val \
@@ -102,17 +113,26 @@ uv run python scripts/run_classical.py --manifest full-v2 --partitions val \
 ## Running the service
 
 The service is an HTTP API plus an inference worker (Docker Compose, CPU). It needs a
-release bundle in `bundles/` (model weights are not in git). To build one from a trained
-checkpoint and make it active:
+release bundle in `bundles/` (model weights are not in git). To build the current release
+from its trained checkpoint (`models/runs/yolox-tiny-t1/epoch-025.pt`), serve it with ONNX
+Runtime, and make it active:
 
 ```bash
-uv run python scripts/build_bundle.py --version passagewatch-0.2.0 \
-    --checkpoint models/runs/yolox-tiny-v1/epoch-025.pt --score-threshold 0.2 \
-    --tracking-config configs/tracking/classical-v2.yaml \
-    --selection docs/neural_baseline.md --activate
+uv run python scripts/export_onnx.py --checkpoint models/runs/yolox-tiny-t1/epoch-025.pt \
+    --out models/onnx/yolox-tiny-t1-epoch-025.onnx \
+    --frames data/extracted/cfc/kenai-dev-v1/kenai-val/2018-06-03-JD154_LeftNear_Stratum1_Set1_LN_2018-06-03_210000_2467_3008
+uv run python scripts/build_bundle.py --version passagewatch-0.3.0 \
+    --checkpoint models/runs/yolox-tiny-t1/epoch-025.pt --score-threshold 0.4 \
+    --tracking-config configs/tracking/classical-v2.yaml --selection docs/error_analysis.md \
+    --calibration-version review-v0 --onnx models/onnx/yolox-tiny-t1-epoch-025.onnx --activate
 docker compose up -d --build
 curl http://127.0.0.1:8000/health/ready
 ```
+
+`/v1/model-info` reports the active release's versions and hashes. Rolling back means
+pointing `bundles/active` at the previous bundle (`--activate` on an existing version, or
+`ln -sfn passagewatch-0.2.0 bundles/active`) and restarting the worker; existing jobs keep
+the versions recorded for them.
 
 Open **http://127.0.0.1:8000/** for the review interface:
 1. Upload a recording, with its frame rate, the sonar window in meters, the upstream
