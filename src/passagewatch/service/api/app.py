@@ -23,6 +23,7 @@ from typing import Annotated, Any
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
 from fastapi.responses import JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
+from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from passagewatch.counting.policy import Direction, DirectionalCounts, to_river_directions
@@ -66,6 +67,7 @@ from passagewatch.service.jobs import (
     utc_now,
 )
 from passagewatch.service.logs import configure_logging
+from passagewatch.service.metrics import ServiceCollector
 from passagewatch.service.settings import ServiceSettings
 
 API_VERSION = "v1"
@@ -516,6 +518,21 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         )
 
     # -- release and health ----------------------------------------------------------
+
+    registry = CollectorRegistry()
+    registry.register(
+        ServiceCollector(
+            connect=lambda: connect(settings.db_path),
+            bundle=lambda: state["bundle"],
+            now=utc_now,
+            stale_seconds=settings.worker_stale_seconds,
+        )
+    )
+
+    @app.get("/metrics", include_in_schema=False)
+    def metrics() -> Response:
+        """Prometheus metrics (docs/operations.md)."""
+        return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
 
     @app.get("/v1/model-info", response_model=ModelInfoOut)
     def model_info() -> ModelInfoOut:
