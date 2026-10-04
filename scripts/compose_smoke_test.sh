@@ -54,7 +54,11 @@ for _ in $(seq 1 60); do
   sleep 2
 done
 curl -fsS "$URL/health/ready"; echo
-curl -fsS "$URL/v1/model-info" | grep -q '"pipeline_version":"smoke-0"'
+INFO=$(curl -fsS "$URL/v1/model-info")
+echo "$INFO" | grep -q '"pipeline_version":"smoke-0"'
+echo "$INFO" | grep -q '"runtime":"onnxruntime"'
+echo "$INFO" | grep -q '"preprocessing_version":"letterbox-temporal3-v1"'
+echo "$INFO" | grep -q '"calibration_version":"review-v0"'
 curl -fsS "$URL/" | grep -q "<title>PassageWatch Review</title>"
 
 echo "== job"
@@ -73,5 +77,6 @@ done
 echo "job $JOB: $STATUS"
 [ "$STATUS" = "succeeded" ]
 curl -fsS "$URL/v1/jobs/$JOB/results"; echo
+curl -fsS "$URL/v1/jobs/$JOB/audit" | grep -q '"calibration_version":"review-v0"'
 docker compose logs --no-color worker | grep -q '"message": "job succeeded"'
 echo "== smoke test passed"
