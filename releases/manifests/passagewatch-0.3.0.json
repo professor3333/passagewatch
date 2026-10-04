@@ -1,0 +1,114 @@
+{
+ "manifest_version": 1,
+ "release": "passagewatch-0.3.0",
+ "created_at": "2026-10-04T08:21:01+00:00",
+ "code_commit": "69c5d96c590b118fa2bd03b2c2aeda31f421c44a",
+ "uv_lock_sha256": "09363d9c60909544bd8fa4437df0b7fb19e8a67c3d68da25628405997e4347ed",
+ "dataset_manifest": {
+  "version": "full-v2",
+  "content_sha256": "a2ecbceda8ba33094717de5fd0124813eb16fa2bbf5633acf139b10ca8d49fb5",
+  "partition": "train",
+  "clips": 183
+ },
+ "training": {
+  "run": "yolox-tiny-t1",
+  "config_file": "configs/training/yolox-tiny-t1.yaml",
+  "config_sha256": "09077d068780f74e3dd30ef3948728838493a180a29c02faa72f3d497931dd04",
+  "resolved_config_sha256": "9614ba957f7eaaf4d4de6c3402cc9eae32390bc672dffd4d1b13ee9ae4b09c96",
+  "training_commit": "8341d37d0291e027214da1df2c0941bee1ead3c1",
+  "device": "cuda",
+  "torch": "2.14.1+cu126"
+ },
+ "bundle": {
+  "pipeline_config_sha256": "4eabd992cac797756bab1ec4d43c31ef36887d51fd80a35ff93a544ad54bc6d9",
+  "detector": {
+   "model_size": "tiny",
+   "checkpoint_sha256": "3230a03ce69d4866b60407eca15122d583f6377b4baa105be5c1104d2a5100ac",
+   "input_height": 960,
+   "input_width": 416,
+   "score_threshold": 0.4,
+   "training_run": "yolox-tiny-t1",
+   "epoch": 25,
+   "runtime": "onnxruntime",
+   "onnx_sha256": "adb448af05745e229ea946be27fba139c16c97569a798fbe4db46b82c18815d8"
+  },
+  "preprocessing_version": "letterbox-temporal3-v1",
+  "tracker": {
+   "kind": "kalman",
+   "config": {
+    "gate_m": 0.5,
+    "gate_sigma": null,
+    "max_age": 4,
+    "min_hits": 3,
+    "min_length": 8,
+    "process_noise": 0.05,
+    "measurement_noise": 0.05
+   }
+  },
+  "counting_policy": "cfc-compatible-v1",
+  "calibration_version": "review-v0"
+ },
+ "evaluation": {
+  "selection": "docs/error_analysis.md",
+  "reports": [
+   {
+    "report": "runs/neural/yolox-tiny-t1/report-val-onnx.json",
+    "report_sha256": "98331b760ea19f501746c09d0978ff10b21361c8edec57bea71142c392ea3102",
+    "manifest": "full-v2",
+    "partition": "val",
+    "runtime": "onnxruntime",
+    "device": "cpu",
+    "clips": 64,
+    "passages": 183,
+    "nmae": 0.0656,
+    "nmae_95ci": [
+     0.0269,
+     0.1111
+    ],
+    "missed_passages": 9,
+    "false_passages": 3,
+    "detection_recall": 0.7078,
+    "detection_precision": 0.9033
+   },
+   {
+    "report": "runs/neural/yolox-tiny-t1/report-holdout.json",
+    "report_sha256": "f04c1a02adab7e7de8653872562c4930c9c5e6ac2e693ca167045c3161ff9e7b",
+    "manifest": "full-v3",
+    "partition": "holdout",
+    "runtime": "torch",
+    "device": "mps",
+    "clips": 174,
+    "passages": 580,
+    "nmae": 0.1172,
+    "nmae_95ci": [
+     0.089,
+     0.1494
+    ],
+    "missed_passages": 44,
+    "false_passages": 24,
+    "detection_recall": 0.7891,
+    "detection_precision": 0.8785
+   }
+  ],
+  "parity": [
+   {
+    "report": "runs/neural/yolox-tiny-t1/report-val.json",
+    "report_sha256": "999a1dd810233649cf095a2360db9a3189b936a59407ce1d9594f65e77b343a4",
+    "runtime": "torch",
+    "device": "mps",
+    "clips": 64,
+    "clips_with_different_counts": 0
+   },
+   {
+    "report": "runs/neural/yolox-tiny-t1/report-val-cpu.json",
+    "report_sha256": "aab4d1507380309ef5a223684c6462bca78c619e537c7b562ae65b39f235c88e",
+    "runtime": "torch",
+    "device": "cpu",
+    "clips": 64,
+    "clips_with_different_counts": 0
+   }
+  ],
+  "test_locations": "not evaluated (Stage 11, once, for a declared release)"
+ },
+ "image_digest": null
+}
