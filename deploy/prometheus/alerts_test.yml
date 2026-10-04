@@ -1,0 +1,50 @@
+# promtool test rules alerts_test.yml (run in CI): each alert fires when it should, and only then.
+rule_files:
+  - alerts.yml
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'up{job="api"}'
+        values: "1 1 0 0 0 0"
+      - series: "passagewatch_live_workers"
+        values: "1 1 0 0 0 0"
+      - series: 'passagewatch_jobs{status="failed"}'
+        values: "0 0 0 1 1 1"
+      - series: "passagewatch_oldest_queued_seconds"
+        values: "0 600 1200 1900 2000 2100 2200 2300 2400 2500"
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: PassageWatchApiDown
+        exp_alerts: []
+      - eval_time: 5m
+        alertname: PassageWatchApiDown
+        exp_alerts:
+          - exp_labels: {severity: critical, job: api}
+            exp_annotations:
+              summary: The API has not answered Prometheus for 2 minutes.
+      - eval_time: 5m
+        alertname: PassageWatchNoLiveWorker
+        exp_alerts:
+          - exp_labels: {severity: critical}
+            exp_annotations:
+              summary: No worker of the active release has heartbeated for 2 minutes; jobs are not being processed.
+      - eval_time: 2m
+        alertname: PassageWatchJobsFailing
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: PassageWatchJobsFailing
+        exp_alerts:
+          - exp_labels: {severity: warning, status: failed}
+            exp_annotations:
+              summary: "1 job(s) failed in the last 30 minutes."
+      - eval_time: 4m
+        alertname: PassageWatchQueueBacklog
+        exp_alerts: []
+      - eval_time: 9m
+        alertname: PassageWatchQueueBacklog
+        exp_alerts:
+          - exp_labels: {severity: warning}
+            exp_annotations:
+              summary: A job has waited more than 30 minutes for a worker.

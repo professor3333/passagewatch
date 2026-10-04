@@ -5,7 +5,9 @@
 #
 #   docker compose up -d --build        # then http://127.0.0.1:8000/health/ready
 #
-# A reverse proxy (HTTPS, frontend) and Prometheus are added in later stages.
+# Prometheus (http://127.0.0.1:9090, alerts at /alerts) scrapes the API and the worker; its
+# configuration and alert rules are in deploy/prometheus/. A reverse proxy (HTTPS) is
+# added in front of the API for a public deployment.
 
 name: passagewatch
 
@@ -54,6 +56,7 @@ services:
       PASSAGEWATCH_DEVICE: cpu
       # Set to the host's performance-core count (docs/operations.md); empty = PyTorch default.
       PASSAGEWATCH_TORCH_THREADS: ${PASSAGEWATCH_TORCH_THREADS:-}
+      PASSAGEWATCH_WORKER_METRICS_PORT: "9100"  # scraped by Prometheus, not published
     # Healthy while the worker heartbeats (idle or mid-job) after loading its model.
     healthcheck:
       test: ["CMD", "python", "-m", "passagewatch.service.worker.health"]
@@ -66,5 +69,35 @@ services:
     # A job interrupted by shutdown is recovered by the next worker after its lease expires.
     stop_grace_period: 30s
 
+  prometheus:
+    image: prom/prometheus:v3.15.0@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./deploy/prometheus:/etc/prometheus:ro
+      - prometheus:/prometheus
+    ports:
+      - "127.0.0.1:${PASSAGEWATCH_PROMETHEUS_PORT:-9090}:9090"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
 volumes:
   data:
+  prometheus:

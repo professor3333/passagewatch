@@ -43,6 +43,16 @@ jobs:
           npm run build
       - name: Shell scripts
         run: shellcheck docker/entrypoint.sh scripts/compose_smoke_test.sh tools/kaggle/train_on_kaggle.sh tools/kaggle/evaluate_release_on_kaggle.sh
+      - name: Prometheus configuration and alert rules
+        run: |
+          docker run --rm --entrypoint promtool -v "$PWD/deploy/prometheus:/etc/prometheus:ro" \
+            -w /etc/prometheus \
+            prom/prometheus:v3.15.0@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e \
+            check config prometheus.yml
+          docker run --rm --entrypoint promtool -v "$PWD/deploy/prometheus:/etc/prometheus:ro" \
+            -w /etc/prometheus \
+            prom/prometheus:v3.15.0@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e \
+            test rules alerts_test.yml
       - name: Container build
         run: docker compose build
       - name: Deployment smoke test (API + worker containers, random-weights bundle)
