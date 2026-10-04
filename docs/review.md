@@ -121,3 +121,64 @@ What this shows, with the caution that 64 clips and 30 errors are a small sample
 
 Next: once the detector is fixed, choose the thresholds on kenai-val and confirm them once on
 `kenai-holdout-v1`.
+
+## Threshold selection for the released detector (declared before running)
+
+Written on 2026-10-04, after measuring `review-v0` on `passagewatch-0.3.0`'s detector
+(`yolox-tiny-t1`, threshold 0.4) on kenai-val, and before any other run. On kenai-val the
+queue finds 0.92 of the reachable errors and 0.79 of all errors at 40% of the review time.
+But kenai-val now has only 14 counting errors (12 reachable, 2 never tracked), too few to
+tune on with confidence.
+
+1. **Grid on kenai-val:** `suggest_threshold` ∈ {0.5, 0.6 (current), 0.7, 0.8}; nothing
+   else changes. Selection: the largest share of **all** errors found at 40% of the review
+   time; ties keep 0.6.
+2. **Holdout:** `review-v0` is evaluated once on `kenai-holdout-v1`, which gives the
+   unbiased prioritization number. If a value other than 0.6 is selected, it is evaluated
+   once too, and it is adopted (as a new calibration version) only if it finds at least as
+   large a share of all holdout errors at 40% of the review time as `review-v0`.
+3. **The `unresolved` rule** stays as it is unless the holdout shows its trajectories are
+   mostly correct (fewer than a quarter leading to an error). In that case it is dropped in
+   a new calibration version, so that such trajectories fall back to the score-based states.
+
+**Results.** On kenai-val, every `suggest_threshold` in the grid found the same share of all
+errors at 40% of the review time (0.786), so 0.6 stays. The threshold only moves trajectories
+between `suggested` and `needs_review`, while the score order within the queue already puts
+the error trajectories early.
+
+`review-v0` once on `kenai-holdout-v1` (174 clips, 1053 trajectories, about 2.6 hours of
+review at 3 s plus duration each; 94 counting errors, 85 reachable from the queue and 9 fish
+that nothing tracked):
+
+| Review time | 10% | 20% | 30% | 40% | 60% | 100% |
+|---|---:|---:|---:|---:|---:|---:|
+| Queue: share of reachable errors found | 0.33 | 0.65 | 0.82 | **0.85** | 0.88 | 1.00 |
+| Queue: share of all errors found | — | 0.59 | 0.74 | **0.77** | 0.80 | 0.90 |
+| Random order: share of all errors found | — | 0.29 | 0.40 | 0.50 | 0.66 | 0.90 |
+
+| Triage | Trajectories | Leading to an error |
+|---|---:|---:|
+| `unresolved` | 35 | 14 (40%) |
+| `needs_review` | 128 | 44 (34%) |
+| `suggested` | 890 | 105 (12%) |
+
+Audit windows covering 12.6% of the frames showed 1 of the 9 fish that nothing tracked.
+
+**Decision: `review-v0` is kept unchanged.** No threshold change was selected. The
+`unresolved` rule stays: 40% of its trajectories lead to an error, above the declared 25%
+cut-off. (On the single-frame detector's 64 val clips it had looked useless, with 0 of 4.)
+
+What this establishes, on new days of the same cameras:
+
+- **Strong and uncertain results are distinguishable.** A `suggested` trajectory leads to an
+  error 12% of the time; `needs_review` and `unresolved` ones 34–40% of the time.
+- **The queue roughly halves the review effort.** At 40% of the review time it finds 77% of
+  all errors (85% of those reachable from the queue), against 50% in random order. The
+  design's planning target of 80% at 40% is nearly but not quite met.
+- **Fish that nothing tracked remain the limit.** They are a tenth of the errors (9 of 94),
+  and the queue's ceiling without audits is 90%. Random audits at about 12% coverage find
+  only a matching fraction of them, as expected from random sampling: they estimate how many
+  are missed rather than finding them all.
+
+The design's independently reviewed sample (a reviewer other than the reference labels) is
+still to do and needs the project owner's time.
