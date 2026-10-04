@@ -140,6 +140,8 @@ def main(argv: list[str] | None = None) -> int:
                     "threshold": threshold,
                     "checkpoint_sha256": detector.checkpoint_sha256,
                     "runtime": "onnxruntime" if args.onnx is not None else "torch",
+                    "onnx_sha256": None if args.onnx is None else file_sha256(args.onnx),
+                    "device": str(device) if args.onnx is None else "cpu",
                     "macro_nmae": macro_nmae(groups),
                     "locations": [
                         {

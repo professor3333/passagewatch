@@ -1,10 +1,11 @@
 """The deployed pipeline must count exactly like the offline evaluation it was selected by.
 
 A real kenai-val clip is uploaded through the API and run by the worker with the active
-release bundle (yolox-tiny-v1 epoch 25, score threshold 0.2, classical-v2 tracker). Its
-counts must equal those that ``evaluate_neural.py`` recorded for the same clip, epoch and
-threshold. Filtering by score before NMS (service) and after it (offline cache) keeps the
-same boxes, because greedy NMS only lets higher-scoring boxes suppress lower-scoring ones.
+release bundle. Its counts must equal those that ``evaluate_neural.py`` recorded for the same
+clip, checkpoint, threshold and runtime: the ONNX report for an ONNX bundle (CPU), otherwise
+the MPS report where MPS is available and the CPU report elsewhere. Filtering by score before
+NMS (service) and after it (offline cache) keeps the same boxes, because greedy NMS only lets
+higher-scoring boxes suppress lower-scoring ones.
 """
 
 from __future__ import annotations
@@ -29,15 +30,31 @@ from passagewatch.service.worker.pipeline import InferencePipeline
 REPO = Path(__file__).resolve().parents[2]
 BUNDLE = REPO / "bundles/active"
 FRAMES = REPO / "data/extracted/cfc/kenai-dev-v1"
-REPORT = REPO / "runs/neural/yolox-tiny-v1/report-val.json"
+
+
+def offline_report() -> tuple[Path | None, str]:
+    """The offline report matching the active bundle's runtime, and the device to serve on."""
+    if not BUNDLE.exists():
+        return None, "cpu"
+    detector = load_bundle(BUNDLE.resolve()).detector
+    run = REPO / "runs/neural" / detector.training_run
+    if detector.runtime == "onnxruntime":
+        return run / "report-val-onnx.json", "cpu"
+    if torch.backends.mps.is_available():
+        return run / "report-val.json", "mps"
+    return run / "report-val-cpu.json", "cpu"
+
+
+REPORT, DEVICE = offline_report()
 
 
 @pytest.mark.slow
 @pytest.mark.skipif(
-    not (BUNDLE.exists() and FRAMES.is_dir() and REPORT.is_file()),
-    reason="needs the active bundle, kenai-dev-v1 frames and the offline report",
+    not (FRAMES.is_dir() and REPORT is not None and REPORT.is_file()),
+    reason="needs the active bundle, kenai-dev-v1 frames and the matching offline report",
 )
 def test_service_counts_equal_the_offline_evaluation(tmp_path: Path) -> None:
+    assert REPORT is not None
     bundle = load_bundle(BUNDLE.resolve())
     report = json.loads(REPORT.read_text())
     offline = next(
@@ -46,6 +63,8 @@ def test_service_counts_equal_the_offline_evaluation(tmp_path: Path) -> None:
         if r["epoch"] == bundle.detector.epoch and r["threshold"] == bundle.detector.score_threshold
     )
     assert offline["checkpoint_sha256"] == bundle.detector.checkpoint_sha256
+    if bundle.detector.runtime == "onnxruntime":
+        assert offline["onnx_sha256"] == bundle.detector.onnx_sha256
     layout = CfcLayout.full(REPO / "data/extracted/cfc")
     meta_by_clip = layout.metadata("kenai-val").clips
     # The smallest-frame clips with at least one passage, for speed.
@@ -63,7 +82,7 @@ def test_service_counts_equal_the_offline_evaluation(tmp_path: Path) -> None:
             zf.writestr(
                 f"{i}.jpg", (FRAMES / "kenai-val" / meta.clip_name / f"{i}.jpg").read_bytes()
             )
-    device = "mps" if torch.backends.mps.is_available() else "cpu"  # offline ran on MPS
+    device = DEVICE
     settings = ServiceSettings(
         data_dir=tmp_path / "var", bundle_dir=BUNDLE.resolve(), max_frames=10_000, device=device
     )
