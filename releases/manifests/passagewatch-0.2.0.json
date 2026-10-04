@@ -1,9 +1,9 @@
 {
  "manifest_version": 1,
  "release": "passagewatch-0.2.0",
- "created_at": "2026-10-04T08:21:01+00:00",
- "code_commit": "69c5d96c590b118fa2bd03b2c2aeda31f421c44a",
- "uv_lock_sha256": "09363d9c60909544bd8fa4437df0b7fb19e8a67c3d68da25628405997e4347ed",
+ "created_at": "2026-10-04T14:00:07+00:00",
+ "code_commit": "583e29a4b1f9079922d130051f8aa51b7eee6a5e",
+ "uv_lock_sha256": "9d59ee5dccde46a83a0a7e31d2af55533f0f88b7fd64d12671f0cd1ae31e9523",
  "dataset_manifest": {
   "version": "full-v2",
   "content_sha256": "a2ecbceda8ba33094717de5fd0124813eb16fa2bbf5633acf139b10ca8d49fb5",
