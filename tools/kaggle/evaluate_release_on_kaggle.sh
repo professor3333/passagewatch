@@ -14,7 +14,7 @@
 set -euo pipefail
 export PYTHONUNBUFFERED=1
 
-BUNDLES="${BUNDLES:?set BUNDLES to the uploaded release bundles (a Kaggle input directory)}"
+BUNDLES="${BUNDLES:-/kaggle/input}"   # searched for <release>/bundle.json (any depth up to 6)
 RELEASE="${RELEASE:-passagewatch-0.3.0}"
 BASELINE="${BASELINE:-passagewatch-0.2.0}"
 LOCATIONS="${LOCATIONS:-kenai-channel nushagak elwha kenai-rightbank}"
@@ -45,6 +45,16 @@ uv pip install --python .venv/bin/python --index-url "https://download.pytorch.o
 .venv/bin/python -c "import torch; assert torch.cuda.is_available(), 'set the accelerator to a GPU'; print('torch', torch.__version__, torch.cuda.get_device_name(0))"
 
 echo "== release"
+# Kaggle mounts an uploaded dataset under /kaggle/input with a layout that varies (an extra
+# folder level, or datasets/<user>/<name>), so find the bundles instead of assuming a path.
+FOUND=$(find "${BUNDLES}" -maxdepth 6 -path "*/${RELEASE}/bundle.json" -print -quit 2>/dev/null || true)
+if [[ -z "${FOUND}" ]]; then
+  echo "no ${RELEASE}/bundle.json under ${BUNDLES}; is the bundles dataset attached? It contains:"
+  find "${BUNDLES}" -maxdepth 4 2>/dev/null | head -40
+  exit 1
+fi
+BUNDLES=$(dirname "$(dirname "${FOUND}")")
+echo "bundles: ${BUNDLES}"
 for version in "${RELEASE}" "${BASELINE}"; do
   test -f "${BUNDLES}/${version}/bundle.json" || { echo "missing ${BUNDLES}/${version}"; exit 1; }
   test -f "releases/manifests/${version}.json" || { echo "missing manifest of ${version}"; exit 1; }
