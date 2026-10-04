@@ -21,7 +21,12 @@ from passagewatch.ingestion.cfc import CfcLayout
 from passagewatch.ingestion.inventory import build_inventory, write_inventory
 from passagewatch.ingestion.sources import load_registry
 from passagewatch.ingestion.stream_extract import stream_extract
-from passagewatch.ingestion.subsets import CfcFrameSelector, load_subset_config, select_clips
+from passagewatch.ingestion.subsets import (
+    CfcFrameSelector,
+    archive_locations,
+    load_subset_config,
+    select_clips,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -72,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     selected = select_clips(config, metadata)
     all_clips = {
         name
-        for location in ("kenai-train", "kenai-val")
+        for location in archive_locations(config.archive)
         for name in layout.metadata(location).clips
     }
     expected = sum(metadata[loc][clip].num_frames for clip, loc in selected.items())
