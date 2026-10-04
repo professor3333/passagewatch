@@ -164,3 +164,37 @@ export gave **the same counts and identical trajectories** as `passagewatch-0.2.
 The active release still uses PyTorch. The next release (once experiment 4 has decided the
 detector) is built with ONNX after rerunning the counting check on that detector.
 Input-size and INT8 trade-offs follow, each with the same check.
+
+## Releases, deployment verification and rollback (Stage 11)
+
+**Release manifests.** Every release has an immutable manifest in `releases/manifests/`
+(`scripts/make_release_manifest.py`, refused with uncommitted changes). It records:
+
+- the code commit and the `uv.lock` hash;
+- the dataset manifest and the training run (config hashes, training commit);
+- the bundle's identity: pipeline config hash, checkpoint and ONNX hashes, input size and
+  threshold, preprocessing version, tracker configuration, counting-policy and calibration
+  versions;
+- the evaluation it was selected and confirmed on, with report-file hashes and runtime parity
+  checks;
+- the image digest, which a release workflow fills in once.
+
+A manifest can only be rewritten unchanged, apart from filling in the image digest once.
+
+**Deployment verification.** `scripts/verify_deployment.py --url <service>` fails unless:
+
+- `/health/ready` answers 200;
+- `/v1/model-info` matches the served release's manifest field by field;
+- an example job completes with that release.
+
+Checked against a local deployment of `passagewatch-0.3.0`: it verified, and a manifest
+altered in one field (the threshold) was reported as that exact difference.
+
+**Rollback.** Point `bundles/active` back at the previous release (for example
+`ln -sfn passagewatch-0.2.0 bundles/active`), restart the API and worker, and run
+`verify_deployment.py`. With Docker Compose, the image must be the one built from that
+release's code commit (recorded in its manifest); a bundle and an image from different
+releases fail the start-up checks when their versions are incompatible. Jobs keep the
+pipeline version recorded for them. `tests/integration/test_release.py` runs the procedure:
+release A, then B, then a rollback to A. `/v1/model-info` matches each manifest in turn,
+new jobs run the active release, and earlier jobs and their exports keep their own versions.
