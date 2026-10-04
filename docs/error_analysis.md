@@ -210,7 +210,7 @@ experiments so far changed counts by 0–3 errors. The remaining budget therefor
 | 1 | Extra duplicate suppression | Not adopted (confirmation failed); kept available |
 | 2 | Tracker gate | Not adopted (no gain on either partition) |
 | 3 | Higher detector input resolution | Not adopted: no confirmed gain on the holdout, 3.2× slower on CPU |
-| 4 | Temporal input channels | `configs/training/yolox-tiny-t1.yaml` (v1 + `letterbox-temporal3-v1`): awaiting a Kaggle run |
+| 4 | Temporal input channels | **Adopted**: −0.093 [−0.133, −0.057] nMAE against v1 on the holdout |
 | 5 | Uncertainty-scaled (Mahalanobis) association gate | Not adopted: fewer merges and duplicates, more splits, no count gain; kept available |
 
 ## Experiment 3 protocol (declared before any result)
@@ -339,3 +339,80 @@ joining a track that ends to one that starts shortly after near its predicted po
 batch analysis allows. That is a new tracker design, and with experiments 1–5 the planned
 budget of about six substantive experiments is nearly used. It is recorded here as the next
 hypothesis rather than run now.
+
+## Experiment 4 result: temporal input channels (`yolox-tiny-t1`)
+
+Trained on Kaggle (Tesla T4, about 44 images/s, 30 epochs) at commit `8341d37`, with no
+uncommitted changes. Everything except the input encoding (`letterbox-temporal3-v1`: the
+frame, the frame minus the clip's background, and the motion to the next frame; after the CFC
+authors' Baseline++) equals `yolox-tiny-v1`. Same protocol as experiment 3, against v1.
+
+**1. Selection on kenai-val:**
+
+| Epoch | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 |
+|---|---:|---:|---:|---:|---:|
+| 20 | 0.098 | 0.093 | 0.082 | 0.082 | 0.082 |
+| 25 | 0.077 | 0.071 | 0.066 | **0.066** | 0.071 |
+| 30 | 0.082 | 0.077 | 0.066 | 0.066 | 0.066 |
+
+The tie rule (earlier epoch, then higher threshold) selects **epoch 25, threshold 0.4**.
+
+**2. Confirmation on `kenai-holdout-v1`** (174 clips, 580 passages; paired clip bootstrap,
+10,000 resamples, 95% CI):
+
+| | kenai-val | kenai-holdout-v1 |
+|---|---|---|
+| v1 (epoch 25, threshold 0.2) | 0.120 [0.078, 0.171] | 0.210 [0.166, 0.261] |
+| t1 (epoch 25, threshold 0.4) | 0.066 [0.027, 0.111] | **0.117 [0.089, 0.149]** |
+| t1 − v1 | −0.055 [−0.101, −0.015] | **−0.093 [−0.133, −0.057]**, P(t1 better) = 1.000 |
+
+On the holdout, t1 misses 44 passages (v1: 99) and adds 24 false ones (v1: 23), with
+detection recall 0.79 and precision 0.88 (v1: 0.71 and 0.80).
+
+**3. Decision: t1 replaces v1.** The holdout interval lies entirely below zero: a 44% lower
+counting error on unseen days. Against `classical-v2` on the holdout (0.369), the
+improvement is about 0.25 nMAE.
+
+**4. Cost:** on the development M1's CPU (4 threads, batch 8, the 541-frame profile clip),
+98.5 ms per frame against 92.5 for v1 (+6%). Detection costs the same; the extra time is
+temporal encoding (a second decode pass and blurring: 8.3 ms/frame against 1.8). Memory is
+unchanged: one background frame per recording.
+
+**Where the gain comes from** (kenai-val, selected settings):
+
+| | v1 | t1 |
+|---|---:|---:|
+| Reference passages: missed outright | 5 | 2 |
+| merged / split | 6 / 5 | 5 / 2 |
+| ambiguous / partial | 2 / 3 | 1 / 0 |
+| Predicted passages: duplicate | 7 | 2 |
+| background / non-passing fish | 1 / 1 | 1 / 1 |
+| **Passage-level errors** | **30** | **13** |
+| Detection recall, fish < 0.02 m² | 0.36 | 0.40 |
+| Detection recall, ≥ 0.1 m² | 0.74 | 0.86 |
+| nMAE, far-range stratum 2 (15 passages) | 0.333 | 0.000 |
+
+The motion and background channels make fish stand out from static clutter and from each
+other. Fewer fish are missed, tracks break less often, and the part-of-fish duplicate boxes
+that experiment 1 tried to suppress largely disappear (7 → 2). The smallest fish remain hard
+(recall 0.40 below 0.02 m²).
+
+These are dev-data results: kenai-val selected the setting, and kenai-holdout-v1 confirmed
+it, both from the same two cameras and season. The official test locations, opened once in
+Stage 11, measure transfer to other cameras and rivers.
+
+## Stage 8 summary
+
+Five experiments after the tracker comparison of Stage 5, each changing one factor with its
+rule declared before its results:
+
+| # | Change | Result |
+|---|---|---|
+| 1 | Extra duplicate suppression | Not adopted |
+| 2 | Tracker gate | Not adopted |
+| 3 | 1280 × 640 input | Not adopted (3.2× slower, gain not confirmed) |
+| 4 | Temporal input channels | **Adopted** (−0.093 nMAE on the holdout) |
+| 5 | Uncertainty-scaled gate | Not adopted (kept available) |
+
+The next release uses `yolox-tiny-t1` (epoch 25, threshold 0.4) with the unchanged
+`classical-v2` tracker.
