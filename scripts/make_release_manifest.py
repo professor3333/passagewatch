@@ -113,11 +113,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--selection", required=True, help="where the selection is documented")
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--allow-dirty", action="store_true", help="for testing only")
+    parser.add_argument(
+        "--allow-unmerged",
+        action="store_true",
+        help="for testing only: allow a HEAD that is not on origin/main",
+    )
     args = parser.parse_args(argv)
 
     dirty = git("status", "--porcelain", "--untracked-files=no")
     if dirty and not args.allow_dirty:
         parser.error("the working tree has uncommitted changes; commit them first")
+    # Pull requests are rebase-merged, which gives a branch's commits new hashes on main, so a
+    # manifest must record a commit that is already on main, or its code commit disappears.
+    merged = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", "HEAD", "origin/main"], cwd=REPO_ROOT, check=False
+    )
+    if merged.returncode != 0 and not args.allow_unmerged:
+        parser.error(
+            "HEAD is not on origin/main; generate release manifests from a merged commit "
+            "(rebase-merging gives branch commits new hashes)"
+        )
     bundle = load_bundle(args.bundle.resolve())
     detector = bundle.detector
     run = json.loads((args.training_run / "run.json").read_text(encoding="utf-8"))

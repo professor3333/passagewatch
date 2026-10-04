@@ -226,3 +226,23 @@ CI checks the configuration with `promtool check config`, and tests each alert w
 `promtool test rules` (`deploy/prometheus/alerts_test.yml`): every alert must fire when it
 should and not before. The Compose smoke test requires both targets to be up in Prometheus
 and the rules to be loaded.
+
+**Publishing a release** (`.github/workflows/release.yml`). Pushing a tag
+`passagewatch-<version>` runs:
+
+1. the release gate (`scripts/check_release.py`): the release's manifest must exist, its code
+   commit must be in the tagged history, it must record a development evaluation, and every
+   runtime parity check must show 0 clips with different counts;
+2. the fast tests;
+3. an image build, pushed to `ghcr.io/<owner>/passagewatch:<version>`;
+4. a GitHub Release carrying the image digest.
+
+The weights and data are not in git, so the evaluation and parity checks run locally before
+tagging; the manifest is their record. The digest is then written into the manifest with
+`scripts/record_image_digest.py` and committed by the project owner. No automation commits
+to the repository.
+
+Manifests must be generated from a commit that is already on `main`
+(`make_release_manifest.py` refuses otherwise). Pull requests are rebase-merged, which gives
+a branch's commits new hashes on `main`, so a commit recorded from a feature branch would not
+exist in the released history.
