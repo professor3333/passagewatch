@@ -19,6 +19,24 @@ from passagewatch.ingestion.cfc import FRAME_SUFFIX, LOCATIONS
 from passagewatch.ingestion.metadata import ClipMetadata
 from passagewatch.ingestion.splits import parse_clip_name
 
+# The locations whose clips each CFC v1.1 image archive holds (all members, selected or not).
+ARCHIVE_LOCATIONS: dict[str, tuple[str, ...]] = {
+    "kenai.tar": ("kenai-train", "kenai-val"),
+    "rightbank.tar": ("kenai-rightbank",),
+    "channel.tar": ("kenai-channel",),
+    "elwha.tar": ("elwha",),
+    "nushagak.tar": ("nushagak",),
+}
+ANY_TOP_DIRECTORY = "*/"  # member_prefix: frames under any single top-level directory
+
+
+def archive_locations(archive: str) -> tuple[str, ...]:
+    key = archive.rpartition("/")[2]
+    try:
+        return ARCHIVE_LOCATIONS[key]
+    except KeyError:
+        raise ValueError(f"unknown CFC image archive {archive!r}") from None
+
 
 class _Frozen(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -96,10 +114,15 @@ class CfcFrameSelector:
             self.unknown_examples.append(name)
 
     def __call__(self, name: str) -> PurePosixPath | None:
-        if not name.startswith(self.prefix) or not name.endswith(FRAME_SUFFIX):
+        if self.prefix == ANY_TOP_DIRECTORY:
+            top, sep, _rest = name.partition("/")
+            prefix = f"{top}/" if sep and top else None
+        else:
+            prefix = self.prefix if name.startswith(self.prefix) else None
+        if prefix is None or not name.endswith(FRAME_SUFFIX):
             self._unknown("unexpected_name", name)
             return None
-        stem = name.removeprefix(self.prefix).removesuffix(FRAME_SUFFIX)
+        stem = name.removeprefix(prefix).removesuffix(FRAME_SUFFIX)
         clip, _, frame = stem.rpartition("_")
         if "/" in stem or not clip or not frame.isdigit():
             self._unknown("unexpected_name", name)
