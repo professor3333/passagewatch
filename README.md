@@ -135,9 +135,24 @@ uv run python scripts/run_classical.py --manifest full-v2 --partitions val \
 ## Running the service
 
 The service is an HTTP API plus an inference worker (Docker Compose, CPU). It needs a
-release bundle in `bundles/` (model weights are not in git). To build the current release
-from its trained checkpoint (`models/runs/yolox-tiny-t1/epoch-025.pt`), serve it with ONNX
-Runtime, and make it active:
+release bundle in `bundles/`. Model weights are not in git: each release's bundle (its
+configuration, the trained detector and its ONNX export, 38 MB) is published on its
+[GitHub release](https://github.com/professor3333/passagewatch/releases). Download it,
+check it against the committed release manifest (pipeline configuration and the SHA-256 of
+every weight file), make it active and start the service:
+
+```bash
+uv run python scripts/fetch_bundle.py --release passagewatch-0.3.0 --activate
+docker compose up -d --build
+curl http://127.0.0.1:8000/health/ready
+```
+
+The archive is also checked by hand with its published `.sha256` file. The previous release
+(`passagewatch-0.2.0`, the rollback target) is attached to the same GitHub release:
+`scripts/fetch_bundle.py --release passagewatch-0.2.0 --tag passagewatch-0.3.0`.
+
+To build the bundle yourself from the trained checkpoint
+(`models/runs/yolox-tiny-t1/epoch-025.pt`; see [training](docs/training.md)) instead:
 
 ```bash
 uv run python scripts/export_onnx.py --checkpoint models/runs/yolox-tiny-t1/epoch-025.pt \
@@ -147,8 +162,6 @@ uv run python scripts/build_bundle.py --version passagewatch-0.3.0 \
     --checkpoint models/runs/yolox-tiny-t1/epoch-025.pt --score-threshold 0.4 \
     --tracking-config configs/tracking/classical-v2.yaml --selection docs/error_analysis.md \
     --calibration-version review-v0 --onnx models/onnx/yolox-tiny-t1-epoch-025.onnx --activate
-docker compose up -d --build
-curl http://127.0.0.1:8000/health/ready
 ```
 
 `/v1/model-info` reports the active release's versions and hashes. Rolling back means

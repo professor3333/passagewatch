@@ -237,6 +237,16 @@ and the rules to be loaded.
 3. an image build, pushed to `ghcr.io/<owner>/passagewatch:<version>`;
 4. a GitHub Release carrying the image digest.
 
+The release's inference bundle is then attached to it. `scripts/package_bundle.py --release
+<version>` verifies `bundles/<version>/` against the manifest and writes a reproducible
+`dist/<version>-bundle.tar.gz` (sorted members, fixed times, so the same bundle always gives
+the same SHA-256) and its `.sha256`. The owner uploads both with `gh release upload`.
+`scripts/fetch_bundle.py` downloads an archive and installs it only if it matches the
+committed manifest: the pipeline configuration hash, the detector, preprocessing, tracker,
+counting-policy and calibration fields, and the SHA-256 of each weight file. The archive
+also carries `LICENSE` and `THIRD_PARTY_NOTICES.md` (CFC data: MIT; YOLOX and its COCO
+weights: Apache-2.0).
+
 The weights and data are not in git, so the evaluation and parity checks run locally before
 tagging; the manifest is their record. The digest is then written into the manifest with
 `scripts/record_image_digest.py` and committed by the project owner. No automation commits
