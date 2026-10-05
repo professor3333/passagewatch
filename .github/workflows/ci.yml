@@ -55,5 +55,7 @@ jobs:
             test rules alerts_test.yml
       - name: Container build
         run: docker compose build
+      - name: Usability-study override is valid
+        run: docker compose -f docker-compose.yml -f docker-compose.study.yml config --quiet
       - name: Deployment smoke test (API + worker containers, random-weights bundle)
         run: ./scripts/compose_smoke_test.sh
