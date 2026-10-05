@@ -35,6 +35,9 @@ class ServiceSettings(BaseModel):
     # PyTorch CPU threads for detection; None keeps PyTorch's default. Set it to the host's
     # performance-core count (docs/operations.md: 4 on the development M1).
     torch_threads: int | None = Field(default=None, gt=0)
+    # The usability study (docs/usability_study.md): study pages and endpoints, off by default.
+    study_mode: bool = False
+    study_plan: Path | None = None
     # Port of the worker's Prometheus metrics endpoint; None disables it.
     worker_metrics_port: int | None = Field(default=None, gt=0, lt=65536)
     worker_poll_seconds: float = Field(default=2.0, gt=0)
