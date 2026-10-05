@@ -204,20 +204,25 @@ Built and tested before the first session:
 
 ### Running the study
 
+The study runs on the development machine, without Docker
+(`scripts/study_service.sh`: the API with the study pages and one worker, data in
+`var/study/`, uploads kept for 90 days). It was prepared once:
+
 ```bash
-export PASSAGEWATCH_HTTP_PORT=8010
-docker compose -p passagewatch-study -f docker-compose.yml -f docker-compose.study.yml \
-  up -d --build api worker
-uv run python scripts/prepare_usability_study.py --url http://127.0.0.1:8010   # once
-git add study/plan.json && git commit -m "Record the usability study's plan"
+scripts/study_service.sh start
+uv run python scripts/prepare_usability_study.py --url http://127.0.0.1:8010
 ```
 
-For each session, open `http://127.0.0.1:8010/#/study` in a fresh browser window, choose
+`docker-compose.study.yml` runs the same service in containers instead.
+
+Before each session, `scripts/study_service.sh start`; after it, `scripts/study_service.sh
+stop` (all data is kept). For each session, open `http://127.0.0.1:8010/#/study` in a fresh browser window, choose
 the participant's code and hand over. Read the introduction aloud from the first block's
 instructions. Note any clip that took over 10 minutes and any technical fault. After the
 last session:
 
 ```bash
+scripts/study_service.sh start
 curl -s http://127.0.0.1:8010/v1/study/export/trials.csv > study/trials.csv
 curl -s http://127.0.0.1:8010/v1/study/export/questionnaires.csv > study/questionnaires.csv
 uv run python scripts/analyze_usability_study.py --out study/results.json

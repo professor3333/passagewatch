@@ -1,0 +1,352 @@
+{
+  "design": "docs/usability_study.md",
+  "release": "passagewatch-0.3.0",
+  "seed": 0,
+  "clips": {
+    "c01": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_151003_1536_1736",
+      "clip_id": "clip_3d6e87b979e845cd",
+      "role": "S1",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "c02": {
+      "clip_name": "2018-06-09-JD160_LeftNear_Stratum1_Set1_LN_2018-06-09_160000_633_833",
+      "clip_id": "clip_717edebfc833447a",
+      "role": "S2",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "c03": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum1_Set1_LO_2018-05-27_220004_4667_4867",
+      "clip_id": "clip_5a5af66fbf02419f",
+      "role": "S2",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 10.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "c04": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_100000_4151_4351",
+      "clip_id": "clip_f1c2310dd9ae49b1",
+      "role": "S1",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        6,
+        0
+      ],
+      "automatic": [
+        7,
+        0
+      ]
+    },
+    "c05": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_120000_3529_3729",
+      "clip_id": "clip_a356d405a90e4677",
+      "role": "S1",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        2,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "c06": {
+      "clip_name": "2018-06-06-JD157_LeftFar_Stratum1_Set1_LO_2018-06-06_120004_2956_3156",
+      "clip_id": "clip_00f916de6fce423e",
+      "role": "S1",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 10.0,
+      "reference": [
+        7,
+        0
+      ],
+      "automatic": [
+        5,
+        0
+      ]
+    },
+    "c07": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_010000_669_869",
+      "clip_id": "clip_e5534a31f6054b5d",
+      "role": "S2",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        4,
+        0
+      ],
+      "automatic": [
+        4,
+        0
+      ]
+    },
+    "c08": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum1_Set1_LO_2018-06-02_100004_437_646",
+      "clip_id": "clip_75e1691a998249ac",
+      "role": "S1",
+      "camera": "LeftFar",
+      "num_frames": 209,
+      "framerate": 10.0,
+      "reference": [
+        3,
+        0
+      ],
+      "automatic": [
+        3,
+        0
+      ]
+    },
+    "c09": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_210000_3424_3624",
+      "clip_id": "clip_433764f04c6f4935",
+      "role": "S2",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        6,
+        0
+      ],
+      "automatic": [
+        7,
+        0
+      ]
+    },
+    "c10": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_181004_3892_4109",
+      "clip_id": "clip_9b3bbfc3a1094288",
+      "role": "S2",
+      "camera": "LeftFar",
+      "num_frames": 217,
+      "framerate": 8.0,
+      "reference": [
+        8,
+        0
+      ],
+      "automatic": [
+        9,
+        0
+      ]
+    },
+    "c11": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_211003_358_561",
+      "clip_id": "clip_360f800e533540c1",
+      "role": "S2",
+      "camera": "LeftFar",
+      "num_frames": 203,
+      "framerate": 8.0,
+      "reference": [
+        3,
+        0
+      ],
+      "automatic": [
+        3,
+        0
+      ]
+    },
+    "c12": {
+      "clip_name": "2018-05-30-JD150_LeftNear_Stratum1_Set1_LN_2018-05-30_150000_0_303",
+      "clip_id": "clip_51305d0852584241",
+      "role": "S1",
+      "camera": "LeftNear",
+      "num_frames": 303,
+      "framerate": 9.000008583068848,
+      "reference": [
+        3,
+        0
+      ],
+      "automatic": [
+        3,
+        0
+      ]
+    },
+    "p01": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum1_Set1_LO_2018-05-30_230004_2222_2422",
+      "clip_id": "clip_ec3abf29cefe47b8",
+      "role": "practice",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 10.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "p02": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_130000_1422_1622",
+      "clip_id": "clip_28df6406a9a04ee2",
+      "role": "practice",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        4,
+        0
+      ],
+      "automatic": [
+        5,
+        0
+      ]
+    }
+  },
+  "practice": [
+    "p01",
+    "p02"
+  ],
+  "sets": {
+    "S1": [
+      "c12",
+      "c04",
+      "c08",
+      "c06",
+      "c05",
+      "c01"
+    ],
+    "S2": [
+      "c02",
+      "c09",
+      "c10",
+      "c11",
+      "c07",
+      "c03"
+    ]
+  },
+  "participants": {
+    "D1": [
+      {
+        "condition": "manual",
+        "set": "S1"
+      },
+      {
+        "condition": "assisted",
+        "set": "S2"
+      }
+    ],
+    "P1": [
+      {
+        "condition": "assisted",
+        "set": "S1"
+      },
+      {
+        "condition": "manual",
+        "set": "S2"
+      }
+    ],
+    "P2": [
+      {
+        "condition": "manual",
+        "set": "S2"
+      },
+      {
+        "condition": "assisted",
+        "set": "S1"
+      }
+    ],
+    "P3": [
+      {
+        "condition": "assisted",
+        "set": "S2"
+      },
+      {
+        "condition": "manual",
+        "set": "S1"
+      }
+    ],
+    "P4": [
+      {
+        "condition": "manual",
+        "set": "S1"
+      },
+      {
+        "condition": "assisted",
+        "set": "S2"
+      }
+    ]
+  },
+  "jobs": {
+    "D1": {
+      "p02": "job_ec5eb6a7dcee4482",
+      "c02": "job_7143824797f54af5",
+      "c09": "job_b5f644f7aad94e57",
+      "c10": "job_11618ef69e6d4fef",
+      "c11": "job_dcfa73302f0b4f63",
+      "c07": "job_9baef3ef892b4bf1",
+      "c03": "job_9d1060de9c2840d7"
+    },
+    "P1": {
+      "p01": "job_ba6a5794521644ee",
+      "c12": "job_9b51df89219f4de0",
+      "c04": "job_1df059b94ba34b3a",
+      "c08": "job_b933437787b8405c",
+      "c06": "job_ab179a0027084edb",
+      "c05": "job_eb7fa42846f1485e",
+      "c01": "job_e8e0e927d17f4531"
+    },
+    "P2": {
+      "p02": "job_5db0a09a22ae47ad",
+      "c12": "job_0a9a91019acd499e",
+      "c04": "job_6d058790f44c4824",
+      "c08": "job_1dffe6e96ab7463e",
+      "c06": "job_b5421ffb713f49f6",
+      "c05": "job_680f9f8073b64cec",
+      "c01": "job_f5e812b4b75648e9"
+    },
+    "P3": {
+      "p01": "job_1333bf3d313446ac",
+      "c02": "job_f4d80bb9661b44cf",
+      "c09": "job_3d2cf2f1eb9e407d",
+      "c10": "job_812136fa2cbf42b7",
+      "c11": "job_3261d2fc12d841d5",
+      "c07": "job_3ef6aaf81e964386",
+      "c03": "job_93b7fa27c67d42a7"
+    },
+    "P4": {
+      "p02": "job_056951a9247f48d5",
+      "c02": "job_83877a7474bf451d",
+      "c09": "job_192ffada8adc495e",
+      "c10": "job_5b5faa74df6940ad",
+      "c11": "job_77aecf3aa6f24b9f",
+      "c07": "job_bd2d366bdc0142b0",
+      "c03": "job_4e15ebe13eee4ef4"
+    }
+  }
+}
