@@ -62,10 +62,16 @@ def store(conn: sqlite3.Connection) -> JobStore:
     return JobStore(conn, max_queue=3, max_attempts=2, deadline_seconds=600)
 
 
-def create(store: JobStore, clip: str = "clip_a", key: str | None = None, **counting: object):  # type: ignore[no-untyped-def]
+def create(  # type: ignore[no-untyped-def]
+    store: JobStore,
+    clip: str = "clip_a",
+    key: str | None = None,
+    framerate: float = 10.0,
+    **counting: object,
+):
     return store.create(
         clip_id=clip,
-        clip_sha256=clip[-1] * 64,
+        recording={"sha256": clip[-1] * 64, "framerate": framerate},
         pipeline_version="pw-test",
         pipeline_config_sha256="c" * 64,
         counting=COUNTING | counting,
@@ -120,10 +126,12 @@ def test_identical_analysis_is_answered_from_the_result_cache(store: JobStore) -
 
     cached = create(store).job
     different = create(store, line_x_normalized=0.4).job
+    other_framerate = create(store, framerate=5.0).job
 
     assert cached.status == SUCCEEDED and cached.cached_from == original.job_id
     assert store.result(cached.job_id).counts == {"right": 1}  # type: ignore[union-attr]
-    assert different.status == QUEUED and different.cached_from is None
+    for job in (different, other_framerate):
+        assert job.status == QUEUED and job.cached_from is None
 
 
 # -- leasing, heartbeats, recovery ------------------------------------------------------
@@ -143,7 +151,7 @@ def test_one_job_is_leased_to_one_worker(store: JobStore) -> None:
 def test_jobs_are_leased_oldest_first(store: JobStore) -> None:
     a = store.create(
         clip_id="clip_a",
-        clip_sha256="a" * 64,
+        recording={"sha256": "a" * 64},
         pipeline_version="pw-test",
         pipeline_config_sha256="c" * 64,
         counting=COUNTING,
@@ -152,7 +160,7 @@ def test_jobs_are_leased_oldest_first(store: JobStore) -> None:
     ).job
     b = store.create(
         clip_id="clip_b",
-        clip_sha256="b" * 64,
+        recording={"sha256": "b" * 64},
         pipeline_version="pw-test",
         pipeline_config_sha256="c" * 64,
         counting=COUNTING,

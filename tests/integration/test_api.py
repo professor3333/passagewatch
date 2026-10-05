@@ -376,6 +376,26 @@ def test_identical_analysis_is_served_from_cache(
     assert results["cached"] is True and results["automatic"]["right"] == 2
 
 
+@pytest.mark.parametrize(
+    "changed",
+    [{"framerate": 5.0}, {"x_meter_stop": 2.0}, {"y_meter_start": 10.0}],
+    ids=["framerate", "x extent", "y extent"],
+)
+def test_the_same_bytes_with_other_recording_metadata_are_analysed_again(
+    client: TestClient, settings: ServiceSettings, changed: dict[str, float]
+) -> None:
+    """Frame rate and sonar extents change tracking and timestamps, so they key the cache."""
+    first_clip = new_clip(client)
+    first = client.post("/v1/jobs", json={"clip_id": first_clip}).json()["job_id"]
+    complete(settings, first)
+    other_clip = upload(client, frames_zip(), **changed).json()["clip_id"]
+
+    second = client.post("/v1/jobs", json={"clip_id": other_clip}).json()
+
+    assert second["status"] == "queued"
+    assert client.get(f"/v1/jobs/{second['job_id']}").json()["cached_from"] is None
+
+
 def test_clip_with_active_jobs_cannot_be_deleted(
     client: TestClient, settings: ServiceSettings
 ) -> None:

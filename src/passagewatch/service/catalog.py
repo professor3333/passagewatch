@@ -82,6 +82,27 @@ class ClipRecord:
     def duration_seconds(self) -> float:
         return self.num_frames / self.framerate
 
+    def identity(self) -> dict[str, Any]:
+        """Everything about the recording that the analysis depends on, for the result cache.
+
+        The same bytes with another frame rate or sonar window give other tracks (motion
+        in meters, gaps in seconds) and other timestamps, so they are another recording.
+        """
+        return {
+            "sha256": self.sha256,
+            "media_kind": self.media_kind,
+            "num_frames": self.num_frames,
+            "width": self.width,
+            "height": self.height,
+            "framerate": self.framerate,
+            "meters": [
+                self.x_meter_start,
+                self.x_meter_stop,
+                self.y_meter_start,
+                self.y_meter_stop,
+            ],
+        }
+
 
 _CLIP_FIELDS = (
     "clip_id",

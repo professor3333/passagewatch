@@ -167,7 +167,7 @@ class JobStore:
         self,
         *,
         clip_id: str,
-        clip_sha256: str,
+        recording: dict[str, Any],
         pipeline_version: str,
         pipeline_config_sha256: str,
         counting: dict[str, Any],
@@ -178,9 +178,9 @@ class JobStore:
             {"clip_id": clip_id, "pipeline_version": pipeline_version, "counting": counting}
         )
         request_sha256 = sha256_text(request)
-        cache_key = sha256_text(
-            canonical_json([clip_sha256, pipeline_config_sha256, canonical_json(counting)])
-        )
+        # The result cache: same recording (content and metadata), same pipeline
+        # configuration, same counting configuration.
+        cache_key = sha256_text(canonical_json([recording, pipeline_config_sha256, counting]))
         with transaction(self.conn):
             if idempotency_key is not None:
                 row = self.conn.execute(
