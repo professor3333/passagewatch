@@ -306,7 +306,7 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         try:
             created = store(conn).create(
                 clip_id=clip.clip_id,
-                clip_sha256=clip.sha256,
+                recording=clip.identity(),
                 pipeline_version=bundle.pipeline_version,
                 pipeline_config_sha256=bundle.config_sha256(),
                 counting=request.counting.model_dump(mode="json"),

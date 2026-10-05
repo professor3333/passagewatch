@@ -35,8 +35,10 @@ flowchart LR
    frame rate and the sonar window in meters, and an expiry time.
 2. `POST /v1/jobs` records a job against the **active pipeline version** and returns
    `202 Accepted` at once, with the status URL in `Location`. An `Idempotency-Key` makes the
-   request safe to retry. An identical analysis (same recording, same pipeline
-   configuration, same counting configuration) is answered from the result cache.
+   request safe to retry. An identical analysis is answered from the result cache:
+   the same recording (its SHA-256 **and** its frame count, size, frame rate and sonar
+   window, which change tracking and timestamps), the same pipeline configuration and the
+   same counting configuration.
 3. The worker leases the oldest queued job of **its own** pipeline version. It decodes
    frames in batches and keeps only their detections, then tracks sequentially, then counts
    completed trajectories with the job's counting line (`cfc-compatible-v1`).
