@@ -14,6 +14,7 @@ import type {
   Track,
   TracksPage,
 } from "./types";
+import type { QuestionnaireIn, StudyPlan, StudyProgress, TrialIn, TrialOut } from "./study";
 
 /** An HTTP error with the API's explanation (FastAPI's `detail`). */
 export class ApiError extends Error {
@@ -132,6 +133,32 @@ export class PassageWatchApi {
       `/v1/jobs/${encodeURIComponent(jobId)}/export?format=json`,
     );
     return report.added_passages;
+  }
+
+  // Usability study (study mode only) ------------------------------------------------
+
+  getStudyPlan(): Promise<StudyPlan> {
+    return this.request<StudyPlan>("/v1/study/plan");
+  }
+
+  getStudyProgress(participant: string): Promise<StudyProgress> {
+    return this.request<StudyProgress>(`/v1/study/progress/${encodeURIComponent(participant)}`);
+  }
+
+  submitTrial(trial: TrialIn): Promise<TrialOut> {
+    return this.request<TrialOut>("/v1/study/trials", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(trial),
+    });
+  }
+
+  submitQuestionnaire(form: QuestionnaireIn): Promise<{ status: string }> {
+    return this.request<{ status: string }>("/v1/study/questionnaires", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
   }
 
   frameUrl(clipId: string, index: number): string {

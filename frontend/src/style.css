@@ -92,3 +92,27 @@ tbody tr { cursor: pointer; }
 .badge { display: inline-block; padding: 0.1rem 0.45rem; border-radius: 4px; background: var(--border); font-size: 0.8rem; }
 .muted { color: var(--muted); }
 kbd { font-size: 0.8rem; border: 1px solid var(--border); border-radius: 3px; padding: 0 0.25rem; }
+
+/* Usability study (study mode only) */
+.study-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; border-color: var(--accent); }
+.study-bar .spacer { flex: 1; }
+.study-bar .message { margin: 0; }
+.study-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+}
+.study-overlay[hidden] { display: none; }
+.study-overlay .panel { min-width: 260px; text-align: center; }
+.study-intro li { margin: 0.3rem 0; }
+.counter { display: flex; gap: 0.5rem; align-items: center; margin: 0.5rem 0; font-size: 1.1rem; }
+.counter > span { width: 6rem; }
+.tally { min-width: 2.5rem; text-align: right; font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+fieldset { border: 1px solid var(--border); border-radius: 6px; margin: 0 0 0.6rem; }
+fieldset.likert, fieldset.tlx { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+fieldset.tlx input[type="range"] { flex: 1; min-width: 200px; }
+label.inline { flex-direction: row; align-items: center; gap: 0.2rem; }
