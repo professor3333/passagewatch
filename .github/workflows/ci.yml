@@ -42,7 +42,7 @@ jobs:
           npm test
           npm run build
       - name: Shell scripts
-        run: shellcheck docker/entrypoint.sh scripts/compose_smoke_test.sh tools/kaggle/train_on_kaggle.sh tools/kaggle/evaluate_release_on_kaggle.sh
+        run: shellcheck docker/entrypoint.sh scripts/compose_smoke_test.sh scripts/study_service.sh tools/kaggle/train_on_kaggle.sh tools/kaggle/evaluate_release_on_kaggle.sh
       - name: Prometheus configuration and alert rules
         run: |
           docker run --rm --entrypoint promtool -v "$PWD/deploy/prometheus:/etc/prometheus:ro" \
