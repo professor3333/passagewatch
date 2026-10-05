@@ -14,7 +14,7 @@ too large; 422 invalid input; 503 queue full or no release loaded.
 
 import shutil
 import sqlite3
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncIterator, Callable, Iterator
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from pathlib import Path, PurePath
@@ -27,7 +27,7 @@ from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, generate_l
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from passagewatch.counting.policy import Direction, DirectionalCounts, to_river_directions
-from passagewatch.service import artifacts, media, reviews
+from passagewatch.service import artifacts, media, reviews, study
 from passagewatch.service.api.schemas import (
     AuditOut,
     ClipOut,
@@ -63,6 +63,7 @@ from passagewatch.service.jobs import (
     Job,
     JobStore,
     QueueFullError,
+    iso,
     new_id,
     utc_now,
 )
@@ -577,6 +578,9 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         )
 
     # The review interface, mounted last so it never shadows an API route.
+    if settings.study_mode:
+        _add_study_routes(app, settings, store)
+
     if (settings.frontend_dir / "index.html").is_file():
         app.mount("/", StaticFiles(directory=settings.frontend_dir, html=True), name="ui")
 
@@ -601,3 +605,85 @@ def app_from_env() -> FastAPI:
     """Entry point for ``uvicorn passagewatch.service.api.app:app_from_env --factory``."""
     configure_logging()
     return create_app(ServiceSettings.from_env())
+
+
+def _add_study_routes(
+    app: FastAPI, settings: ServiceSettings, store: Callable[[sqlite3.Connection], JobStore]
+) -> None:
+    """Usability-study endpoints (docs/usability_study.md), only in study mode.
+
+    The plan is read on each request, so the service can run while
+    ``scripts/prepare_usability_study.py`` uploads the clips and writes it (503 until then).
+    """
+    plan_path = settings.study_plan
+    if plan_path is None:
+        raise ValueError("study mode needs PASSAGEWATCH_STUDY_PLAN")
+    study_db = settings.data_dir / "study.db"
+
+    def current_plan() -> study.StudyPlan:
+        if not plan_path.is_file():
+            raise HTTPException(503, "the study plan has not been prepared yet")
+        return study.load_plan(plan_path)
+
+    Plan = Annotated[study.StudyPlan, Depends(current_plan)]
+
+    def study_conn() -> Iterator[sqlite3.Connection]:
+        conn = study.connect_study(study_db)
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+    def service_conn() -> Iterator[sqlite3.Connection]:
+        conn = connect(settings.db_path)
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+    StudyDb = Annotated[sqlite3.Connection, Depends(study_conn)]
+    ServiceDb = Annotated[sqlite3.Connection, Depends(service_conn)]
+
+    @app.get("/v1/study/plan")
+    def study_plan(plan: Plan) -> dict[str, Any]:
+        return study.public_plan(plan)
+
+    @app.get("/v1/study/progress/{participant}")
+    def study_progress(participant: str, conn: StudyDb) -> dict[str, Any]:
+        return study.progress(conn, participant)
+
+    @app.post("/v1/study/trials", status_code=201)
+    def study_trial(
+        trial: study.TrialIn, plan: Plan, conn: StudyDb, service: ServiceDb
+    ) -> dict[str, Any]:
+        try:
+            clip, job_id = study.check_trial(plan, trial)
+        except study.StudyError as exc:
+            raise HTTPException(422, str(exc)) from None
+        if job_id is not None:
+            result = store(service).result(job_id)
+            if result is None:
+                raise HTTPException(409, f"job {job_id} has no result")
+            final = (int(result.counts["right"]), int(result.counts["left"]))
+            revision: int | None = result.revision
+        else:
+            assert trial.right is not None and trial.left is not None
+            final, revision = (trial.right, trial.left), None
+        try:
+            study.record_trial(conn, trial, clip, final, job_id, revision)
+        except study.StudyError as exc:
+            raise HTTPException(409, str(exc)) from None
+        return {"clip": trial.clip, "final": list(final), "revision": revision}
+
+    @app.post("/v1/study/questionnaires", status_code=201)
+    def study_questionnaire(q: study.QuestionnaireIn, plan: Plan, conn: StudyDb) -> dict[str, str]:
+        if q.participant not in plan.participants:
+            raise HTTPException(422, f"unknown participant {q.participant}")
+        study.record_questionnaire(conn, q, iso(utc_now()))
+        return {"status": "recorded"}
+
+    @app.get("/v1/study/export/{table}.csv")
+    def study_export(table: str, conn: StudyDb) -> PlainTextResponse:
+        if table not in ("trials", "questionnaires"):
+            raise HTTPException(404, f"no study table {table}")
+        return PlainTextResponse(study.export_csv(conn, table), media_type="text/csv")  # type: ignore[arg-type]
