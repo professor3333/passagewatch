@@ -3,8 +3,8 @@
 This card describes the pipeline of release **`passagewatch-0.3.0`**. That release uses the
 detector `yolox-tiny-t1`, epoch 25, at score threshold 0.4, with the `classical-v2` Kalman
 tracker, counting policy `cfc-compatible-v1` and calibration version `review-v0`. All results
-below come from development data. The official test locations are evaluated once, for a
-declared release, in Stage 11; until then no result on them exists.
+below come from development data, except the test-location section, which reports the
+release's one-time evaluation on the official test locations.
 
 ## Intended use
 
@@ -46,6 +46,23 @@ frames and a review state; automatic and reviewed counts are kept separate.
   days, no shared day) confirms them. The four test locations (kenai-rightbank,
   kenai-channel, elwha, nushagak) are never used for training or tuning.
 
+## Metrics on the official test locations
+
+Evaluated once with the frozen release ([test results](test_results.md)): 1,021 clips,
+5,296 passages; directional nMAE with clip-bootstrap 95% intervals.
+
+| Location | This release | `classical-v2` |
+|---|---|---|
+| elwha (other river) | 0.168 [0.124, 0.211] | 0.419 |
+| kenai-channel (side channel) | 0.256 [0.184, 0.335] | 0.506 |
+| kenai-rightbank (other bank of the training river) | 0.075 [0.062, 0.089] | 0.241 |
+| nushagak (other river, dense traffic) | 0.355 [0.312, 0.396] | 0.384 |
+| **Macro average** | **0.213 [0.189, 0.238]** | 0.388 [0.351, 0.428] |
+
+On 20 test clips, the deployed ONNX runtime gave the same counts as the evaluated PyTorch
+runtime. The test set is now a known benchmark: later changes need fresh held-out data to
+claim an improvement.
+
 ## Metrics (development data)
 
 Directional nMAE = Σ(|R̂ − R| + |L̂ − L|) / Σ(R + L), with paired clip-bootstrap 95% intervals.
@@ -79,7 +96,9 @@ rivers.
 - Dense scenes: fish passing close together merge into one track.
 - Track fragmentation near the counting line, which can turn one passage into zero.
 - Short occlusions and gaps longer than the tracker's 4-frame limit.
-- Unfamiliar cameras, sonar settings or rivers (untested until Stage 11).
+- Unfamiliar cameras, sonar settings or rivers: tested on three new sites (0.168–0.355 nMAE)
+  and the other bank of the training river (0.075); other sonars remain untested.
+- Dense traffic: on nushagak the release misses about a third of the passages (915 of 2,654).
 - A wrong upstream configuration flips upstream and downstream; image directions are
   unaffected.
 - Frame-timing or decoding problems: dropped or duplicated frames change tracking.
