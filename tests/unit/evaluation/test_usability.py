@@ -57,8 +57,8 @@ def test_faster_but_less_accurate_does_not_meet_the_target() -> None:
     assert not result["target_met"]
 
 
-def test_group_results_need_three_participants() -> None:
-    two = person("D1", 100, 60) + person("P1", 100, 90)
+def test_group_results_need_three_independent_participants() -> None:
+    two = person("P3", 100, 60) + person("P1", 100, 90)
     three = two + person("P2", 100, 75)
 
     assert group_result(two) is None
@@ -78,3 +78,15 @@ def test_questionnaires_and_roles_are_reported() -> None:
         "manual": {"sus": 50.0, "tlx_raw": 40.0}
     }
     assert sus_score([5, 1, 5, 1, 5, 1, 5, 1, 5, 1]) == 100
+
+
+def test_the_developer_never_counts_towards_the_group() -> None:
+    # Only the developer is faster; the two independent participants are not.
+    developer_and_two = person("D1", 100, 20) + person("P1", 100, 100) + person("P2", 100, 110)
+    three_independent = person("P1", 100, 90) + person("P2", 100, 75) + person("P3", 100, 60)
+
+    assert group_result(developer_and_two) is None
+    group = group_result(three_independent + person("D1", 100, 1))
+    assert group is not None and group["participants"] == ["P1", "P2", "P3"]
+    ratio = math.exp((math.log(0.9) + math.log(0.75) + math.log(0.6)) / 3)
+    assert group["time_ratio_geometric_mean"] == pytest.approx(ratio)

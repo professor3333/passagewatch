@@ -3,12 +3,13 @@
 - **Time.** Per participant, the ratio of total assisted to total manual active time over
   their scored clips; the time saving is 1 - ratio. Each ratio gets a bootstrap interval
   over that participant's clips (each condition's clips resampled separately: they are
-  different clips). With 3 or more participants, the geometric mean of the ratios is
-  reported with an interval from a two-stage bootstrap (participants, then their clips).
+  different clips). With 3 or more **independent** participants, the geometric mean of
+  their ratios is reported with an interval from a two-stage bootstrap (participants, then
+  their clips). The developer (code ``D...``) is reported alone and never enters the group.
 - **Counts.** nMAE per condition, sum(|R^ - R| + |L^ - L|) / sum(R + L), per participant
   and pooled; the difference assisted - manual with intervals from the same resamples.
 - **Target met** when the time saving is at least 30% and assisted nMAE is not higher than
-  manual nMAE (point estimates); per participant, and for the group with 3 or more.
+  manual nMAE (point estimates); per participant, and for the independent group.
 - Practice clips and clips excluded for a recorded technical fault are left out.
 """
 
@@ -21,7 +22,8 @@ from typing import Any
 import numpy as np
 
 TARGET_SAVING = 0.30
-MIN_GROUP = 3
+MIN_GROUP = 3  # independent participants
+DEVELOPER_PREFIX = "D"
 RESAMPLES = 10_000
 
 
@@ -147,8 +149,16 @@ def participant_result(trials: list[Trial], seed: int = 0) -> dict[str, Any]:
     }
 
 
+def is_developer(participant: str) -> bool:
+    return participant.startswith(DEVELOPER_PREFIX)
+
+
 def group_result(trials: list[Trial], seed: int = 0) -> dict[str, Any] | None:
-    """Group-level results with 3 or more participants, else None (reported per person)."""
+    """Group results over the independent participants (the developer left out).
+
+    None with fewer than 3 of them: results are then reported per person, as a pilot.
+    """
+    trials = [t for t in trials if not is_developer(t.participant)]
     people = sorted({t.participant for t in trials})
     if len(people) < MIN_GROUP:
         return None
@@ -175,7 +185,7 @@ def group_result(trials: list[Trial], seed: int = 0) -> dict[str, Any] | None:
     manual = [t for t in trials if t.condition == "manual"]
     assisted = [t for t in trials if t.condition == "assisted"]
     return {
-        "participants": len(people),
+        "participants": people,
         "time_ratio_geometric_mean": ratio,
         "time_ratio_ci": _interval(ratios),
         "time_saving": 1 - ratio,
@@ -205,7 +215,7 @@ def analyze(
     return {
         "participants": {
             p: {
-                "role": "developer" if p.startswith("D") else "participant",
+                "role": "developer" if is_developer(p) else "independent",
                 **participant_result([t for t in trials if t.participant == p], seed),
                 "questionnaires": forms.get(p, {}),
             }
