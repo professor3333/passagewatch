@@ -1,0 +1,208 @@
+{
+ "release": "passagewatch-0.3.0",
+ "partition": "test",
+ "result_files": [
+  "releases/evaluations/passagewatch-0.3.0-test/elwha.json",
+  "releases/evaluations/passagewatch-0.3.0-test/kenai-channel.json",
+  "releases/evaluations/passagewatch-0.3.0-test/kenai-rightbank.json",
+  "releases/evaluations/passagewatch-0.3.0-test/nushagak.json"
+ ],
+ "resamples": 10000,
+ "locations": {
+  "elwha": {
+   "clips": 223,
+   "passages": 334,
+   "quarantined": {},
+   "release": {
+    "nmae": 0.1677,
+    "nmae_95ci": [
+     0.1243,
+     0.2112
+    ],
+    "absolute_error": 56,
+    "false_passages": 10,
+    "missed_passages": 46
+   },
+   "baseline": {
+    "nmae": 1.1826,
+    "nmae_95ci": [
+     0.9972,
+     1.4007
+    ],
+    "absolute_error": 395,
+    "false_passages": 299,
+    "missed_passages": 96
+   },
+   "classical": {
+    "nmae": 0.4192,
+    "nmae_95ci": [
+     0.3414,
+     0.508
+    ],
+    "absolute_error": 140,
+    "false_passages": 94,
+    "missed_passages": 46
+   },
+   "onnx_parity": {
+    "clips": 5,
+    "clips_with_different_counts": 0
+   }
+  },
+  "kenai-channel": {
+   "clips": 69,
+   "passages": 164,
+   "quarantined": {},
+   "release": {
+    "nmae": 0.2561,
+    "nmae_95ci": [
+     0.1835,
+     0.3353
+    ],
+    "absolute_error": 42,
+    "false_passages": 23,
+    "missed_passages": 19
+   },
+   "baseline": {
+    "nmae": 5.2256,
+    "nmae_95ci": [
+     4.0673,
+     6.5961
+    ],
+    "absolute_error": 857,
+    "false_passages": 830,
+    "missed_passages": 27
+   },
+   "classical": {
+    "nmae": 0.5061,
+    "nmae_95ci": [
+     0.3926,
+     0.6331
+    ],
+    "absolute_error": 83,
+    "false_passages": 37,
+    "missed_passages": 46
+   },
+   "onnx_parity": {
+    "clips": 5,
+    "clips_with_different_counts": 0
+   }
+  },
+  "kenai-rightbank": {
+   "clips": 657,
+   "passages": 2144,
+   "quarantined": {},
+   "release": {
+    "nmae": 0.0746,
+    "nmae_95ci": [
+     0.062,
+     0.0886
+    ],
+    "absolute_error": 160,
+    "false_passages": 49,
+    "missed_passages": 111
+   },
+   "baseline": {
+    "nmae": 1.1152,
+    "nmae_95ci": [
+     0.9705,
+     1.2705
+    ],
+    "absolute_error": 2391,
+    "false_passages": 2225,
+    "missed_passages": 166
+   },
+   "classical": {
+    "nmae": 0.2411,
+    "nmae_95ci": [
+     0.2116,
+     0.2736
+    ],
+    "absolute_error": 517,
+    "false_passages": 314,
+    "missed_passages": 203
+   },
+   "onnx_parity": {
+    "clips": 5,
+    "clips_with_different_counts": 0
+   }
+  },
+  "nushagak": {
+   "clips": 72,
+   "passages": 2654,
+   "quarantined": {},
+   "release": {
+    "nmae": 0.3546,
+    "nmae_95ci": [
+     0.312,
+     0.3956
+    ],
+    "absolute_error": 941,
+    "false_passages": 26,
+    "missed_passages": 915
+   },
+   "baseline": {
+    "nmae": 0.4985,
+    "nmae_95ci": [
+     0.4636,
+     0.532
+    ],
+    "absolute_error": 1323,
+    "false_passages": 81,
+    "missed_passages": 1242
+   },
+   "classical": {
+    "nmae": 0.3836,
+    "nmae_95ci": [
+     0.3444,
+     0.4236
+    ],
+    "absolute_error": 1018,
+    "false_passages": 19,
+    "missed_passages": 999
+   },
+   "onnx_parity": {
+    "clips": 5,
+    "clips_with_different_counts": 0
+   }
+  }
+ },
+ "macro_average": {
+  "release": {
+   "nmae": 0.2132,
+   "nmae_95ci": [
+    0.1887,
+    0.2376
+   ]
+  },
+  "baseline": {
+   "nmae": 2.0055,
+   "nmae_95ci": [
+    1.7076,
+    2.35
+   ],
+   "release_minus_this": {
+    "estimate": -1.7923,
+    "95ci": [
+     -2.1353,
+     -1.4984
+    ],
+    "probability_release_better": 1.0
+   }
+  },
+  "classical": {
+   "nmae": 0.3875,
+   "nmae_95ci": [
+    0.3509,
+    0.4276
+   ],
+   "release_minus_this": {
+    "estimate": -0.1743,
+    "95ci": [
+     -0.2154,
+     -0.1368
+    ],
+    "probability_release_better": 1.0
+   }
+  }
+ }
+}
