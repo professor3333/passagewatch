@@ -60,10 +60,11 @@ def main() -> int:
         )
     group = result["group"]
     if group is None:
-        print("fewer than 3 participants: per-person (pilot) results only")
+        print("fewer than 3 independent participants: per-person (pilot) results only")
     else:
         print(
-            f"group of {group['participants']}: time saving {group['time_saving']:.0%} "
+            f"independent group {', '.join(group['participants'])}: "
+            f"time saving {group['time_saving']:.0%} "
             f"[{group['time_saving_ci'][0]:.0%}, {group['time_saving_ci'][1]:.0%}], "
             f"nMAE difference {group['nmae_difference']:+.3f}, target met: {group['target_met']}"
         )

@@ -137,16 +137,20 @@ There is no time limit, but the facilitator notes any clip that took over 10 min
 These rules are fixed now, by `scripts/analyze_usability_study.py`:
 
 - **Time.** For each participant, the ratio of total assisted time to total manual time over
-  their 6 + 6 clips. The **time saving** is 1 − that ratio. With 3 or more participants, the
-  geometric mean of the ratios is reported with a bootstrap interval over participants.
-  Otherwise each participant's ratio is reported with a bootstrap interval over their clips.
+  their 6 + 6 clips. The **time saving** is 1 − that ratio, reported for each participant
+  with a bootstrap interval over their clips. With 3 or more **independent** participants
+  (`P` codes), the geometric mean of their ratios is also reported, with a bootstrap
+  interval over participants. **The developer's results never enter a group figure.**
 - **Counts.** nMAE per condition over each participant's 6 clips, and the paired difference
-  (assisted − manual) with a bootstrap interval over clips (and participants when there are
-  3 or more).
+  (assisted − manual) with a bootstrap interval over clips (and over participants for the
+  independent group).
 - **Target met** only if the time saving is at least 30% **and** assisted nMAE is not higher
   than manual nMAE (point estimate). Both intervals are reported regardless.
 - **Secondary results** are reported descriptively: SUS, NASA-TLX, actions, errors fixed and
   introduced, and comments. No significance tests are run on a sample this small.
+- *Clarified on 2026-10-05, before any session:* the analysis said "3 or more
+  participants", which could include the developer. As under **Participants**, group
+  figures use independent participants only.
 - **Exclusions:** practice clips, and a clip only if its session was interrupted for a
   technical fault (recorded with the reason). No clip is dropped for being slow or wrong.
 
