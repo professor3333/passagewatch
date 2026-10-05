@@ -1,0 +1,1992 @@
+{
+ "release": "passagewatch-0.3.0",
+ "release_manifest": "releases/manifests/passagewatch-0.3.0.json",
+ "baseline": "passagewatch-0.2.0",
+ "classical": "classical-v2",
+ "partition": "test",
+ "location": "nushagak",
+ "manifest": "full-v3",
+ "device": "cuda",
+ "clips": {
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-02_211000_3600_3900": {
+   "reference": [
+    0,
+    76
+   ],
+   "release": {
+    "predicted": [
+     0,
+     48
+    ],
+    "tracks": 92
+   },
+   "release_onnx": {
+    "predicted": [
+     0,
+     48
+    ],
+    "tracks": 92
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     52
+    ],
+    "tracks": 134
+   },
+   "classical": {
+    "predicted": [
+     0,
+     43
+    ],
+    "tracks": 88
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-02_211000_3900_4200": {
+   "reference": [
+    0,
+    59
+   ],
+   "release": {
+    "predicted": [
+     0,
+     49
+    ],
+    "tracks": 68
+   },
+   "release_onnx": {
+    "predicted": [
+     0,
+     49
+    ],
+    "tracks": 68
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     36
+    ],
+    "tracks": 97
+   },
+   "classical": {
+    "predicted": [
+     0,
+     37
+    ],
+    "tracks": 73
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-02_211000_6000_6300": {
+   "reference": [
+    0,
+    58
+   ],
+   "release": {
+    "predicted": [
+     0,
+     32
+    ],
+    "tracks": 61
+   },
+   "release_onnx": {
+    "predicted": [
+     0,
+     32
+    ],
+    "tracks": 61
+   },
+   "baseline": {
+    "predicted": [
+     4,
+     34
+    ],
+    "tracks": 98
+   },
+   "classical": {
+    "predicted": [
+     1,
+     38
+    ],
+    "tracks": 62
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-02_211000_900_1200": {
+   "reference": [
+    0,
+    46
+   ],
+   "release": {
+    "predicted": [
+     0,
+     29
+    ],
+    "tracks": 44
+   },
+   "release_onnx": {
+    "predicted": [
+     0,
+     29
+    ],
+    "tracks": 44
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     25
+    ],
+    "tracks": 76
+   },
+   "classical": {
+    "predicted": [
+     0,
+     28
+    ],
+    "tracks": 49
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-03_121000_5400_5700": {
+   "reference": [
+    0,
+    50
+   ],
+   "release": {
+    "predicted": [
+     0,
+     38
+    ],
+    "tracks": 56
+   },
+   "release_onnx": {
+    "predicted": [
+     0,
+     38
+    ],
+    "tracks": 56
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     28
+    ],
+    "tracks": 78
+   },
+   "classical": {
+    "predicted": [
+     0,
+     39
+    ],
+    "tracks": 67
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-12_121000_1800_2100": {
+   "reference": [
+    0,
+    28
+   ],
+   "release": {
+    "predicted": [
+     0,
+     17
+    ],
+    "tracks": 38
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     16
+    ],
+    "tracks": 63
+   },
+   "classical": {
+    "predicted": [
+     1,
+     23
+    ],
+    "tracks": 46
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-12_121000_2100_2400": {
+   "reference": [
+    0,
+    26
+   ],
+   "release": {
+    "predicted": [
+     0,
+     18
+    ],
+    "tracks": 42
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     14
+    ],
+    "tracks": 66
+   },
+   "classical": {
+    "predicted": [
+     1,
+     18
+    ],
+    "tracks": 58
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-12_121000_2400_2700": {
+   "reference": [
+    0,
+    23
+   ],
+   "release": {
+    "predicted": [
+     0,
+     22
+    ],
+    "tracks": 36
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     13
+    ],
+    "tracks": 55
+   },
+   "classical": {
+    "predicted": [
+     0,
+     20
+    ],
+    "tracks": 47
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-12_121000_2700_3000": {
+   "reference": [
+    0,
+    23
+   ],
+   "release": {
+    "predicted": [
+     0,
+     16
+    ],
+    "tracks": 39
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     11
+    ],
+    "tracks": 62
+   },
+   "classical": {
+    "predicted": [
+     0,
+     11
+    ],
+    "tracks": 48
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-12_121000_3300_3600": {
+   "reference": [
+    0,
+    43
+   ],
+   "release": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 57
+   },
+   "baseline": {
+    "predicted": [
+     4,
+     30
+    ],
+    "tracks": 99
+   },
+   "classical": {
+    "predicted": [
+     2,
+     19
+    ],
+    "tracks": 57
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-12_121000_4500_4800": {
+   "reference": [
+    0,
+    12
+   ],
+   "release": {
+    "predicted": [
+     0,
+     7
+    ],
+    "tracks": 18
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     9
+    ],
+    "tracks": 34
+   },
+   "classical": {
+    "predicted": [
+     0,
+     10
+    ],
+    "tracks": 21
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-12_121000_5100_5400": {
+   "reference": [
+    1,
+    38
+   ],
+   "release": {
+    "predicted": [
+     0,
+     24
+    ],
+    "tracks": 56
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     15
+    ],
+    "tracks": 71
+   },
+   "classical": {
+    "predicted": [
+     0,
+     15
+    ],
+    "tracks": 60
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-12_121000_900_1200": {
+   "reference": [
+    0,
+    52
+   ],
+   "release": {
+    "predicted": [
+     1,
+     25
+    ],
+    "tracks": 78
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     21
+    ],
+    "tracks": 108
+   },
+   "classical": {
+    "predicted": [
+     1,
+     29
+    ],
+    "tracks": 98
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-13_121000_3000_3300": {
+   "reference": [
+    0,
+    25
+   ],
+   "release": {
+    "predicted": [
+     0,
+     20
+    ],
+    "tracks": 36
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     12
+    ],
+    "tracks": 41
+   },
+   "classical": {
+    "predicted": [
+     0,
+     19
+    ],
+    "tracks": 45
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-13_121000_3900_4200": {
+   "reference": [
+    0,
+    28
+   ],
+   "release": {
+    "predicted": [
+     0,
+     20
+    ],
+    "tracks": 41
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     12
+    ],
+    "tracks": 60
+   },
+   "classical": {
+    "predicted": [
+     0,
+     19
+    ],
+    "tracks": 50
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-13_121000_4500_4800": {
+   "reference": [
+    0,
+    36
+   ],
+   "release": {
+    "predicted": [
+     0,
+     30
+    ],
+    "tracks": 49
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     17
+    ],
+    "tracks": 75
+   },
+   "classical": {
+    "predicted": [
+     0,
+     20
+    ],
+    "tracks": 58
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_091000_0_300": {
+   "reference": [
+    0,
+    36
+   ],
+   "release": {
+    "predicted": [
+     0,
+     35
+    ],
+    "tracks": 43
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 50
+   },
+   "classical": {
+    "predicted": [
+     0,
+     29
+    ],
+    "tracks": 38
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_091000_300_600": {
+   "reference": [
+    0,
+    25
+   ],
+   "release": {
+    "predicted": [
+     0,
+     24
+    ],
+    "tracks": 27
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     20
+    ],
+    "tracks": 33
+   },
+   "classical": {
+    "predicted": [
+     0,
+     23
+    ],
+    "tracks": 27
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_091000_4200_4500": {
+   "reference": [
+    0,
+    38
+   ],
+   "release": {
+    "predicted": [
+     0,
+     29
+    ],
+    "tracks": 33
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     23
+    ],
+    "tracks": 41
+   },
+   "classical": {
+    "predicted": [
+     1,
+     28
+    ],
+    "tracks": 41
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_091000_4500_4800": {
+   "reference": [
+    0,
+    38
+   ],
+   "release": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 31
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     17
+    ],
+    "tracks": 39
+   },
+   "classical": {
+    "predicted": [
+     0,
+     29
+    ],
+    "tracks": 33
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_091000_600_900": {
+   "reference": [
+    0,
+    26
+   ],
+   "release": {
+    "predicted": [
+     0,
+     22
+    ],
+    "tracks": 26
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     18
+    ],
+    "tracks": 33
+   },
+   "classical": {
+    "predicted": [
+     0,
+     21
+    ],
+    "tracks": 27
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_091000_900_1200": {
+   "reference": [
+    0,
+    56
+   ],
+   "release": {
+    "predicted": [
+     0,
+     46
+    ],
+    "tracks": 53
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     17
+    ],
+    "tracks": 46
+   },
+   "classical": {
+    "predicted": [
+     0,
+     42
+    ],
+    "tracks": 54
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_191000_1200_1500": {
+   "reference": [
+    1,
+    36
+   ],
+   "release": {
+    "predicted": [
+     1,
+     17
+    ],
+    "tracks": 32
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     19
+    ],
+    "tracks": 36
+   },
+   "classical": {
+    "predicted": [
+     0,
+     19
+    ],
+    "tracks": 29
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_191000_2400_2700": {
+   "reference": [
+    0,
+    14
+   ],
+   "release": {
+    "predicted": [
+     0,
+     14
+    ],
+    "tracks": 15
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     9
+    ],
+    "tracks": 17
+   },
+   "classical": {
+    "predicted": [
+     0,
+     12
+    ],
+    "tracks": 13
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_191000_3900_4200": {
+   "reference": [
+    0,
+    27
+   ],
+   "release": {
+    "predicted": [
+     0,
+     18
+    ],
+    "tracks": 23
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     16
+    ],
+    "tracks": 25
+   },
+   "classical": {
+    "predicted": [
+     0,
+     18
+    ],
+    "tracks": 24
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_191000_4200_4500": {
+   "reference": [
+    0,
+    28
+   ],
+   "release": {
+    "predicted": [
+     0,
+     23
+    ],
+    "tracks": 33
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     14
+    ],
+    "tracks": 30
+   },
+   "classical": {
+    "predicted": [
+     1,
+     19
+    ],
+    "tracks": 25
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_191000_6300_6600": {
+   "reference": [
+    0,
+    19
+   ],
+   "release": {
+    "predicted": [
+     0,
+     14
+    ],
+    "tracks": 17
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     13
+    ],
+    "tracks": 25
+   },
+   "classical": {
+    "predicted": [
+     0,
+     15
+    ],
+    "tracks": 23
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_191000_6600_6900": {
+   "reference": [
+    0,
+    45
+   ],
+   "release": {
+    "predicted": [
+     1,
+     25
+    ],
+    "tracks": 31
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     25
+    ],
+    "tracks": 47
+   },
+   "classical": {
+    "predicted": [
+     0,
+     26
+    ],
+    "tracks": 34
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_191000_6900_7200": {
+   "reference": [
+    0,
+    16
+   ],
+   "release": {
+    "predicted": [
+     0,
+     16
+    ],
+    "tracks": 19
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     9
+    ],
+    "tracks": 23
+   },
+   "classical": {
+    "predicted": [
+     0,
+     14
+    ],
+    "tracks": 23
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_191000_7500_7800": {
+   "reference": [
+    0,
+    35
+   ],
+   "release": {
+    "predicted": [
+     1,
+     26
+    ],
+    "tracks": 35
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     20
+    ],
+    "tracks": 40
+   },
+   "classical": {
+    "predicted": [
+     0,
+     26
+    ],
+    "tracks": 34
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_201000_1500_1800": {
+   "reference": [
+    0,
+    29
+   ],
+   "release": {
+    "predicted": [
+     0,
+     24
+    ],
+    "tracks": 28
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     17
+    ],
+    "tracks": 31
+   },
+   "classical": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 31
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_201000_1800_2100": {
+   "reference": [
+    0,
+    32
+   ],
+   "release": {
+    "predicted": [
+     0,
+     22
+    ],
+    "tracks": 30
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     23
+    ],
+    "tracks": 38
+   },
+   "classical": {
+    "predicted": [
+     0,
+     24
+    ],
+    "tracks": 28
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_201000_3900_4200": {
+   "reference": [
+    0,
+    52
+   ],
+   "release": {
+    "predicted": [
+     2,
+     29
+    ],
+    "tracks": 45
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     27
+    ],
+    "tracks": 52
+   },
+   "classical": {
+    "predicted": [
+     0,
+     27
+    ],
+    "tracks": 42
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-07-30_201000_4200_4500": {
+   "reference": [
+    0,
+    46
+   ],
+   "release": {
+    "predicted": [
+     1,
+     30
+    ],
+    "tracks": 41
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     28
+    ],
+    "tracks": 49
+   },
+   "classical": {
+    "predicted": [
+     1,
+     27
+    ],
+    "tracks": 38
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_0_300": {
+   "reference": [
+    0,
+    27
+   ],
+   "release": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 33
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     18
+    ],
+    "tracks": 39
+   },
+   "classical": {
+    "predicted": [
+     0,
+     22
+    ],
+    "tracks": 29
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_1200_1500": {
+   "reference": [
+    0,
+    17
+   ],
+   "release": {
+    "predicted": [
+     2,
+     15
+    ],
+    "tracks": 21
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     13
+    ],
+    "tracks": 29
+   },
+   "classical": {
+    "predicted": [
+     0,
+     16
+    ],
+    "tracks": 19
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_1500_1800": {
+   "reference": [
+    1,
+    39
+   ],
+   "release": {
+    "predicted": [
+     1,
+     20
+    ],
+    "tracks": 31
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     14
+    ],
+    "tracks": 33
+   },
+   "classical": {
+    "predicted": [
+     1,
+     18
+    ],
+    "tracks": 28
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_1800_2100": {
+   "reference": [
+    0,
+    26
+   ],
+   "release": {
+    "predicted": [
+     2,
+     14
+    ],
+    "tracks": 20
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     18
+    ],
+    "tracks": 33
+   },
+   "classical": {
+    "predicted": [
+     1,
+     16
+    ],
+    "tracks": 21
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_2100_2400": {
+   "reference": [
+    0,
+    29
+   ],
+   "release": {
+    "predicted": [
+     0,
+     21
+    ],
+    "tracks": 26
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     13
+    ],
+    "tracks": 35
+   },
+   "classical": {
+    "predicted": [
+     0,
+     20
+    ],
+    "tracks": 28
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_3300_3600": {
+   "reference": [
+    0,
+    21
+   ],
+   "release": {
+    "predicted": [
+     0,
+     14
+    ],
+    "tracks": 20
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     14
+    ],
+    "tracks": 23
+   },
+   "classical": {
+    "predicted": [
+     0,
+     12
+    ],
+    "tracks": 14
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_3600_3900": {
+   "reference": [
+    0,
+    34
+   ],
+   "release": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 35
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     22
+    ],
+    "tracks": 39
+   },
+   "classical": {
+    "predicted": [
+     0,
+     21
+    ],
+    "tracks": 23
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_3900_4200": {
+   "reference": [
+    0,
+    6
+   ],
+   "release": {
+    "predicted": [
+     0,
+     6
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 5
+   },
+   "classical": {
+    "predicted": [
+     0,
+     5
+    ],
+    "tracks": 10
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_4200_4500": {
+   "reference": [
+    0,
+    1
+   ],
+   "release": {
+    "predicted": [
+     0,
+     1
+    ],
+    "tracks": 1
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     1
+    ],
+    "tracks": 5
+   },
+   "classical": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 2
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_4500_4800": {
+   "reference": [
+    0,
+    36
+   ],
+   "release": {
+    "predicted": [
+     0,
+     29
+    ],
+    "tracks": 36
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     20
+    ],
+    "tracks": 38
+   },
+   "classical": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 35
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_4800_5100": {
+   "reference": [
+    0,
+    50
+   ],
+   "release": {
+    "predicted": [
+     0,
+     34
+    ],
+    "tracks": 50
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     22
+    ],
+    "tracks": 61
+   },
+   "classical": {
+    "predicted": [
+     0,
+     37
+    ],
+    "tracks": 52
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_5100_5400": {
+   "reference": [
+    0,
+    11
+   ],
+   "release": {
+    "predicted": [
+     1,
+     8
+    ],
+    "tracks": 17
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     4
+    ],
+    "tracks": 18
+   },
+   "classical": {
+    "predicted": [
+     1,
+     8
+    ],
+    "tracks": 19
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_600_900": {
+   "reference": [
+    0,
+    28
+   ],
+   "release": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 31
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     26
+    ],
+    "tracks": 35
+   },
+   "classical": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 32
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_6600_6900": {
+   "reference": [
+    0,
+    19
+   ],
+   "release": {
+    "predicted": [
+     0,
+     17
+    ],
+    "tracks": 25
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     15
+    ],
+    "tracks": 32
+   },
+   "classical": {
+    "predicted": [
+     0,
+     16
+    ],
+    "tracks": 23
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_091000_900_1200": {
+   "reference": [
+    0,
+    38
+   ],
+   "release": {
+    "predicted": [
+     0,
+     21
+    ],
+    "tracks": 31
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     22
+    ],
+    "tracks": 37
+   },
+   "classical": {
+    "predicted": [
+     0,
+     24
+    ],
+    "tracks": 30
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_101000_0_300": {
+   "reference": [
+    0,
+    22
+   ],
+   "release": {
+    "predicted": [
+     1,
+     22
+    ],
+    "tracks": 24
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     12
+    ],
+    "tracks": 22
+   },
+   "classical": {
+    "predicted": [
+     0,
+     19
+    ],
+    "tracks": 21
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_101000_2400_2700": {
+   "reference": [
+    0,
+    29
+   ],
+   "release": {
+    "predicted": [
+     0,
+     16
+    ],
+    "tracks": 24
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     18
+    ],
+    "tracks": 33
+   },
+   "classical": {
+    "predicted": [
+     0,
+     17
+    ],
+    "tracks": 24
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_101000_3000_3300": {
+   "reference": [
+    0,
+    55
+   ],
+   "release": {
+    "predicted": [
+     0,
+     23
+    ],
+    "tracks": 37
+   },
+   "baseline": {
+    "predicted": [
+     5,
+     21
+    ],
+    "tracks": 48
+   },
+   "classical": {
+    "predicted": [
+     1,
+     29
+    ],
+    "tracks": 37
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_101000_5100_5400": {
+   "reference": [
+    0,
+    45
+   ],
+   "release": {
+    "predicted": [
+     1,
+     32
+    ],
+    "tracks": 44
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     27
+    ],
+    "tracks": 55
+   },
+   "classical": {
+    "predicted": [
+     0,
+     34
+    ],
+    "tracks": 39
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_101000_600_900": {
+   "reference": [
+    0,
+    49
+   ],
+   "release": {
+    "predicted": [
+     1,
+     31
+    ],
+    "tracks": 46
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     22
+    ],
+    "tracks": 59
+   },
+   "classical": {
+    "predicted": [
+     2,
+     28
+    ],
+    "tracks": 39
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-01_101000_7200_7500": {
+   "reference": [
+    1,
+    12
+   ],
+   "release": {
+    "predicted": [
+     1,
+     10
+    ],
+    "tracks": 17
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     8
+    ],
+    "tracks": 24
+   },
+   "classical": {
+    "predicted": [
+     1,
+     7
+    ],
+    "tracks": 11
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_161000_2100_2400": {
+   "reference": [
+    0,
+    41
+   ],
+   "release": {
+    "predicted": [
+     0,
+     28
+    ],
+    "tracks": 39
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     28
+    ],
+    "tracks": 49
+   },
+   "classical": {
+    "predicted": [
+     1,
+     25
+    ],
+    "tracks": 36
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_161000_2700_3000": {
+   "reference": [
+    0,
+    63
+   ],
+   "release": {
+    "predicted": [
+     0,
+     24
+    ],
+    "tracks": 40
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     22
+    ],
+    "tracks": 57
+   },
+   "classical": {
+    "predicted": [
+     0,
+     22
+    ],
+    "tracks": 35
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_161000_300_600": {
+   "reference": [
+    0,
+    38
+   ],
+   "release": {
+    "predicted": [
+     0,
+     28
+    ],
+    "tracks": 34
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     15
+    ],
+    "tracks": 44
+   },
+   "classical": {
+    "predicted": [
+     0,
+     14
+    ],
+    "tracks": 31
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_161000_7200_7500": {
+   "reference": [
+    0,
+    75
+   ],
+   "release": {
+    "predicted": [
+     0,
+     39
+    ],
+    "tracks": 64
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     36
+    ],
+    "tracks": 84
+   },
+   "classical": {
+    "predicted": [
+     0,
+     41
+    ],
+    "tracks": 58
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_161000_7500_7800": {
+   "reference": [
+    0,
+    50
+   ],
+   "release": {
+    "predicted": [
+     0,
+     28
+    ],
+    "tracks": 42
+   },
+   "baseline": {
+    "predicted": [
+     4,
+     18
+    ],
+    "tracks": 47
+   },
+   "classical": {
+    "predicted": [
+     0,
+     34
+    ],
+    "tracks": 47
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_0_300": {
+   "reference": [
+    0,
+    39
+   ],
+   "release": {
+    "predicted": [
+     1,
+     23
+    ],
+    "tracks": 39
+   },
+   "baseline": {
+    "predicted": [
+     5,
+     14
+    ],
+    "tracks": 44
+   },
+   "classical": {
+    "predicted": [
+     0,
+     17
+    ],
+    "tracks": 33
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_1500_1800": {
+   "reference": [
+    0,
+    40
+   ],
+   "release": {
+    "predicted": [
+     1,
+     25
+    ],
+    "tracks": 33
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     17
+    ],
+    "tracks": 42
+   },
+   "classical": {
+    "predicted": [
+     0,
+     26
+    ],
+    "tracks": 30
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_1800_2100": {
+   "reference": [
+    0,
+    39
+   ],
+   "release": {
+    "predicted": [
+     0,
+     29
+    ],
+    "tracks": 39
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     21
+    ],
+    "tracks": 42
+   },
+   "classical": {
+    "predicted": [
+     0,
+     29
+    ],
+    "tracks": 40
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_2100_2400": {
+   "reference": [
+    0,
+    47
+   ],
+   "release": {
+    "predicted": [
+     2,
+     25
+    ],
+    "tracks": 40
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     22
+    ],
+    "tracks": 49
+   },
+   "classical": {
+    "predicted": [
+     0,
+     28
+    ],
+    "tracks": 33
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_2400_2700": {
+   "reference": [
+    0,
+    39
+   ],
+   "release": {
+    "predicted": [
+     2,
+     19
+    ],
+    "tracks": 28
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     15
+    ],
+    "tracks": 33
+   },
+   "classical": {
+    "predicted": [
+     1,
+     19
+    ],
+    "tracks": 26
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_2700_3000": {
+   "reference": [
+    0,
+    66
+   ],
+   "release": {
+    "predicted": [
+     1,
+     28
+    ],
+    "tracks": 47
+   },
+   "baseline": {
+    "predicted": [
+     5,
+     25
+    ],
+    "tracks": 62
+   },
+   "classical": {
+    "predicted": [
+     2,
+     28
+    ],
+    "tracks": 42
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_300_600": {
+   "reference": [
+    0,
+    42
+   ],
+   "release": {
+    "predicted": [
+     1,
+     29
+    ],
+    "tracks": 44
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     29
+    ],
+    "tracks": 47
+   },
+   "classical": {
+    "predicted": [
+     0,
+     28
+    ],
+    "tracks": 35
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_4200_4500": {
+   "reference": [
+    0,
+    80
+   ],
+   "release": {
+    "predicted": [
+     3,
+     22
+    ],
+    "tracks": 55
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     29
+    ],
+    "tracks": 65
+   },
+   "classical": {
+    "predicted": [
+     1,
+     18
+    ],
+    "tracks": 38
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_5700_6000": {
+   "reference": [
+    0,
+    42
+   ],
+   "release": {
+    "predicted": [
+     0,
+     33
+    ],
+    "tracks": 48
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     27
+    ],
+    "tracks": 54
+   },
+   "classical": {
+    "predicted": [
+     0,
+     28
+    ],
+    "tracks": 43
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_600_900": {
+   "reference": [
+    0,
+    41
+   ],
+   "release": {
+    "predicted": [
+     1,
+     25
+    ],
+    "tracks": 33
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     16
+    ],
+    "tracks": 41
+   },
+   "classical": {
+    "predicted": [
+     0,
+     25
+    ],
+    "tracks": 39
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_6300_6600": {
+   "reference": [
+    0,
+    40
+   ],
+   "release": {
+    "predicted": [
+     0,
+     32
+    ],
+    "tracks": 48
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     26
+    ],
+    "tracks": 50
+   },
+   "classical": {
+    "predicted": [
+     0,
+     26
+    ],
+    "tracks": 42
+   }
+  },
+  "RB_Nusagak_Sonar_Files_2018_RB_2018-08-06_171000_900_1200": {
+   "reference": [
+    0,
+    53
+   ],
+   "release": {
+    "predicted": [
+     0,
+     31
+    ],
+    "tracks": 49
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     34
+    ],
+    "tracks": 56
+   },
+   "classical": {
+    "predicted": [
+     0,
+     34
+    ],
+    "tracks": 49
+   }
+  }
+ },
+ "quarantined": {}
+}

@@ -1,0 +1,1911 @@
+{
+ "release": "passagewatch-0.3.0",
+ "release_manifest": "releases/manifests/passagewatch-0.3.0.json",
+ "baseline": "passagewatch-0.2.0",
+ "classical": "classical-v2",
+ "partition": "test",
+ "location": "kenai-channel",
+ "manifest": "full-v3",
+ "device": "cuda",
+ "clips": {
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_060006_532_732": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 6
+   },
+   "release_onnx": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 6
+   },
+   "baseline": {
+    "predicted": [
+     9,
+     18
+    ],
+    "tracks": 78
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 4
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_070005_1185_1385": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 2
+   },
+   "release_onnx": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 2
+   },
+   "baseline": {
+    "predicted": [
+     7,
+     16
+    ],
+    "tracks": 68
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 2
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_080005_689_889": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 3
+   },
+   "release_onnx": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 3
+   },
+   "baseline": {
+    "predicted": [
+     11,
+     15
+    ],
+    "tracks": 77
+   },
+   "classical": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_090006_2374_2574": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 2
+   },
+   "release_onnx": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 2
+   },
+   "baseline": {
+    "predicted": [
+     14,
+     11
+    ],
+    "tracks": 83
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 3
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_100005_3472_3672": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 3
+   },
+   "release_onnx": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 3
+   },
+   "baseline": {
+    "predicted": [
+     12,
+     9
+    ],
+    "tracks": 61
+   },
+   "classical": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 4
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_110005_1995_2195": {
+   "reference": [
+    1,
+    1
+   ],
+   "release": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 3
+   },
+   "baseline": {
+    "predicted": [
+     13,
+     13
+    ],
+    "tracks": 83
+   },
+   "classical": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 3
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_120005_0_119": {
+   "reference": [
+    0,
+    1
+   ],
+   "release": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 0
+   },
+   "baseline": {
+    "predicted": [
+     9,
+     5
+    ],
+    "tracks": 49
+   },
+   "classical": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 0
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_120005_246_446": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 3
+   },
+   "baseline": {
+    "predicted": [
+     11,
+     9
+    ],
+    "tracks": 75
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 2
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_130006_314_514": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 3
+   },
+   "baseline": {
+    "predicted": [
+     12,
+     13
+    ],
+    "tracks": 73
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 2
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_140006_1206_1406": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 7
+   },
+   "baseline": {
+    "predicted": [
+     22,
+     9
+    ],
+    "tracks": 72
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 3
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_150005_0_170": {
+   "reference": [
+    4,
+    1
+   ],
+   "release": {
+    "predicted": [
+     4,
+     2
+    ],
+    "tracks": 10
+   },
+   "baseline": {
+    "predicted": [
+     15,
+     16
+    ],
+    "tracks": 73
+   },
+   "classical": {
+    "predicted": [
+     4,
+     1
+    ],
+    "tracks": 7
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_160005_0_124": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 3
+   },
+   "baseline": {
+    "predicted": [
+     9,
+     10
+    ],
+    "tracks": 61
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 1
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_170005_13_213": {
+   "reference": [
+    6,
+    0
+   ],
+   "release": {
+    "predicted": [
+     4,
+     1
+    ],
+    "tracks": 15
+   },
+   "baseline": {
+    "predicted": [
+     17,
+     14
+    ],
+    "tracks": 79
+   },
+   "classical": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 4
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_190005_107_307": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 7
+   },
+   "baseline": {
+    "predicted": [
+     12,
+     17
+    ],
+    "tracks": 85
+   },
+   "classical": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 3
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_200005_0_180": {
+   "reference": [
+    4,
+    0
+   ],
+   "release": {
+    "predicted": [
+     4,
+     0
+    ],
+    "tracks": 11
+   },
+   "baseline": {
+    "predicted": [
+     13,
+     17
+    ],
+    "tracks": 81
+   },
+   "classical": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_210006_1507_1707": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     10,
+     11
+    ],
+    "tracks": 85
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_220005_1143_1343": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 10
+   },
+   "baseline": {
+    "predicted": [
+     14,
+     13
+    ],
+    "tracks": 93
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_220005_680_880": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 6
+   },
+   "baseline": {
+    "predicted": [
+     13,
+     10
+    ],
+    "tracks": 90
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum1_Set1_CH_2018-08-16_230005_1116_1316": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 9
+   },
+   "baseline": {
+    "predicted": [
+     8,
+     10
+    ],
+    "tracks": 81
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum2_Set1_CH_2018-08-16_071004_3401_3601": {
+   "reference": [
+    0,
+    0
+   ],
+   "release": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     3
+    ],
+    "tracks": 54
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 17
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum2_Set1_CH_2018-08-16_131004_0_173": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 4
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     2
+    ],
+    "tracks": 55
+   },
+   "classical": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 8
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum2_Set1_CH_2018-08-16_141004_1198_1398": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 10
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 56
+   },
+   "classical": {
+    "predicted": [
+     2,
+     2
+    ],
+    "tracks": 10
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum2_Set1_CH_2018-08-16_151004_346_546": {
+   "reference": [
+    0,
+    3
+   ],
+   "release": {
+    "predicted": [
+     1,
+     4
+    ],
+    "tracks": 11
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     3
+    ],
+    "tracks": 64
+   },
+   "classical": {
+    "predicted": [
+     4,
+     2
+    ],
+    "tracks": 21
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_002000_0_139": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 4
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     2
+    ],
+    "tracks": 25
+   },
+   "classical": {
+    "predicted": [
+     0,
+     2
+    ],
+    "tracks": 10
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_002000_152_352": {
+   "reference": [
+    3,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 9
+   },
+   "baseline": {
+    "predicted": [
+     4,
+     2
+    ],
+    "tracks": 34
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 15
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_042000_1461_1661": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 11
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     2
+    ],
+    "tracks": 45
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 20
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_082000_587_787": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 2
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 15
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 7
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_102000_0_128": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 4
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 11
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 11
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_112000_0_200": {
+   "reference": [
+    3,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 27
+   },
+   "classical": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 24
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_122000_601_801": {
+   "reference": [
+    5,
+    0
+   ],
+   "release": {
+    "predicted": [
+     5,
+     0
+    ],
+    "tracks": 11
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     1
+    ],
+    "tracks": 43
+   },
+   "classical": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 26
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_152000_0_198": {
+   "reference": [
+    7,
+    0
+   ],
+   "release": {
+    "predicted": [
+     4,
+     0
+    ],
+    "tracks": 13
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     2
+    ],
+    "tracks": 28
+   },
+   "classical": {
+    "predicted": [
+     4,
+     0
+    ],
+    "tracks": 24
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_202000_179_379": {
+   "reference": [
+    8,
+    0
+   ],
+   "release": {
+    "predicted": [
+     7,
+     0
+    ],
+    "tracks": 17
+   },
+   "baseline": {
+    "predicted": [
+     10,
+     2
+    ],
+    "tracks": 39
+   },
+   "classical": {
+    "predicted": [
+     7,
+     0
+    ],
+    "tracks": 27
+   }
+  },
+  "2018-08-16-JD228_Channel_Stratum3_Set1_CH_2018-08-16_232000_1006_1206": {
+   "reference": [
+    3,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 27
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 11
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_070005_0_118": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     7,
+     8
+    ],
+    "tracks": 53
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_090006_413_613": {
+   "reference": [
+    2,
+    1
+   ],
+   "release": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     14,
+     18
+    ],
+    "tracks": 78
+   },
+   "classical": {
+    "predicted": [
+     3,
+     1
+    ],
+    "tracks": 7
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_090006_47_247": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 10
+   },
+   "baseline": {
+    "predicted": [
+     6,
+     9
+    ],
+    "tracks": 79
+   },
+   "classical": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_100006_52_252": {
+   "reference": [
+    2,
+    5
+   ],
+   "release": {
+    "predicted": [
+     1,
+     3
+    ],
+    "tracks": 13
+   },
+   "baseline": {
+    "predicted": [
+     14,
+     19
+    ],
+    "tracks": 83
+   },
+   "classical": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 10
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_110006_385_585": {
+   "reference": [
+    4,
+    2
+   ],
+   "release": {
+    "predicted": [
+     4,
+     3
+    ],
+    "tracks": 15
+   },
+   "baseline": {
+    "predicted": [
+     14,
+     13
+    ],
+    "tracks": 74
+   },
+   "classical": {
+    "predicted": [
+     1,
+     2
+    ],
+    "tracks": 12
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_120005_1006_1206": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     16,
+     10
+    ],
+    "tracks": 73
+   },
+   "classical": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 4
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_140005_0_193": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 10
+   },
+   "baseline": {
+    "predicted": [
+     15,
+     7
+    ],
+    "tracks": 67
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 4
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_150005_866_1066": {
+   "reference": [
+    3,
+    1
+   ],
+   "release": {
+    "predicted": [
+     3,
+     1
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     14,
+     13
+    ],
+    "tracks": 77
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 9
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_160005_497_697": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 11
+   },
+   "baseline": {
+    "predicted": [
+     13,
+     14
+    ],
+    "tracks": 69
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 8
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_170006_0_143": {
+   "reference": [
+    3,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     10,
+     6
+    ],
+    "tracks": 51
+   },
+   "classical": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 5
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_180006_0_186": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 14
+   },
+   "baseline": {
+    "predicted": [
+     17,
+     13
+    ],
+    "tracks": 76
+   },
+   "classical": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 7
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_190006_68_268": {
+   "reference": [
+    4,
+    0
+   ],
+   "release": {
+    "predicted": [
+     4,
+     0
+    ],
+    "tracks": 15
+   },
+   "baseline": {
+    "predicted": [
+     14,
+     16
+    ],
+    "tracks": 81
+   },
+   "classical": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 10
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_210006_0_121": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 7
+   },
+   "baseline": {
+    "predicted": [
+     8,
+     7
+    ],
+    "tracks": 51
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 4
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_220006_783_983": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     15,
+     5
+    ],
+    "tracks": 78
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 7
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_230006_133_333": {
+   "reference": [
+    2,
+    1
+   ],
+   "release": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     12,
+     14
+    ],
+    "tracks": 68
+   },
+   "classical": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 7
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_230006_405_605": {
+   "reference": [
+    1,
+    1
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 10
+   },
+   "baseline": {
+    "predicted": [
+     17,
+     10
+    ],
+    "tracks": 73
+   },
+   "classical": {
+    "predicted": [
+     0,
+     1
+    ],
+    "tracks": 4
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_001004_345_545": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 4
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     2
+    ],
+    "tracks": 68
+   },
+   "classical": {
+    "predicted": [
+     3,
+     2
+    ],
+    "tracks": 11
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_011004_2289_2489": {
+   "reference": [
+    0,
+    1
+   ],
+   "release": {
+    "predicted": [
+     0,
+     1
+    ],
+    "tracks": 3
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 66
+   },
+   "classical": {
+    "predicted": [
+     1,
+     3
+    ],
+    "tracks": 10
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_101004_662_862": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 7
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 78
+   },
+   "classical": {
+    "predicted": [
+     3,
+     2
+    ],
+    "tracks": 22
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_141004_507_707": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 7
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 75
+   },
+   "classical": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 11
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_141004_849_1049": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 7
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 80
+   },
+   "classical": {
+    "predicted": [
+     2,
+     2
+    ],
+    "tracks": 13
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_161004_265_465": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     2
+    ],
+    "tracks": 69
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 9
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_171004_964_1164": {
+   "reference": [
+    2,
+    1
+   ],
+   "release": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 84
+   },
+   "classical": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 20
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_181004_575_775": {
+   "reference": [
+    3,
+    0
+   ],
+   "release": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 13
+   },
+   "baseline": {
+    "predicted": [
+     2,
+     3
+    ],
+    "tracks": 74
+   },
+   "classical": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 22
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_201004_274_474": {
+   "reference": [
+    0,
+    2
+   ],
+   "release": {
+    "predicted": [
+     1,
+     3
+    ],
+    "tracks": 14
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 85
+   },
+   "classical": {
+    "predicted": [
+     0,
+     2
+    ],
+    "tracks": 11
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_211004_2329_2529": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     4,
+     2
+    ],
+    "tracks": 80
+   },
+   "classical": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 20
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum2_Set1_CH_2018-08-17_221004_2797_2997": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 5
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     1
+    ],
+    "tracks": 81
+   },
+   "classical": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 18
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_002000_342_542": {
+   "reference": [
+    3,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     0
+    ],
+    "tracks": 33
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 16
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_062000_146_346": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 11
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 32
+   },
+   "classical": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 18
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_082000_363_563": {
+   "reference": [
+    1,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 9
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 36
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 18
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_092000_0_197": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 12
+   },
+   "baseline": {
+    "predicted": [
+     3,
+     1
+    ],
+    "tracks": 33
+   },
+   "classical": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 17
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_122000_0_170": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 7
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 25
+   },
+   "classical": {
+    "predicted": [
+     2,
+     1
+    ],
+    "tracks": 18
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_192000_54_254": {
+   "reference": [
+    0,
+    1
+   ],
+   "release": {
+    "predicted": [
+     0,
+     1
+    ],
+    "tracks": 14
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     2
+    ],
+    "tracks": 25
+   },
+   "classical": {
+    "predicted": [
+     0,
+     2
+    ],
+    "tracks": 14
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_192000_612_812": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 8
+   },
+   "baseline": {
+    "predicted": [
+     0,
+     2
+    ],
+    "tracks": 17
+   },
+   "classical": {
+    "predicted": [
+     0,
+     0
+    ],
+    "tracks": 10
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_212000_331_531": {
+   "reference": [
+    6,
+    0
+   ],
+   "release": {
+    "predicted": [
+     4,
+     0
+    ],
+    "tracks": 15
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 29
+   },
+   "classical": {
+    "predicted": [
+     1,
+     0
+    ],
+    "tracks": 25
+   }
+  },
+  "2018-08-17-JD229_Channel_Stratum3_Set1_CH_2018-08-17_232000_1434_1634": {
+   "reference": [
+    2,
+    0
+   ],
+   "release": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 11
+   },
+   "baseline": {
+    "predicted": [
+     1,
+     1
+    ],
+    "tracks": 29
+   },
+   "classical": {
+    "predicted": [
+     2,
+     0
+    ],
+    "tracks": 23
+   }
+  }
+ },
+ "quarantined": {}
+}
