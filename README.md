@@ -11,11 +11,12 @@ evidence and a prioritized review queue. Automatic and human-reviewed counts sta
 distinguishable, and every report is traceable to the model and pipeline versions
 that produced it.
 
-> **Status: early development (Stage 1 of 12).** The scope and counting policy are
-> defined; the pipeline is not implemented yet. No results have been measured, and this
-> README will report numbers only after they are. See the [roadmap](docs/roadmap.md).
+> **Status: Stage 11 of 12.** The pipeline, review service and release
+> `passagewatch-0.3.0` are built and have been evaluated once on the official test
+> locations ([test results](docs/test_results.md)). The remaining stage is a usability study.
+> See the [roadmap](docs/roadmap.md).
 
-## Planned pipeline
+## Pipeline
 
 Recording → validation → frame decoding → preprocessing → neural detection →
 tracking → directional counting → review prioritization → human corrections → export.
@@ -30,6 +31,11 @@ tracking → directional counting → review prioritization → human correction
 | [Classical baseline](docs/classical_baseline.md) | Method, tuning protocol, and measured results of the non-learned baseline |
 | [Training](docs/training.md) | How detectors are trained on a free Kaggle GPU, resumed, and collected |
 | [Neural baseline](docs/neural_baseline.md) | YOLOX-Tiny through the same tracker: selection and measured results |
+| [Error analysis](docs/error_analysis.md) | Why counts are wrong, and the one-factor experiments (temporal input adopted) |
+| [Review](docs/review.md) | Review scores, triage, random audits, and how prioritization is measured |
+| [Test results](docs/test_results.md) | The release's one-time evaluation on the four official test locations |
+| [Model card](docs/model_card.md) | Intended use, provenance, training data, metrics, failure modes, release process |
+| [Operations](docs/operations.md) | Performance profile, reliability, hardening, releases, rollback, monitoring |
 | [Architecture](docs/architecture.md) | The service: API, worker, job lifecycle, storage, release bundles, configuration |
 | [Roadmap](docs/roadmap.md) | Twelve stages, each with its completion test |
 | [Design](docs/design.md) | The full system design: data, models, evaluation, service, and operations |
@@ -100,7 +106,23 @@ test locations are evaluated once, for a declared release, in a later stage.
 ByteTrack, fed the same detections, was not measurably better than the Kalman tracker
 (−0.011 [−0.048, +0.021]), so the Kalman tracker is kept
 ([tracker experiment](docs/neural_baseline.md#tracker-experiment-stage-5-kalman-tracker-versus-bytetrack)).
-These are development numbers, not test results. Details are in
+**Official test locations** (one-time evaluation of the frozen release, 1,021 clips, 5,296
+passages; [details](docs/test_results.md)):
+
+| System | elwha | kenai-channel | kenai-rightbank | nushagak | **Macro average** |
+|---|---:|---:|---:|---:|---|
+| Classical baseline `classical-v2` | 0.419 | 0.506 | 0.241 | 0.384 | 0.388 [0.351, 0.428] |
+| YOLOX-Tiny, single frame (0.2.0) | 1.183 | 5.226 | 1.115 | 0.499 | 2.006 [1.708, 2.350] |
+| **YOLOX-Tiny, temporal input (0.3.0)** | **0.168** | **0.256** | **0.075** | **0.355** | **0.213** [0.189, 0.238] |
+| CFC published Baseline / Baseline++ (same clips) | 0.323 / 0.213 | 0.530 / 0.122 | 0.118 / 0.037 | 0.140 / 0.088 | 0.278 / 0.115 |
+
+The release beats the classical baseline at every location (macro difference −0.174
+[−0.215, −0.137]). Without temporal input, the single-frame model counts static clutter on
+unfamiliar sonars as fish, so it fails to transfer. Dense traffic (nushagak) remains the
+main weakness. CFC's Baseline++ uses a larger detector trained on three times as many
+recording days.
+
+The development numbers above are not test results. Details are in
 [classical baseline](docs/classical_baseline.md#results),
 [neural baseline](docs/neural_baseline.md#results) and
 [error analysis](docs/error_analysis.md).
