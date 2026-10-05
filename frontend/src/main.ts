@@ -1,7 +1,10 @@
 // PassageWatch review interface: upload a recording, follow the job, review, export.
-// Routes: #/ (upload) and #/jobs/<job_id> (progress, then review).
+// Routes: #/ (upload), #/jobs/<job_id> (progress, then review), and in study mode
+// #/study[/<participant>] (docs/usability_study.md).
 
 import { ApiError, PassageWatchApi } from "./api";
+import { el, errorText, showMessage } from "./dom";
+import { studyView } from "./studyPages";
 import { boxToCanvas, countingLineX, fitFrame } from "./geometry";
 import { FrameCache, ObservationCache } from "./player";
 import {
@@ -22,47 +25,29 @@ import type { AddedPassage, Audit, Clip, ImageDirection, Job, Results, ReviewReq
 
 const api = new PassageWatchApi();
 const app = document.getElementById("app") as HTMLElement;
-let teardown: (() => void) | null = null;
-
-// -- DOM helpers (text is always set with textContent, never as HTML) ----------------
-
-type Child = Node | string | null | undefined | false;
-
-function el<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  props: Partial<Record<string, string>> = {},
-  ...children: Child[]
-): HTMLElementTagNameMap[K] {
-  const node = document.createElement(tag);
-  for (const [key, value] of Object.entries(props)) {
-    if (value !== undefined) node.setAttribute(key, value);
-  }
-  for (const child of children) {
-    if (child === null || child === undefined || child === false) continue;
-    node.append(typeof child === "string" ? document.createTextNode(child) : child);
-  }
-  return node;
-}
-
-function showMessage(target: HTMLElement, text: string, kind: "error" | "ok" | "" = ""): void {
-  target.textContent = text;
-  target.className = `message ${kind}`;
-}
-
-function errorText(error: unknown): string {
-  if (error instanceof ApiError) return error.detail;
-  return error instanceof Error ? error.message : String(error);
-}
+let cleanups: (() => void)[] = [];
 
 // -- routing ----------------------------------------------------------------------------
 
 function route(): void {
-  teardown?.();
-  teardown = null;
+  for (const cleanup of cleanups) cleanup();
+  cleanups = [];
   app.replaceChildren();
   const match = /^#\/jobs\/([A-Za-z0-9_-]+)$/.exec(location.hash);
+  const study = /^#\/study(?:\/([A-Z][0-9]{1,3}))?$/.exec(location.hash);
   if (match?.[1]) {
     void jobView(match[1]);
+  } else if (study) {
+    void studyView(
+      {
+        app,
+        api,
+        review: reviewView,
+        onLeave: (cleanup) => cleanups.push(cleanup),
+        refresh: route,
+      },
+      study[1] ?? null,
+    );
   } else {
     uploadView();
   }
@@ -163,9 +148,9 @@ async function jobView(jobId: string): Promise<void> {
   const bar = el("div", { style: "width: 0%" });
   app.append(el("section", { class: "panel" }, el("h2", {}, `Job ${jobId}`), el("div", { class: "progress" }, bar), status));
   let stopped = false;
-  teardown = () => {
+  cleanups.push(() => {
     stopped = true;
-  };
+  });
   while (!stopped) {
     let job: Job;
     try {
@@ -207,7 +192,8 @@ interface ReviewState {
   speed: number;
 }
 
-async function reviewView(job: Job): Promise<void> {
+/** The review view; in the usability study, `studyBar` replaces the export links. */
+async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
   const [clip, results, { revision, tracks }, passages, audit] = await Promise.all([
     api.getClip(job.clip_id),
     api.getResults(job.job_id),
@@ -268,8 +254,8 @@ async function reviewView(job: Job): Promise<void> {
       "div",
       { class: "actions" },
       revisionLabel,
-      el("a", { href: api.exportUrl(job.job_id, "csv"), download: "" }, "Export CSV"),
-      el("a", { href: api.exportUrl(job.job_id, "json"), download: "" }, "Export JSON"),
+      studyBar ? null : el("a", { href: api.exportUrl(job.job_id, "csv"), download: "" }, "Export CSV"),
+      studyBar ? null : el("a", { href: api.exportUrl(job.job_id, "json"), download: "" }, "Export JSON"),
     ),
   );
   const stage = el(
@@ -337,7 +323,7 @@ async function reviewView(job: Job): Promise<void> {
     ),
     el("section", { class: "panel" }, el("h2", {}, "Random audit"), auditPanel),
   );
-  app.append(header, el("div", { class: "review" }, stage, side));
+  app.append(...(studyBar ? [studyBar] : []), header, el("div", { class: "review" }, stage, side));
 
   // Rendering -------------------------------------------------------------------------
   const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -665,12 +651,12 @@ async function reviewView(job: Job): Promise<void> {
   document.addEventListener("keydown", onKey);
   const onResize = (): void => void draw();
   window.addEventListener("resize", onResize);
-  teardown = () => {
+  cleanups.push(() => {
     state.playing = false;
     window.clearTimeout(timer);
     document.removeEventListener("keydown", onKey);
     window.removeEventListener("resize", onResize);
-  };
+  });
 
   renderAll();
 }
