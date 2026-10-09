@@ -388,9 +388,10 @@ GitHub releases), runs, caches and service data.
 - **Counts are suggestions.** They are meant to be reviewed before use. The review score is
   a heuristic ranking, not a calibrated probability, and no count confidence interval is
   shown in the product.
-- **Counts can differ slightly between hosts.** The same release counted 4 of 36
-  kenai-channel clips differently on the development Mac than in the recorded Kaggle
-  evaluation. Runtimes agree within a host, and the cause is not yet established
+- **Counts can differ slightly between CPU architectures.** OpenCV's resize rounds a few
+  input pixels differently on Apple arm64 than on x86, which changed 4 of 36 kenai-channel
+  clips' counts. The deployed x86 image reproduces the x86 test evaluation. The development
+  results were measured on the Mac
   ([details](docs/demos.md#results-depend-slightly-on-the-host)).
 - **No time-saved claim.** The usability study (4 independent participants, short clips) did
   not show a time saving ([results](docs/usability_results.md)).

@@ -3,10 +3,9 @@
 Runs the worker's own path (``InferencePipeline`` from the bundle) on each frames ZIP in the
 demo archive (docs/demos.md), and records, besides the counts, a SHA-256 of every stage's
 output: the decoded frames, the temporal encoding, the letterboxed network input (also with
-OpenCV's SIMD code off), the detections, and the
-trajectories. Comparing two hosts' outputs shows whether they count alike and, if not, the
-first stage where they differ. The detections are also saved (``.npz``) so the size of a
-difference can be measured.
+OpenCV's SIMD code off), the detections, and the trajectories. Comparing two hosts' outputs
+shows whether they count alike and, if not, the first stage where they differ. The
+detections are also saved (``.npz``) so the size of a difference can be measured.
 
 It uses only interfaces that release ``passagewatch-0.3.0`` already had, so it also runs
 inside that release's image (``.github/workflows/host-parity.yml``).

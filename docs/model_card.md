@@ -102,6 +102,10 @@ rivers.
 - A wrong upstream configuration flips upstream and downstream; image directions are
   unaffected.
 - Frame-timing or decoding problems: dropped or duplicated frames change tracking.
+- A different CPU architecture: OpenCV's resize rounds some input pixels differently on Apple
+  arm64 than on x86, which changes a few detections and occasionally a count (4 of 36 clips
+  on one test day). Test results were measured on x86, like the deployed image
+  ([details](demos.md#results-depend-slightly-on-the-host)).
 
 ## Release process
 

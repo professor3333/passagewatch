@@ -165,16 +165,20 @@ The active release still uses PyTorch. The next release (once experiment 4 has d
 detector) is built with ONNX after rerunning the counting check on that detector.
 Input-size and INT8 trade-offs follow, each with the same check.
 
-### Across hosts (found 2026-10-09)
+### Across hosts (traced 2026-10-09)
 
-The checks above compare runtimes on one host. Across hosts, the same release does not count
-identically. On the 36 clips of one kenai-channel day, the development Mac (ONNX Runtime,
-Apple M1 CPU) gives different counts from the recorded Kaggle test evaluation on 4 clips,
-and different track numbers on 11. The day's nMAE is 0.241 on the Mac against 0.264
-recorded. Runtimes agree within each host, so the likely source is something they share,
-such as JPEG decoding or preprocessing arithmetic. The cause is not established. Checking
-the deployed image against the recorded evaluation, and finding the cause, are open work.
-Details are in [demos](demos.md#results-depend-slightly-on-the-host).
+The checks above compare runtimes on one host. Across CPU architectures, the same release
+does not count identically. OpenCV's bilinear resize (the letterbox step) gives 8–15% of the
+network-input pixels a value 1 grey level different (at most 2) on an Apple arm64 CPU than on
+an x86 CPU. The detector amplifies this into score changes of up to about 0.18, enough to move
+a few detections across the threshold. On the 36 clips of one kenai-channel day, the
+development Mac counts 4 differently from the recorded Kaggle (x86) test evaluation.
+
+The release image (linux/amd64), pulled by its manifest digest, reproduces the recorded test
+evaluation's counts on the demo clip that differs. Development results measured on the Mac
+can differ slightly on x86. The manual `host-parity` workflow checks a release image against
+the public demo recordings stage by stage. Details and fingerprints are in
+[demos](demos.md#results-depend-slightly-on-the-host).
 
 ## Releases, deployment verification and rollback (Stage 11)
 
