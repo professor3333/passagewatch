@@ -1,0 +1,63 @@
+# Does the deployed image count like the evaluated release? Runs the published release image
+# (by its recorded digest) on the public demo recordings, on a linux/amd64 runner like the
+# serving host, and records counts plus a fingerprint of every pipeline stage
+# (scripts/host_parity.py; docs/demos.md#results-depend-slightly-on-the-host). The same script
+# run elsewhere shows where two hosts start to differ. Manual: it downloads 230 MB.
+name: host-parity
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Release whose image and bundle to run
+        default: passagewatch-0.3.0
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      RELEASE: ${{ inputs.release }}
+      DOWNLOADS: https://github.com/${{ github.repository }}/releases/download
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download and verify the demos and the bundle
+        run: |
+          mkdir -p work
+          cd work
+          curl -fsSLO "${DOWNLOADS}/demos-v1/passagewatch-demos-v1.tar.gz"
+          curl -fsSLO "${DOWNLOADS}/demos-v1/passagewatch-demos-v1.tar.gz.sha256"
+          curl -fsSLO "${DOWNLOADS}/${RELEASE}/${RELEASE}-bundle.tar.gz"
+          curl -fsSLO "${DOWNLOADS}/${RELEASE}/${RELEASE}-bundle.tar.gz.sha256"
+          sha256sum -c passagewatch-demos-v1.tar.gz.sha256 "${RELEASE}-bundle.tar.gz.sha256"
+          tar -xzf "${RELEASE}-bundle.tar.gz"
+      - name: Image digest from the release manifest
+        id: image
+        run: |
+          digest=$(jq -r .image_digest "releases/manifests/${RELEASE}.json")
+          test "${digest#sha256:}" != "$digest"
+          echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}@${digest}" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Count the demos in the release image
+        run: |
+          chmod a+rwx work
+          docker run --rm --network none \
+            -v "$PWD/scripts/host_parity.py:/check/host_parity.py:ro" \
+            -v "$PWD/work:/work" \
+            "${{ steps.image.outputs.ref }}" \
+            python /check/host_parity.py --archive /work/passagewatch-demos-v1.tar.gz \
+              --bundle "/work/${RELEASE}" --out /work/linux-amd64-image.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: host-parity-${{ inputs.release }}
+          path: |
+            work/linux-amd64-image.json
+            work/linux-amd64-image.npz
