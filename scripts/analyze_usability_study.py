@@ -3,10 +3,13 @@
 Reads the plan (reference and automatic counts) and the two CSV tables the study service
 exports, then applies the declared analysis (``passagewatch.evaluation.usability``).
 A clip interrupted by a technical fault is excluded with ``--exclude P1:c04:"reason"``.
+Review actions come from ``study/review_actions.csv`` (``scripts/export_study_reviews.py``)
+when it exists.
 
 Example:
     curl -s http://127.0.0.1:8010/v1/study/export/trials.csv > study/trials.csv
     curl -s http://127.0.0.1:8010/v1/study/export/questionnaires.csv > study/questionnaires.csv
+    uv run python scripts/export_study_reviews.py --url http://127.0.0.1:8010
     uv run python scripts/analyze_usability_study.py --out study/results.json
 """
 
@@ -29,6 +32,7 @@ def main() -> int:
     parser.add_argument("--plan", type=Path, default=STUDY / "plan.json")
     parser.add_argument("--trials", type=Path, default=STUDY / "trials.csv")
     parser.add_argument("--questionnaires", type=Path, default=STUDY / "questionnaires.csv")
+    parser.add_argument("--review-actions", type=Path, default=STUDY / "review_actions.csv")
     parser.add_argument("--exclude", action="append", default=[], help="PARTICIPANT:CLIP:REASON")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
@@ -49,7 +53,15 @@ def main() -> int:
                 for r in csv.DictReader(fh)
             ]
 
-    result = analyze(trials, forms) | {"release": plan["release"], "exclusions": exclusions}
+    actions = None
+    if args.review_actions.is_file():
+        with args.review_actions.open(encoding="utf-8") as fh:
+            actions = list(csv.DictReader(fh))
+
+    result = analyze(trials, forms, actions=actions) | {
+        "release": plan["release"],
+        "exclusions": exclusions,
+    }
     for person, r in result["participants"].items():
         print(
             f"{person} ({r['role']}): time saving {r['time_saving']:.0%} "

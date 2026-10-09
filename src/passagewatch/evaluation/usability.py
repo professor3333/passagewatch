@@ -1,16 +1,20 @@
 """Analysis of the usability study, by the rules declared in ``docs/usability_study.md``.
 
-- **Time.** Per participant, the ratio of total assisted to total manual active time over
-  their scored clips; the time saving is 1 - ratio. Each ratio gets a bootstrap interval
-  over that participant's clips (each condition's clips resampled separately: they are
-  different clips). With 3 or more **independent** participants, the geometric mean of
-  their ratios is reported with an interval from a two-stage bootstrap (participants, then
-  their clips). The developer (code ``D...``) is reported alone and never enters the group.
+- **Time.** Per participant, the ratio of mean assisted to mean manual active time per
+  scored clip (the ratio of totals declared in the design, whenever both conditions keep all
+  six clips; means keep it fair when a clip is excluded); the time saving is 1 - ratio. Each
+  ratio gets a bootstrap interval over that participant's clips (each condition's clips
+  resampled separately: they are different clips). With 3 or more **independent**
+  participants, the geometric mean of their ratios is reported with an interval from a
+  two-stage bootstrap (participants, then their clips). The developer (code ``D...``) is
+  reported alone and never enters the group.
 - **Counts.** nMAE per condition, sum(|R^ - R| + |L^ - L|) / sum(R + L), per participant
   and pooled; the difference assisted - manual with intervals from the same resamples.
 - **Target met** when the time saving is at least 30% and assisted nMAE is not higher than
   manual nMAE (point estimates); per participant, and for the independent group.
 - Practice clips and clips excluded for a recorded technical fault are left out.
+- **Review actions** (secondary, descriptive): assisted-condition review events by type, and
+  how many changed a track the release had not counted as a passage into one.
 """
 
 from __future__ import annotations
@@ -83,8 +87,12 @@ def nmae(trials: list[Trial]) -> float:
     return sum(t.error for t in trials) / passages if passages else math.nan
 
 
+def _mean_s(trials: list[Trial]) -> float:
+    return sum(t.active_s for t in trials) / len(trials)
+
+
 def _ratio(manual: list[Trial], assisted: list[Trial]) -> float:
-    return sum(t.active_s for t in assisted) / sum(t.active_s for t in manual)
+    return _mean_s(assisted) / _mean_s(manual)
 
 
 def _interval(values: list[float]) -> list[float]:
@@ -122,6 +130,7 @@ def participant_result(trials: list[Trial], seed: int = 0) -> dict[str, Any]:
             "manual": sum(t.active_s for t in manual),
             "assisted": sum(t.active_s for t in assisted),
         },
+        "mean_active_s": {"manual": _mean_s(manual), "assisted": _mean_s(assisted)},
         "time_ratio": ratio,
         "time_ratio_ci": _interval(ratios),
         "time_saving": 1 - ratio,
@@ -197,13 +206,36 @@ def group_result(trials: list[Trial], seed: int = 0) -> dict[str, Any] | None:
     }
 
 
+def review_actions(rows: list[dict[str, str]]) -> dict[str, dict[str, Any]]:
+    """Per participant, scored assisted-clip review events by action, and how many turned a
+    track without an automatic passage into a passage (``set_direction`` on it).
+
+    Rows are ``review_actions.csv`` (``scripts/export_study_reviews.py``); practice clips
+    are left out.
+    """
+    result: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if row["practice"] == "1":
+            continue
+        person = result.setdefault(
+            row["participant"], {"by_action": {}, "set_direction_on_non_passages": 0}
+        )
+        person["by_action"][row["action"]] = person["by_action"].get(row["action"], 0) + 1
+        if row["action"] == "set_direction" and not row["automatic_direction"]:
+            person["set_direction_on_non_passages"] += 1
+    return result
+
+
 def sus_score(answers: list[int]) -> float:
     """SUS, 0-100: odd items (answer - 1), even items (5 - answer), the sum times 2.5."""
     return 2.5 * sum(a - 1 if i % 2 == 0 else 5 - a for i, a in enumerate(answers))
 
 
 def analyze(
-    trials: list[Trial], questionnaires: list[dict[str, Any]], seed: int = 0
+    trials: list[Trial],
+    questionnaires: list[dict[str, Any]],
+    seed: int = 0,
+    actions: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     people = sorted({t.participant for t in trials})
     forms: dict[str, dict[str, Any]] = {}
@@ -212,12 +244,14 @@ def analyze(
             "sus": sus_score(q["sus"]),
             "tlx_raw": float(np.mean(q["tlx"])),
         }
+    reviews = review_actions(actions or [])
     return {
         "participants": {
             p: {
                 "role": "developer" if is_developer(p) else "independent",
                 **participant_result([t for t in trials if t.participant == p], seed),
                 "questionnaires": forms.get(p, {}),
+                **({"review_actions": reviews[p]} if p in reviews else {}),
             }
             for p in people
         },

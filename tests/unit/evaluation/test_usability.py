@@ -9,6 +9,7 @@ from passagewatch.evaluation.usability import (
     analyze,
     group_result,
     participant_result,
+    review_actions,
     sus_score,
     trials_from_rows,
 )
@@ -90,3 +91,39 @@ def test_the_developer_never_counts_towards_the_group() -> None:
     assert group is not None and group["participants"] == ["P1", "P2", "P3"]
     ratio = math.exp((math.log(0.9) + math.log(0.75) + math.log(0.6)) / 3)
     assert group["time_ratio_geometric_mean"] == pytest.approx(ratio)
+
+
+def test_an_excluded_clip_does_not_bias_the_time_ratio() -> None:
+    # Same pace in both conditions; one manual clip excluded leaves 5 against 6.
+    trials = person("P1", 100, 100)
+    trials.remove(next(t for t in trials if t.condition == "manual"))
+
+    result = participant_result(trials)
+    assert result["clips"] == {"manual": 5, "assisted": 6}
+    assert result["mean_active_s"] == {"manual": 100.0, "assisted": 100.0}
+    assert result["time_saving"] == pytest.approx(0.0)
+
+
+def test_review_actions_count_tracks_turned_into_passages() -> None:
+    def row(action: str, automatic: str, practice: str = "0") -> dict[str, str]:
+        return {
+            "participant": "P1",
+            "practice": practice,
+            "action": action,
+            "automatic_direction": automatic,
+        }
+
+    rows = [
+        row("accept", "right"),
+        row("set_direction", "right"),
+        row("set_direction", ""),
+        row("set_direction", "", practice="1"),
+        row("add_passage", ""),
+    ]
+
+    assert review_actions(rows) == {
+        "P1": {
+            "by_action": {"accept": 1, "set_direction": 2, "add_passage": 1},
+            "set_direction_on_non_passages": 1,
+        }
+    }
