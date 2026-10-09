@@ -55,9 +55,17 @@ jobs:
             "${{ steps.image.outputs.ref }}" \
             python /check/host_parity.py --archive /work/passagewatch-demos-v1.tar.gz \
               --bundle "/work/${RELEASE}" --out /work/linux-amd64-image.json
+      - name: The same with PyTorch on the CPU, for reference
+        run: |
+          docker run --rm --network none \
+            -v "$PWD/scripts/host_parity.py:/check/host_parity.py:ro" \
+            -v "$PWD/work:/work" \
+            "${{ steps.image.outputs.ref }}" \
+            python /check/host_parity.py --torch --archive /work/passagewatch-demos-v1.tar.gz \
+              --bundle "/work/${RELEASE}" --out /work/linux-amd64-image-torch.json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: host-parity-${{ inputs.release }}
           path: |
-            work/linux-amd64-image.json
-            work/linux-amd64-image.npz
+            work/linux-amd64-image*.json
+            work/linux-amd64-image*.npz
