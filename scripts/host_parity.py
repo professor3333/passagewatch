@@ -2,7 +2,8 @@
 
 Runs the worker's own path (``InferencePipeline`` from the bundle) on each frames ZIP in the
 demo archive (docs/demos.md), and records, besides the counts, a SHA-256 of every stage's
-output: the decoded frames, the network input (after preprocessing), the detections, and the
+output: the decoded frames, the temporal encoding, the letterboxed network input (also with
+OpenCV's SIMD code off), the detections, and the
 trajectories. Comparing two hosts' outputs shows whether they count alike and, if not, the
 first stage where they differ. The detections are also saved (``.npz``) so the size of a
 difference can be measured.
@@ -32,9 +33,11 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import cv2
 import numpy as np
 
 from passagewatch.detection.classical import FrameDetections
+from passagewatch.preprocessing.letterbox import InputSize, letterbox_image
 from passagewatch.preprocessing.temporal import encode_frames
 from passagewatch.service.catalog import ClipRecord
 from passagewatch.service.media import iter_frames, probe
@@ -83,6 +86,13 @@ def run_demo(pipeline: InferencePipeline, demo: dict[str, Any], media: Path) -> 
     version = pipeline.bundle.preprocessing_version
     decoded = list(iter_frames(media, "frames"))
     encoded = list(encode_frames(version, lambda: iter_frames(media, "frames")))
+    size = InputSize(pipeline.bundle.detector.input_height, pipeline.bundle.detector.input_width)
+    letterboxed = [letterbox_image(f, size)[0] for f in encoded]
+    # The same resize with OpenCV's SIMD code paths off, to test whether they are the source
+    # of a difference between hosts.
+    cv2.setUseOptimized(False)
+    plain = [letterbox_image(f, size)[0] for f in encoded]
+    cv2.setUseOptimized(True)
     detections = pipeline._detect(clip, iter(encoded), None)
     result = pipeline.run(clip, media, COUNTING)
     tracks = [x for t in result.trajectories for x in (t.frames, t.boxes, t.scores)]
@@ -93,6 +103,8 @@ def run_demo(pipeline: InferencePipeline, demo: dict[str, Any], media: Path) -> 
         "sha256": {
             "decoded_frames": digest(decoded),
             "network_input": digest(encoded),
+            "letterboxed_input": digest(letterboxed),
+            "letterboxed_input_unoptimized": digest(plain),
             "detections": detections_digest(detections, None),
             "detections_rounded_1e-2": detections_digest(detections, 2),
             "trajectories": digest(tracks),
@@ -100,6 +112,7 @@ def run_demo(pipeline: InferencePipeline, demo: dict[str, Any], media: Path) -> 
         "per_frame_decoded_sha256": [digest([f])[:16] for f in decoded],
         "per_frame_input_sha256": [digest([f])[:16] for f in encoded],
         "_detections": detections,
+        "_letterboxed_first": letterboxed[0],
     }
 
 
@@ -124,7 +137,6 @@ def main() -> int:
         pipeline = InferencePipeline.load(
             bundle_dir, device="cpu", batch_size=8, threads=args.threads
         )
-    import cv2
     import onnxruntime
     import torch
 
@@ -157,6 +169,7 @@ def main() -> int:
             media = Path(tmp) / f"{demo['demo_id']}.zip"
             media.write_bytes(data)
             result = run_demo(pipeline, demo, media)
+            arrays[f"{demo['demo_id']}/letterboxed_first"] = result.pop("_letterboxed_first")
             for i, d in enumerate(result.pop("_detections")):
                 arrays[f"{demo['demo_id']}/{i}/boxes"] = d.boxes
                 arrays[f"{demo['demo_id']}/{i}/scores"] = d.scores
