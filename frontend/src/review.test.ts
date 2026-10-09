@@ -3,17 +3,19 @@ import { describe, expect, it } from "vitest";
 import {
   auditWindowAt,
   countRows,
+  demoForClip,
   directionLabel,
   formatTime,
   newIdempotencyKey,
   nextUnreviewed,
   reasonText,
+  referenceText,
   reviewOrder,
   trackActions,
   tracksAt,
   uncountedReason,
 } from "./review";
-import type { AuditWindow, Counts, Track } from "./types";
+import type { AuditWindow, Counts, Demo, Track } from "./types";
 
 function track(id: number, start: number, state: Track["review_state"] = "automatic"): Track {
   return {
@@ -174,5 +176,31 @@ describe("trackActions", () => {
     expect(uncountedReason(track(3, 0))).toBeNull();
     expect(uncountedReason(uncounted)).toMatch(/does not end on the other side/);
     expect(uncountedReason({ ...uncounted, outcome: "stationary" })).toMatch(/barely moves/);
+  });
+});
+
+describe("demo examples", () => {
+  const demo: Demo = {
+    demo_id: "clear",
+    kind: "clear",
+    title: "Clear",
+    summary: "",
+    source: { dataset: "CFC", location: "kenai-train", clip_name: "x", split_note: "" },
+    reference: { right: 11, left: 0 },
+    available: true,
+    clip_id: "clip_a",
+    job_id: "job_a",
+    computed_at: "2026-10-09T00:00:00Z",
+    pipeline_version: "passagewatch-0.3.0",
+  };
+
+  it("finds the demo a job's recording belongs to", () => {
+    const listing = { version: "demos-v1", demos: [demo] };
+    expect(demoForClip(listing, "clip_a")).toBe(demo);
+    expect(demoForClip(listing, "clip_b")).toBeNull();
+  });
+
+  it("gives the reference counts in image directions", () => {
+    expect(referenceText(demo)).toBe("→ right 11 · ← left 0");
   });
 });

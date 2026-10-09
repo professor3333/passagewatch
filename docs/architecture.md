@@ -87,6 +87,9 @@ For the review interface:
 - `/tracks` also returns each track's review state and final direction, and its triage,
   review score and reasons; `?order=queue` lists tracks in review-queue order;
 - `GET /v1/jobs/{id}/audit` returns the job's random audit windows and their state.
+- `GET /v1/demos` lists the demo examples, with each one's clip and precomputed job once
+  the active release has analysed it ([demos](demos.md)). A demo's recording never expires,
+  and deleting it is refused with `403`.
 
 Triage, review scores and audit windows exist when the release declares a calibration
 version (`review-v0`); they are computed by the worker and stored with the predictions. See
@@ -169,6 +172,7 @@ All settings are `PASSAGEWATCH_*` environment variables (`passagewatch.service.s
 | `PASSAGEWATCH_WORKER_POLL_SECONDS` | 2 | Idle polling interval |
 | `PASSAGEWATCH_RETENTION_SWEEP_SECONDS` | 600 | How often expired uploads are deleted |
 | `PASSAGEWATCH_WORKER_STALE_SECONDS` | 60 | A worker silent this long no longer counts for readiness |
+| `PASSAGEWATCH_DEMO_CATALOG` | unset (`/app/demos/catalog.json` in the image) | Demo catalog ([demos](demos.md)); unset means no demos |
 
 ## Logs
 

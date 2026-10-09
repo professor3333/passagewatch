@@ -165,6 +165,17 @@ The active release still uses PyTorch. The next release (once experiment 4 has d
 detector) is built with ONNX after rerunning the counting check on that detector.
 Input-size and INT8 trade-offs follow, each with the same check.
 
+### Across hosts (found 2026-10-09)
+
+The checks above compare runtimes on one host. Across hosts, the same release does not count
+identically. On the 36 clips of one kenai-channel day, the development Mac (ONNX Runtime,
+Apple M1 CPU) gives different counts from the recorded Kaggle test evaluation on 4 clips,
+and different track numbers on 11. The day's nMAE is 0.241 on the Mac against 0.264
+recorded. Runtimes agree within each host, so the likely source is something they share,
+such as JPEG decoding or preprocessing arithmetic. The cause is not established. Checking
+the deployed image against the recorded evaluation, and finding the cause, are open work.
+Details are in [demos](demos.md#results-depend-slightly-on-the-host).
+
 ## Releases, deployment verification and rollback (Stage 11)
 
 **Release manifests.** Every release has an immutable manifest in `releases/manifests/`

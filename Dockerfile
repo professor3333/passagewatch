@@ -32,6 +32,8 @@ COPY configs ./configs
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --no-dev
 
 COPY --from=frontend /frontend/dist ./frontend/dist
+# The demo catalog only (docs/demos.md); the demo frames are loaded at run time.
+COPY demos/catalog.json ./demos/catalog.json
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN useradd --create-home --uid 10001 passagewatch \
     && mkdir -p /data /bundles \
@@ -40,7 +42,8 @@ USER passagewatch
 
 ENV PASSAGEWATCH_DATA_DIR=/data \
     PASSAGEWATCH_BUNDLE_DIR=/bundles/active \
-    PASSAGEWATCH_FRONTEND_DIR=/app/frontend/dist
+    PASSAGEWATCH_FRONTEND_DIR=/app/frontend/dist \
+    PASSAGEWATCH_DEMO_CATALOG=/app/demos/catalog.json
 EXPOSE 8000
 ENTRYPOINT ["entrypoint"]
 CMD ["api"]

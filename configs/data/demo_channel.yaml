@@ -1,0 +1,12 @@
+# Frames for the "unfamiliar camera" demo example (docs/demos.md): one kenai-channel
+# recording day, a test-location camera the model never trained on. The test set has been
+# evaluated and is a known benchmark; nothing is tuned on these frames.
+#
+# Changing this selection means a new name: extractions are keyed by it.
+
+name: demo-channel-v1
+archive: g945x-41103/channel.tar
+member_prefix: "*/"
+include:
+  - location: kenai-channel
+    days: [2018-08-17]

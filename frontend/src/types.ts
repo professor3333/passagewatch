@@ -172,3 +172,24 @@ export interface Audit {
   unflagged_frames: number;
   windows: AuditWindow[];
 }
+
+/** A demo example (docs/demos.md): a CFC recording with a precomputed (cached) result. */
+export interface Demo {
+  demo_id: string;
+  kind: "clear" | "difficult" | "unfamiliar-camera";
+  title: string;
+  summary: string;
+  source: { dataset: string; location: string; clip_name: string; split_note: string };
+  /** CFC reference counts (image directions), counted with the same policy. */
+  reference: { right: number; left: number };
+  available: boolean;
+  clip_id: string | null;
+  job_id: string | null;
+  computed_at: string | null;
+  pipeline_version: string | null;
+}
+
+export interface DemoListing {
+  version: string | null;
+  demos: Demo[];
+}
