@@ -203,7 +203,14 @@ A manifest can only be rewritten unchanged, apart from filling in the image dige
 - an example job completes with that release.
 
 Checked against a local deployment of `passagewatch-0.3.0`: it verified, and a manifest
-altered in one field (the threshold) was reported as that exact difference.
+altered in one field (the threshold) was reported as that exact difference. `passagewatch-0.3.1` was verified the same way on 2026-10-09: its bundle downloaded
+from the GitHub release and matched its manifest, the deployment verified, and the demos
+loaded.
+
+**Release 0.3.1 counts exactly like 0.3.0.** The `host-parity` workflow ran both releases'
+images (by their manifest digests) on the demo recordings. Every stage is bit-identical
+between the two, from decoded frames to trajectories, with ONNX Runtime and with PyTorch
+(`releases/evaluations/passagewatch-0.3.{0,1}-host-parity/`).
 
 **Rollback.** Point `bundles/active` back at the previous release (for example
 `ln -sfn passagewatch-0.2.0 bundles/active`), restart the API and worker, and run
