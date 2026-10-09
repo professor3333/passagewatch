@@ -85,32 +85,59 @@ The same frames always give the same archive, byte for byte.
 
 ## Results depend slightly on the host
 
-Loaded on the development Mac (Apple M1, ONNX Runtime on the CPU), release
-`passagewatch-0.3.0` counts the demos as follows. The test evaluation ran on Kaggle (x86
-CPU and an NVIDIA GPU).
+The same release counts some recordings slightly differently on an Apple (arm64) CPU and on
+an x86 CPU. Found while loading these demos, and traced on 2026-10-09:
 
-| Demo | This Mac | Recorded evaluation | CFC reference |
-|---|---|---|---|
-| Clear | 11 / 0 | 11 / 0 (holdout report) | 11 / 0 |
-| Difficult | 2 / 0 | 2 / 0 (holdout report) | 5 / 0 |
-| Unfamiliar camera | **4 / 2** | **4 / 3** (test evaluation: PyTorch GPU and ONNX CPU) | 4 / 2 |
+| Demo | Development Mac (arm64) | Release image (linux/amd64) | Recorded evaluation | CFC reference |
+|---|---|---|---|---|
+| Clear | 11 / 0 | 11 / 0 | 11 / 0 (holdout, Mac) | 11 / 0 |
+| Difficult | 2 / 0 | **3 / 0** | 2 / 0 (holdout, Mac) | 5 / 0 |
+| Unfamiliar camera | **4 / 2** | 4 / 3 | 4 / 3 (test, Kaggle x86) | 4 / 2 |
 
-The unfamiliar-camera demo was chosen from the recorded evaluation (4 / 3, one false ←
-passage). On this Mac it counts exactly. To see how far this goes, the release's worker path
-was run on this Mac over all 36 clips of the same kenai-channel day (2026-10-09) and
-compared with the recorded test evaluation:
+**Each host reproduces its own evaluation.** The release image, pulled by the digest in its
+manifest and run on a GitHub linux/amd64 runner, counts the kenai-channel demo exactly as the
+recorded test evaluation did on Kaggle (x86). The Mac counts the two holdout demos exactly as
+the holdout report, which was measured on the Mac. On the 36 clips of the demo's
+kenai-channel day, the Mac's counts differ from the recorded test evaluation on 4 clips (3
+closer to the reference, 1 further) and its track numbers on 11. The day's nMAE is 0.241 on
+the Mac and 0.264 recorded.
 
-| | |
+**The cause is the letterbox resize.** `scripts/host_parity.py` records a fingerprint of
+every stage. The workflow `host-parity.yml` runs it inside the release image, and
+`scripts/compare_host_parity.py` compares two runs. On all three demos, on both hosts:
+
+| Stage | Mac vs release image |
 |---|---|
-| Clips with different counts | **4 of 36** (3 closer to the reference here, 1 further) |
-| Clips with a different number of tracks | 11 of 36 |
-| nMAE on this day (87 passages) | 0.241 on this Mac, 0.264 recorded |
+| Decoded frames | identical |
+| Temporal encoding (frame, background difference, motion) | identical |
+| Letterboxed network input (`cv2.resize`, bilinear) | **different**: 8–15% of pixels differ by 1 grey level (at most 2) |
+| The same resize with OpenCV's SIMD code turned off | still different |
+| Detections, ONNX Runtime | scores differ by a median of about 6 × 10⁻⁴ and at most 0.18; boxes shift by up to 4.7 px |
+| Detections, PyTorch (CPU), same checkpoint | the same differences as ONNX Runtime |
+| ONNX Runtime vs PyTorch on the **same** host | scores within 1 × 10⁻⁵; same counts and tracks |
 
-Within one host the runtimes agree. On the Mac, PyTorch on the GPU, PyTorch on the CPU and
-ONNX Runtime give the same counts on all 64 kenai-val clips. On Kaggle, ONNX Runtime on the
-CPU and PyTorch on the GPU agree on all 20 test clips checked. The difference therefore
-comes from something every runtime on a host shares, such as frame decoding or
-preprocessing arithmetic. The cause has **not been established**, and the deployed image
-(linux/amd64, like Kaggle) has not been checked against the recorded evaluation on these
-clips. Small changes in boxes or scores can change which detections a track links, and so
-a count. This is listed under the README's limitations and in [operations](operations.md).
+OpenCV's bilinear resize rounds differently on the two CPU architectures. The network
+amplifies these one-level differences in some pixels into score changes that move a few
+detections across the 0.4 threshold. That changes which detections a track links, and
+occasionally a count. The runtimes are not the cause: two independent implementations agree
+on each host and differ identically between hosts.
+
+**What follows:**
+- The service is deployed as the linux/amd64 image, the same architecture as the test
+  evaluation, so the test results describe the deployed system.
+- The development results in this repository (kenai-val, `kenai-holdout-v1`, the usability
+  study's automatic counts) were measured on the Mac. On x86 they can differ slightly: on
+  this day, 4 of 36 clips' counts.
+- A resize that gives the same pixels on every CPU would remove the difference. It changes
+  the network input, so it would be a new preprocessing version, evaluated again before a
+  release. This is not done.
+
+The fingerprints are in `releases/evaluations/passagewatch-0.3.0-host-parity/`. To reproduce
+them, run the `host-parity` workflow, and on another host:
+
+```bash
+uv run python scripts/host_parity.py --archive dist/passagewatch-demos-v1.tar.gz \
+    --bundle bundles/passagewatch-0.3.0 --out runs/host-parity/mac-m1.json
+uv run python scripts/compare_host_parity.py runs/host-parity/mac-m1.json \
+    releases/evaluations/passagewatch-0.3.0-host-parity/linux-amd64-image.json
+```
