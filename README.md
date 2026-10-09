@@ -13,7 +13,9 @@ that produced it.
 
 > **Status: Stage 11 of 12.** The pipeline, review service and release
 > `passagewatch-0.3.0` are built and have been evaluated once on the official test
-> locations ([test results](docs/test_results.md)). The remaining stage is a usability study.
+> locations ([test results](docs/test_results.md)). A usability study was run: assisted review
+> did not save time on its short clips, and reviewers' corrections made the counts worse
+> ([results](docs/usability_results.md)).
 > See the [roadmap](docs/roadmap.md).
 
 ## Pipeline
@@ -34,6 +36,7 @@ tracking → directional counting → review prioritization → human correction
 | [Error analysis](docs/error_analysis.md) | Why counts are wrong, and the one-factor experiments (temporal input adopted) |
 | [Review](docs/review.md) | Review scores, triage, random audits, and how prioritization is measured |
 | [Test results](docs/test_results.md) | The release's one-time evaluation on the four official test locations |
+| [Usability study](docs/usability_results.md) | Manual counting vs. assisted review with four independent participants: [design](docs/usability_study.md) and results |
 | [Model card](docs/model_card.md) | Intended use, provenance, training data, metrics, failure modes, release process |
 | [Operations](docs/operations.md) | Performance profile, reliability, hardening, releases, rollback, monitoring |
 | [Architecture](docs/architecture.md) | The service: API, worker, job lifecycle, storage, release bundles, configuration |
