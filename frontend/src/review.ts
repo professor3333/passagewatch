@@ -1,6 +1,16 @@
 // Review logic that does not touch the DOM: ordering, labels, colors, and counts.
 
-import type { AuditWindow, Counts, ImageDirection, ReviewRequest, ReviewState, Track, Triage } from "./types";
+import type {
+  AuditWindow,
+  Counts,
+  Demo,
+  DemoListing,
+  ImageDirection,
+  ReviewRequest,
+  ReviewState,
+  Track,
+  Triage,
+} from "./types";
 
 const TRIAGE_RANK: Record<Triage, number> = { unresolved: 0, needs_review: 1, suggested: 2 };
 
@@ -161,6 +171,22 @@ export function uncountedReason(track: Track): string | null {
       "(a fish that crosses and comes back counts zero)."
     );
   return null;
+}
+
+export const DEMO_KIND_LABELS: Record<Demo["kind"], string> = {
+  clear: "Clear",
+  difficult: "Difficult",
+  "unfamiliar-camera": "Unfamiliar camera",
+};
+
+/** The demo example whose recording ``clipId`` is, if it is one. */
+export function demoForClip(listing: DemoListing, clipId: string): Demo | null {
+  return listing.demos.find((demo) => demo.clip_id === clipId) ?? null;
+}
+
+/** A demo's CFC reference counts, in image directions as the benchmark gives them. */
+export function referenceText(demo: Demo): string {
+  return `→ right ${demo.reference.right} · ← left ${demo.reference.left}`;
 }
 
 export function formatTime(seconds: number): string {

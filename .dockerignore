@@ -10,6 +10,7 @@ data
 models
 bundles
 runs
+dist
 var
 mlruns
 mlartifacts

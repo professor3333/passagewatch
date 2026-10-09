@@ -18,12 +18,15 @@ import {
   formatTime,
   newIdempotencyKey,
   nextUnreviewed,
+  DEMO_KIND_LABELS,
+  demoForClip,
   reasonText,
+  referenceText,
   reviewOrder,
   trackActions,
   uncountedReason,
 } from "./review";
-import type { AddedPassage, Audit, Clip, ImageDirection, Job, Results, ReviewRequest, Track } from "./types";
+import type { AddedPassage, Audit, Clip, Demo, DemoListing, ImageDirection, Job, Results, ReviewRequest, Track } from "./types";
 
 const api = new PassageWatchApi();
 const app = document.getElementById("app") as HTMLElement;
@@ -137,9 +140,84 @@ function uploadView(): void {
     if (jobId.value.trim()) location.hash = `#/jobs/${jobId.value.trim()}`;
   });
 
+  const demos = el("section", { class: "panel", hidden: "" });
+  void api
+    .getDemos()
+    .then((listing) => {
+      const available = listing.demos.filter((d) => d.available);
+      if (available.length === 0) return;
+      demos.replaceChildren(
+        el("h2", {}, "Demo examples"),
+        el(
+          "p",
+          { class: "muted" },
+          "Recordings from the Caltech Fish Counting dataset with ",
+          el("strong", {}, "precomputed (cached) results"),
+          ". Opening one gives you your own copy to review; it does not run a new analysis. Upload a recording below for a live analysis.",
+        ),
+        el("div", { class: "demo-grid" }, ...available.map(demoCard)),
+      );
+      demos.hidden = false;
+    })
+    .catch(() => undefined); // demos are optional: the upload form works without them
+
   app.append(
+    demos,
     el("section", { class: "panel" }, el("h2", {}, "Analyze a recording"), form, message),
     el("section", { class: "panel" }, el("h2", {}, "Open an existing job"), el("div", { class: "actions" }, jobId, open)),
+  );
+}
+
+function demoCard(demo: Demo): HTMLElement {
+  const message = el("p", { class: "message" });
+  const open = el("button", { type: "button", class: "primary" }, "Open and review");
+  open.addEventListener("click", () => {
+    open.disabled = true;
+    // The visitor's own job: a result-cache hit of the precomputed analysis, so their
+    // corrections never change the shared example.
+    api
+      .createJob(demo.clip_id as string, {}, newIdempotencyKey())
+      .then((accepted) => {
+        location.hash = `#/jobs/${accepted.job_id}`;
+      })
+      .catch((error: unknown) => {
+        showMessage(message, errorText(error), "error");
+        open.disabled = false;
+      });
+  });
+  return el(
+    "article",
+    { class: "demo-card" },
+    el("div", {}, el("span", { class: `badge demo-${demo.kind}` }, DEMO_KIND_LABELS[demo.kind]), " ", el("span", { class: "badge" }, "cached result")),
+    el("h3", {}, demo.title),
+    el("p", {}, demo.summary),
+    el("p", { class: "muted" }, `CFC reference: ${referenceText(demo)} · ${demo.source.location}`),
+    el("div", { class: "actions" }, open),
+    message,
+  );
+}
+
+function demoNotice(demo: Demo): HTMLElement {
+  const computed = demo.computed_at ? ` on ${demo.computed_at.slice(0, 10)}` : "";
+  return el(
+    "section",
+    { class: "panel notice" },
+    el("h2", {}, `Demo example · ${demo.title}`),
+    el(
+      "p",
+      {},
+      el("strong", {}, "Precomputed (cached) result. "),
+      `Release ${demo.pipeline_version ?? "—"} analysed this recording once, when the demo was loaded${computed}; opening it did not run a new analysis. `,
+      "Your corrections apply only to your copy. ",
+      el("a", { href: "#/" }, "Upload a recording"),
+      " for a live analysis.",
+    ),
+    el("p", {}, demo.summary),
+    el(
+      "p",
+      { class: "muted" },
+      `CFC reference counts: ${referenceText(demo)}. Source: ${demo.source.dataset}, ${demo.source.location} (${demo.source.split_note}).`,
+    ),
   );
 }
 
@@ -196,13 +274,16 @@ interface ReviewState {
 
 /** The review view; in the usability study, `studyBar` replaces the export links. */
 async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
-  const [clip, results, { revision, tracks }, passages, audit] = await Promise.all([
+  const noDemos: DemoListing = { version: null, demos: [] };
+  const [clip, results, { revision, tracks }, passages, audit, demos] = await Promise.all([
     api.getClip(job.clip_id),
     api.getResults(job.job_id),
     api.getAllTracks(job.job_id),
     api.getAddedPassages(job.job_id),
     api.getAudit(job.job_id),
+    studyBar ? noDemos : api.getDemos().catch(() => noDemos),
   ]);
+  const demo = demoForClip(demos, job.clip_id);
   const state: ReviewState = {
     job,
     clip,
@@ -325,7 +406,7 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
     ),
     el("section", { class: "panel" }, el("h2", {}, "Random audit"), auditPanel),
   );
-  app.append(...(studyBar ? [studyBar] : []), header, el("div", { class: "review" }, stage, side));
+  app.append(...(studyBar ? [studyBar] : []), ...(demo ? [demoNotice(demo)] : []), header, el("div", { class: "review" }, stage, side));
 
   // Rendering -------------------------------------------------------------------------
   const context = canvas.getContext("2d") as CanvasRenderingContext2D;

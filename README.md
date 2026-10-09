@@ -121,6 +121,9 @@ What exists today, not a roadmap:
   extra privileges.
 - **Release discipline.** Hash-checked bundles downloaded from GitHub releases, release
   manifests, deployment verification, and a tested rollback.
+- **Demo examples.** Three CFC recordings (clear, difficult, unfamiliar camera) shown as
+  visibly **cached** results, next to their reference counts. Opening one gives you a
+  personal copy to review ([demos](docs/demos.md)).
 
 ## 🚀 Quick start
 
@@ -133,6 +136,13 @@ git clone https://github.com/professor3333/passagewatch.git && cd passagewatch
 uv run python scripts/fetch_bundle.py --release passagewatch-0.3.0 --activate   # verified against the release manifest
 docker compose up -d --build
 curl http://127.0.0.1:8000/health/ready
+```
+
+Optionally load the three demo examples (a 187 MB download from the `demos-v1` release,
+analysed once by the running release):
+
+```bash
+uv run python scripts/load_demos.py --url http://127.0.0.1:8000
 ```
 
 Then open **http://127.0.0.1:8000/**:
@@ -378,6 +388,10 @@ GitHub releases), runs, caches and service data.
 - **Counts are suggestions.** They are meant to be reviewed before use. The review score is
   a heuristic ranking, not a calibrated probability, and no count confidence interval is
   shown in the product.
+- **Counts can differ slightly between hosts.** The same release counted 4 of 36
+  kenai-channel clips differently on the development Mac than in the recorded Kaggle
+  evaluation. Runtimes agree within a host, and the cause is not yet established
+  ([details](docs/demos.md#results-depend-slightly-on-the-host)).
 - **No time-saved claim.** The usability study (4 independent participants, short clips) did
   not show a time saving ([results](docs/usability_results.md)).
 
@@ -394,6 +408,7 @@ GitHub releases), runs, caches and service data.
 | [Error analysis](docs/error_analysis.md) | Why counts are wrong, and the one-factor experiments |
 | [Review](docs/review.md) | Review scores, triage, random audits, and how prioritization is measured |
 | [Test results](docs/test_results.md) | The release's one-time evaluation on the official test locations |
+| [Demo examples](docs/demos.md) | The three cached demo recordings: how they were chosen, loaded and labelled |
 | [Usability study](docs/usability_results.md) | Manual counting vs. assisted review: [design](docs/usability_study.md) and results |
 | [Model card](docs/model_card.md) | Intended use, provenance, training data, metrics, failure modes, release process |
 | [Operations](docs/operations.md) | Performance profile, reliability, hardening, releases, monitoring |
@@ -402,8 +417,8 @@ GitHub releases), runs, caches and service data.
 | [Design](docs/design.md) | The full system design |
 
 **Status: Stage 12 of 12** ([roadmap](docs/roadmap.md)). The pipeline, review service and
-release are complete and evaluated, and the usability study is done. The remaining work is
-the demo examples and an independent check of the documentation.
+release are complete and evaluated, and the usability study and the demo examples are done.
+The remaining work is an independent check of the documentation.
 
 ## 🙏 Acknowledgements and license
 

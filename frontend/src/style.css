@@ -116,3 +116,15 @@ fieldset { border: 1px solid var(--border); border-radius: 6px; margin: 0 0 0.6r
 fieldset.likert, fieldset.tlx { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
 fieldset.tlx input[type="range"] { flex: 1; min-width: 200px; }
 label.inline { flex-direction: row; align-items: center; gap: 0.2rem; }
+
+/* Demo examples (docs/demos.md) */
+.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.75rem; }
+.demo-card { border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.demo-card h3 { margin: 0.35rem 0 0; font-size: 1rem; }
+.demo-card p { margin: 0.25rem 0; }
+.demo-card .actions { margin-top: auto; }
+.badge.demo-clear { background: var(--ok); color: #fff; }
+.badge.demo-difficult { background: var(--danger); color: #fff; }
+.badge.demo-unfamiliar-camera { background: var(--accent); color: #fff; }
+.notice { border-left: 4px solid var(--accent); }
+.notice p { margin: 0.35rem 0; }

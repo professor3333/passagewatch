@@ -80,6 +80,13 @@ def pack_bundle(
     members += [(f"{manifest.release}/{n}", notices_dir / n) for n in NOTICES]
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / archive_name(manifest.release)
+    write_tar_gz(members, out)
+    return out
+
+
+def write_tar_gz(members: list[tuple[str, Path]], out: Path) -> None:
+    """Write ``(arcname, path)`` members as a reproducible ``.tar.gz``: sorted members,
+    fixed times, owners and modes, so the same files always give the same SHA-256."""
     with (
         out.open("wb") as raw,
         gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as zipped,
@@ -94,7 +101,6 @@ def pack_bundle(
             info.uname = info.gname = ""
             with path.open("rb") as fh:
                 tar.addfile(info, fh)
-    return out
 
 
 def unpack_bundle(archive: Path, manifest: ReleaseManifest, bundles_dir: Path) -> Path:

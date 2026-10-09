@@ -1,0 +1,80 @@
+{
+  "version": "demos-v1",
+  "demos": [
+    {
+      "demo_id": "clear",
+      "kind": "clear",
+      "title": "Clear: eleven fish moving right",
+      "summary": "A busy but clear near-range recording with fish moving right. Compare the automatic counts with the CFC reference, and step through the tracks as they cross the line.",
+      "source": {
+        "dataset": "Caltech Fish Counting (CFC) v1.1",
+        "location": "kenai-train",
+        "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_190000_2060_2260",
+        "split_note": "kenai-holdout-v1: a recording day never used for training or for choosing any setting"
+      },
+      "reference": {
+        "right": 11,
+        "left": 0
+      },
+      "framerate": 9.000008583068848,
+      "meters": {
+        "x_start": -2.2966863904199095,
+        "x_stop": 2.275832512871951,
+        "y_start": 9.480404834208208,
+        "y_stop": 3.3958868686457166
+      },
+      "num_frames": 200,
+      "sha256": "23f956da6fc4fb74b1bcc0345a0869301366afde26483636668cb2a805829e90"
+    },
+    {
+      "demo_id": "difficult",
+      "kind": "difficult",
+      "title": "Difficult: faint fish far from the sonar",
+      "summary": "A far-range recording where fish are small and faint, so the detector can miss them. Compare the automatic counts with the CFC reference; look for missed fish among the uncounted tracks and in the random audit windows, and add them with \"Add missed fish here\".",
+      "source": {
+        "dataset": "Caltech Fish Counting (CFC) v1.1",
+        "location": "kenai-train",
+        "clip_name": "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_001003_0_321",
+        "split_note": "kenai-holdout-v1: a recording day never used for training or for choosing any setting"
+      },
+      "reference": {
+        "right": 5,
+        "left": 0
+      },
+      "framerate": 8.0,
+      "meters": {
+        "x_start": -2.868275414023042,
+        "x_stop": 2.8672086677024,
+        "y_start": 21.983532438089654,
+        "y_stop": 7.926835180323213
+      },
+      "num_frames": 321,
+      "sha256": "10b451b3b3d8320cafb8a68984eadafd4e137af80e5a0f3525dbe369a0193d9a"
+    },
+    {
+      "demo_id": "unfamiliar-camera",
+      "kind": "unfamiliar-camera",
+      "title": "Unfamiliar camera: the Kenai channel sonar",
+      "summary": "A camera the model never saw in training (an official CFC test location), with fish moving both ways. Compare the automatic counts with the CFC reference, and check each track's direction.",
+      "source": {
+        "dataset": "Caltech Fish Counting (CFC) v1.1",
+        "location": "kenai-channel",
+        "clip_name": "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_110006_385_585",
+        "split_note": "official test location kenai-channel, evaluated once for release passagewatch-0.3.0; never used for training or tuning"
+      },
+      "reference": {
+        "right": 4,
+        "left": 2
+      },
+      "framerate": 8.0,
+      "meters": {
+        "x_start": -0.7847559986853061,
+        "x_stop": 0.7855319725061,
+        "y_start": 5.9974479336717,
+        "y_stop": 2.4733454361131066
+      },
+      "num_frames": 200,
+      "sha256": "ffb08036ffed907ea198cf01328d82c5035c8a0cb2cb74c040526c972d758eac"
+    }
+  ]
+}

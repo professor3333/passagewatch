@@ -54,6 +54,7 @@ from passagewatch.service.catalog import (
     register_pipeline_version,
 )
 from passagewatch.service.db import connect
+from passagewatch.service.demos import demo_listing, load_catalog
 from passagewatch.service.export import automatic_tracks, build_report, to_csv
 from passagewatch.service.jobs import (
     QUEUED,
@@ -109,6 +110,9 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         finally:
             conn.close()
         yield
+
+    # A configured catalog that cannot be read stops the service: demos are never guessed.
+    demos = None if settings.demo_catalog is None else load_catalog(settings.demo_catalog)
 
     app = FastAPI(title="PassageWatch", version=API_VERSION, lifespan=lifespan)
     app.add_middleware(_UploadSizeLimit, max_bytes=settings.max_upload_bytes)
@@ -198,6 +202,9 @@ def create_app(settings: ServiceSettings) -> FastAPI:
             if rate is None:
                 raise media.UploadRejectedError("framerate is required for a ZIP of frames")
             now = utc_now()
+            # A demo recording (docs/demos.md) is kept; every other upload expires.
+            is_demo = demos is not None and demos.by_sha256(saved.sha256) is not None
+            expires = None if is_demo else now + timedelta(hours=settings.upload_retention_hours)
             clip = add_clip(
                 conn,
                 clip_id=clip_id,
@@ -211,7 +218,7 @@ def create_app(settings: ServiceSettings) -> FastAPI:
                 framerate=rate,
                 meters=(x_meter_start, x_meter_stop, y_meter_start, y_meter_stop),
                 now=now,
-                expires_at=now + timedelta(hours=settings.upload_retention_hours),
+                expires_at=expires,
             )
         except media.UploadTooLargeError as exc:
             shutil.rmtree(clip_dir, ignore_errors=True)
@@ -230,6 +237,8 @@ def create_app(settings: ServiceSettings) -> FastAPI:
         clip = get_clip(conn, clip_id)
         if clip is None:
             raise HTTPException(404, f"unknown clip {clip_id}")
+        if demos is not None and demos.by_sha256(clip.sha256) is not None:
+            raise HTTPException(403, f"clip {clip_id} is a demo example and is kept")
         active = conn.execute(
             "SELECT COUNT(*) FROM jobs WHERE clip_id = ? AND status IN (?, ?)",
             (clip_id, QUEUED, RUNNING),
@@ -534,6 +543,16 @@ def create_app(settings: ServiceSettings) -> FastAPI:
     def metrics() -> Response:
         """Prometheus metrics (docs/operations.md)."""
         return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
+
+    @app.get("/v1/demos")
+    def get_demos(conn: Db) -> dict[str, Any]:
+        """The demo examples: precomputed (cached) results of CFC recordings, with their
+        reference counts. Open one by creating a job for its clip (a result-cache hit)."""
+        if demos is None:
+            return {"version": None, "demos": []}
+        bundle: ReleaseBundle | None = state["bundle"]
+        version = None if bundle is None else bundle.pipeline_version
+        return {"version": demos.version, "demos": demo_listing(conn, demos, version)}
 
     @app.get("/v1/model-info", response_model=ModelInfoOut)
     def model_info() -> ModelInfoOut:

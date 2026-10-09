@@ -38,6 +38,8 @@ class ServiceSettings(BaseModel):
     # The usability study (docs/usability_study.md): study pages and endpoints, off by default.
     study_mode: bool = False
     study_plan: Path | None = None
+    # Demo examples (docs/demos.md): the committed catalog; None disables them.
+    demo_catalog: Path | None = None
     # Port of the worker's Prometheus metrics endpoint; None disables it.
     worker_metrics_port: int | None = Field(default=None, gt=0, lt=65536)
     worker_poll_seconds: float = Field(default=2.0, gt=0)

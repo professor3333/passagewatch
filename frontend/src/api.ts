@@ -6,6 +6,7 @@ import type {
   Box,
   Clip,
   Counting,
+  DemoListing,
   Job,
   JobAccepted,
   Results,
@@ -84,6 +85,10 @@ export class PassageWatchApi {
       headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
       body: JSON.stringify({ clip_id: clipId, counting }),
     });
+  }
+
+  getDemos(): Promise<DemoListing> {
+    return this.request<DemoListing>("/v1/demos");
   }
 
   getJob(jobId: string): Promise<Job> {
