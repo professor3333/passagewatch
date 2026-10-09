@@ -85,7 +85,8 @@ training and validation data from Kenai.
   three demo examples (clear, difficult, unfamiliar camera), and a README, model card,
   dataset card, and architecture guide verified by another person.
   *Done when* the important work can be understood quickly and reproduced independently.
-  *In progress:* [study design and tooling](usability_study.md); sessions not yet run.
+  *In progress:* [study design](usability_study.md) and [results](usability_results.md)
+  (target not met); demo examples and the documentation check remain.
 
 ## Out of scope for Version 1
 
