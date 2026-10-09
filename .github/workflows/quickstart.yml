@@ -1,0 +1,79 @@
+# The README's Quick start, as a newcomer would run it on a fresh machine: clone, fetch the
+# release named in the README, build and start the Compose deployment, load the demo
+# examples, and verify the deployment against the release manifest. On linux/amd64, the
+# demos must count exactly as the release image did in its host-parity check
+# (releases/evaluations/<release>-host-parity/). Manual, and after each successful run of the
+# release workflow (its GITHUB_TOKEN-created release cannot trigger workflows by itself).
+name: quickstart
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [release]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  quickstart:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Release named in the README
+        id: readme
+        run: |
+          release=$(grep -o 'fetch_bundle.py --release passagewatch-[0-9.]*' README.md | head -1 | awk '{print $3}')
+          test -n "$release"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          echo "README Quick start uses $release"
+      - name: Fetch and activate the release bundle (README)
+        run: uv run python scripts/fetch_bundle.py --release "${{ steps.readme.outputs.release }}" --activate
+      - name: Start the service (README)
+        run: docker compose up -d --build
+      - name: Wait until ready (README)
+        run: |
+          for _ in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:8000/health/ready; then echo; exit 0; fi
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+      - name: Load the demo examples (README)
+        run: uv run python scripts/load_demos.py --url http://127.0.0.1:8000
+      - name: Verify the deployment against its manifest
+        run: uv run python scripts/verify_deployment.py --url http://127.0.0.1:8000
+      - name: Demo counts equal the release image's host-parity counts
+        env:
+          RELEASE: ${{ steps.readme.outputs.release }}
+        run: |
+          uv run python - <<'EOF'
+          import json, os, sys, urllib.request
+          from pathlib import Path
+
+          release = os.environ["RELEASE"]
+          path = Path(f"releases/evaluations/{release}-host-parity/linux-amd64-image.json")
+          if not path.is_file():
+              print(f"no host-parity record for {release}; counts not compared")
+              sys.exit(0)
+          expected = {k: v["counts"] for k, v in json.loads(path.read_text())["demos"].items()}
+
+          def get(url):
+              with urllib.request.urlopen("http://127.0.0.1:8000" + url) as response:
+                  return json.load(response)
+
+          failed = False
+          for demo in get("/v1/demos")["demos"]:
+              auto = get(f"/v1/jobs/{demo['job_id']}/results")["automatic"]
+              got = {"right": auto["right"], "left": auto["left"]}
+              ok = got == expected[demo["demo_id"]]
+              failed |= not ok
+              print(f"{demo['demo_id']}: {got} expected {expected[demo['demo_id']]}", "ok" if ok else "DIFFERENT")
+          sys.exit(1 if failed else 0)
+          EOF
+      - name: Service logs
+        if: always()
+        run: docker compose logs --tail 200
