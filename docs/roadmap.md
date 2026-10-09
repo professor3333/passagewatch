@@ -36,8 +36,9 @@ training and validation data from Kenai.
   small training subset, with configuration files, checkpoints, resume, and MLflow tracking.
   *Done when* training can be reproduced and resumed, and it detects fish usefully on unseen
   validation sequences.
-  *Done:* [training](training.md), [neural baseline](neural_baseline.md). Metrics are logged
-  to `metrics.jsonl` and `run.json` per run, not to MLflow.
+  *Done:* [training](training.md), [neural baseline](neural_baseline.md). Each run's
+  `run.json` and `metrics.jsonl` are imported into a local MLflow store afterwards (added at
+  Stage 12; training runs on Kaggle, which cannot reach a tracking server).
 - [x] **5. Detection, tracking, and counting** — neural detections through the tracker,
   a comparison with the classical pipeline, ByteTrack as a separate experiment, and
   timestamped evidence with full provenance.

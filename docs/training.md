@@ -85,7 +85,38 @@ When the version finishes, open it and go to **Output**. The run directory
 
 Download the directory and put it at `models/runs/yolox-tiny-v1/` in your local clone
 (`models/` is not committed). The next step chooses the released epoch by **counting
-nMAE on kenai-val** through the full pipeline, not by training loss.
+nMAE on kenai-val** through the full pipeline, not by training loss. Then record the run
+in MLflow (`make mlflow-import`, below).
+
+## Experiment tracking (MLflow)
+
+Training runs on Kaggle, which cannot reach a tracking server on your machine. Each run
+therefore writes its own record (`run.json`, `metrics.jsonl`), and
+`scripts/log_to_mlflow.py` imports it into a local MLflow store once the run is downloaded.
+It also imports the counting evaluations of the run's checkpoints
+(`runs/neural/<run>/report-*.json`).
+
+```bash
+make mlflow-import   # uv run scripts/log_to_mlflow.py: every run under models/runs/
+make mlflow-ui       # http://127.0.0.1:5050, then choose "Model training"
+```
+
+| Experiment | One MLflow run per | Parameters | Metrics | Tags and artifacts |
+|---|---|---|---|---|
+| `training` | training run | the resolved config (flattened), the Python, NumPy, PyTorch and sampler seeds, sample counts | losses, learning rate, throughput; step = global iteration | git commit and dirty flag, device, library versions, data manifest and its hash, SHA-256 of each checkpoint; `run.json`, `metrics.jsonl`, the training config |
+| `evaluation` | evaluation report | manifest, partition, frames, tracker, runtime | `nmae/t<threshold>`, `missed/…`, `false/…`, `recall/…`, `precision/…`; step = epoch, so each threshold is a curve over epochs; `best/*` for the selected setting | the selected epoch and threshold, the training run's MLflow ID; the report |
+
+- **Importing again is safe.** A record whose source files have not changed is skipped, and
+  a changed one is added as a new MLflow run.
+- **Times are import times.** The training files record no wall-clock times, so MLflow's
+  "Created" and "Duration" show when the record was imported.
+- **The store** is `mlruns/` (SQLite and artifacts), which is not committed. The source
+  files remain the record of truth, and the store can be rebuilt from them at any time.
+- **MLflow is not a project dependency.** MLflow 3.16 needs protobuf below 7, and adding it
+  to the project's lock would change the protobuf version the service runs (through ONNX
+  Runtime). The script declares `mlflow==3.16.1` in inline metadata, locked in
+  `scripts/log_to_mlflow.py.lock`, and `uv run` gives it its own environment. The UI runs
+  the same version through `uvx`.
 
 ## If a run stops early
 
@@ -144,8 +175,8 @@ See the docstring of `passagewatch.training.yolox_train` for details.
 - **Reproducibility:** fixed seeds for Python, NumPy and PyTorch, plus a seeded per-epoch
   sample order. Augmentation is seeded per (seed, epoch, sample). A resumed run is
   bit-identical to an uninterrupted one on CPU (tested).
-- **Not yet:** MLflow tracking. Metrics go to `metrics.jsonl` and `run.json`, which a later
-  stage can import.
+- **Tracking:** each run's `run.json` and `metrics.jsonl` are imported into MLflow
+  ([above](#experiment-tracking-mlflow)).
 
 ## Evaluating a release on the test locations (Kaggle)
 

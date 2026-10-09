@@ -299,7 +299,7 @@ docs/                 design, cards, results, operations, architecture
 
 | Layer | Tools |
 |---|---|
-| Modeling | PyTorch, YOLOX (Apache-2.0, vendored at a pinned commit), OpenCV, NumPy |
+| Modeling | PyTorch, YOLOX (Apache-2.0, vendored at a pinned commit), OpenCV, NumPy, MLflow (experiment tracking) |
 | Data | Parquet manifests, SHA-256 inventories, CaltechDATA downloads |
 | Serving | FastAPI, Pydantic, SQLite (WAL), ONNX Runtime (CPU) |
 | Frontend | TypeScript, Vite, Vitest (no framework) |
@@ -312,6 +312,7 @@ docs/                 design, cards, results, operations, architecture
 make install    # create the virtual environment and install dependencies (uv)
 make check      # ruff, mypy, and the fast tests (no network or dataset needed)
 npm --prefix frontend ci && npm --prefix frontend test   # frontend unit tests
+make mlflow-import && make mlflow-ui   # training runs and evaluations in MLflow
 ```
 
 - **Test priorities.** The tests cover what could silently change a count: the coordinate
