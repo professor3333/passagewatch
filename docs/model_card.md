@@ -1,6 +1,9 @@
 # Model Card: PassageWatch fish detector and counting pipeline
 
-This card describes the pipeline of release **`passagewatch-0.3.0`**. That release uses the
+This card describes the pipeline of release **`passagewatch-0.3.1`**. Its bundle is
+`passagewatch-0.3.0`'s with only the version name changed: the same checkpoint, ONNX export,
+threshold, tracker, counting policy and calibration, so every result for 0.3.0 applies to it.
+0.3.1 ships the review-panel change and the demo examples. That pipeline uses the
 detector `yolox-tiny-t1`, epoch 25, at score threshold 0.4, with the `classical-v2` Kalman
 tracker, counting policy `cfc-compatible-v1` and calibration version `review-v0`. All results
 below come from development data, except the test-location section, which reports the

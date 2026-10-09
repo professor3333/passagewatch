@@ -133,7 +133,7 @@ are not in git: each release's bundle (configuration, trained detector and its O
 
 ```bash
 git clone https://github.com/professor3333/passagewatch.git && cd passagewatch
-uv run python scripts/fetch_bundle.py --release passagewatch-0.3.0 --activate   # verified against the release manifest
+uv run python scripts/fetch_bundle.py --release passagewatch-0.3.1 --activate   # verified against the release manifest
 docker compose up -d --build
 curl http://127.0.0.1:8000/health/ready
 ```
@@ -180,6 +180,10 @@ If port 8000 is taken, set another with `PASSAGEWATCH_HTTP_PORT=8010 docker comp
 bundle (CI runs it).
 
 ## 📊 Results
+
+Release `passagewatch-0.3.1` runs the same pipeline as `passagewatch-0.3.0`: only the
+version name differs, and its release manifest records the same checkpoint, ONNX export and
+evaluations. The results below were measured as 0.3.0 and apply to both.
 
 ### Official test locations
 
@@ -343,7 +347,7 @@ release bundle yourself from the trained checkpoint (`models/runs/yolox-tiny-t1/
 uv run python scripts/export_onnx.py --checkpoint models/runs/yolox-tiny-t1/epoch-025.pt \
     --out models/onnx/yolox-tiny-t1-epoch-025.onnx \
     --frames data/extracted/cfc/kenai-dev-v1/kenai-val/2018-06-03-JD154_LeftNear_Stratum1_Set1_LN_2018-06-03_210000_2467_3008
-uv run python scripts/build_bundle.py --version passagewatch-0.3.0 \
+uv run python scripts/build_bundle.py --version passagewatch-0.3.1 \
     --checkpoint models/runs/yolox-tiny-t1/epoch-025.pt --score-threshold 0.4 \
     --tracking-config configs/tracking/classical-v2.yaml --selection docs/error_analysis.md \
     --calibration-version review-v0 --onnx models/onnx/yolox-tiny-t1-epoch-025.onnx --activate
@@ -364,8 +368,8 @@ the GitHub release.
   must complete (`scripts/verify_deployment.py`).
 - **Roll back.** Point `bundles/active` at the previous bundle and restart with the matching
   image:
-  - `scripts/fetch_bundle.py --release passagewatch-0.2.0 --tag passagewatch-0.3.0 --activate`
-  - or `ln -sfn passagewatch-0.2.0 bundles/active`
+  - `scripts/fetch_bundle.py --release passagewatch-0.3.0 --activate`, the previous release
+  - or `ln -sfn passagewatch-0.3.0 bundles/active` when it is already downloaded
 
   Existing jobs keep the versions recorded for them. The A → B → A rollback is an
   integration test.
