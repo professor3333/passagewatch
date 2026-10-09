@@ -10,6 +10,10 @@ difference can be measured.
 It uses only interfaces that release ``passagewatch-0.3.0`` already had, so it also runs
 inside that release's image (``.github/workflows/host-parity.yml``).
 
+With ``--torch`` the bundle's checkpoint runs with PyTorch on the CPU instead of its ONNX
+export (a temporary copy of the bundle declares the PyTorch runtime), as an independent
+implementation to compare each host's ONNX Runtime against.
+
 Example:
     uv run python scripts/host_parity.py --archive dist/passagewatch-demos-v1.tar.gz \\
         --bundle bundles/passagewatch-0.3.0 --out runs/host-parity/mac.json
@@ -21,6 +25,7 @@ import argparse
 import hashlib
 import json
 import platform
+import shutil
 import sys
 import tarfile
 import tempfile
@@ -104,15 +109,28 @@ def main() -> int:
     parser.add_argument("--bundle", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--threads", type=int, default=4)
+    parser.add_argument("--torch", action="store_true", help="run the checkpoint with PyTorch")
     args = parser.parse_args()
 
-    pipeline = InferencePipeline.load(args.bundle, device="cpu", batch_size=8, threads=args.threads)
+    with tempfile.TemporaryDirectory() as tmp:
+        bundle_dir = args.bundle
+        if args.torch:
+            bundle_dir = Path(tmp) / "bundle"
+            shutil.copytree(args.bundle, bundle_dir)
+            spec = json.loads((bundle_dir / "bundle.json").read_text(encoding="utf-8"))
+            for name in ("runtime", "onnx_file", "onnx_sha256"):
+                spec["detector"].pop(name, None)
+            (bundle_dir / "bundle.json").write_text(json.dumps(spec), encoding="utf-8")
+        pipeline = InferencePipeline.load(
+            bundle_dir, device="cpu", batch_size=8, threads=args.threads
+        )
     import cv2
     import onnxruntime
     import torch
 
     report: dict[str, Any] = {
         "bundle": pipeline.version,
+        "runtime": "torch" if args.torch else pipeline.bundle.detector.runtime,
         "host": {
             "machine": platform.machine(),
             "system": platform.system(),
