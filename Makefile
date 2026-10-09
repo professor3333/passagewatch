@@ -1,4 +1,4 @@
-.PHONY: install lint format typecheck test check data-tiny validate-tiny manifest-tiny data-kenai-dev data-kenai-holdout
+.PHONY: install lint format typecheck test check data-tiny validate-tiny manifest-tiny data-kenai-dev data-kenai-holdout mlflow-import mlflow-ui
 
 install:
 	uv sync
@@ -37,3 +37,12 @@ data-kenai-holdout:
 	uv run python scripts/build_manifest.py --version full-v3 \
 		--frames-subset configs/data/kenai_subset.yaml \
 		--frames-subset configs/data/kenai_holdout.yaml
+
+# Experiment tracking (docs/training.md#experiment-tracking-mlflow). MLflow runs in its own
+# environment, never in the project's: it would pin protobuf for the service too.
+mlflow-import:
+	uv run scripts/log_to_mlflow.py
+
+mlflow-ui:
+	uvx --from 'mlflow==3.16.1' mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db \
+		--host 127.0.0.1 --port 5050
