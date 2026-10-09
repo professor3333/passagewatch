@@ -181,4 +181,5 @@ What this establishes, on new days of the same cameras:
   are missed rather than finding them all.
 
 The design's independently reviewed sample (a reviewer other than the reference labels) is
-still to do and needs the project owner's time.
+prepared: 50 kenai-holdout-v1 clips for the project owner, 15 of them also for a second
+reviewer ([protocol](review_sample.md)). It waits for the reviewers' time.

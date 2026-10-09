@@ -139,6 +139,11 @@ they are not results of the declared analysis.
 
 ## Reproducing
 
+The selection excludes every clip the documentation names, so it depends on the
+documentation at preparation time. `scripts/prepare_usability_study.py --dry-run`
+reproduces `study/plan.json` at commit `dda937d^`, the commit it was prepared on (checked on
+2026-10-09). Later commits name more clips (the demo examples, for one) and select others.
+
 The records are committed in `study/`: `plan.json` (the selection, written before the first
 session), `trials.csv`, `questionnaires.csv`, `review_actions.csv` and `results.json`.
 
