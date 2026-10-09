@@ -178,7 +178,8 @@ Open **http://127.0.0.1:8000/** for the review interface:
 2. Follow the analysis, then play the recording with tracked fish and the counting line
    drawn on it.
 3. Accept, reject, correct or mark each track unresolved, or add fish the model missed.
-   Keyboard shortcuts are listed under the player.
+   A track the model did not count is counted only with an explicit **Count as passage**
+   button. Keyboard shortcuts are listed under the player.
 4. Compare automatic and reviewed counts, and export the report as CSV or JSON.
 
 The same steps through the API, for a recording that is a ZIP of frames `0.jpg … N-1.jpg`

@@ -1,6 +1,6 @@
 // Review logic that does not touch the DOM: ordering, labels, colors, and counts.
 
-import type { AuditWindow, Counts, ImageDirection, ReviewState, Track, Triage } from "./types";
+import type { AuditWindow, Counts, ImageDirection, ReviewRequest, ReviewState, Track, Triage } from "./types";
 
 const TRIAGE_RANK: Record<Triage, number> = { unresolved: 0, needs_review: 1, suggested: 2 };
 
@@ -104,6 +104,63 @@ export function directionLabel(direction: ImageDirection | null, upstream: Image
   const arrow = directionArrow(direction);
   if (upstream === null) return `${arrow} ${direction}`;
   return `${arrow} ${direction === upstream ? "upstream" : "downstream"}`;
+}
+
+/** One review action offered for a track; ``key`` is its keyboard shortcut, if any. */
+export interface TrackAction {
+  label: string;
+  key: string | null;
+  request: Omit<ReviewRequest, "base_revision">;
+}
+
+const OPPOSITE: Record<ImageDirection, ImageDirection> = { right: "left", left: "right" };
+const DIRECTION_KEYS: Record<ImageDirection, string> = { right: "r", left: "l" };
+
+/**
+ * The actions offered for a track, by what the release decided about it.
+ *
+ * A counted passage can be accepted, rejected, or changed to the other direction. A track
+ * the release did not count can be kept uncounted or, deliberately, counted: those buttons
+ * say "Count as passage" and have no keyboard shortcut. (In the usability study, "Set →
+ * right" offered on every track was read as describing the fish's movement, and 36 of 38
+ * uses turned non-passing tracks into passages; docs/usability_results.md.)
+ */
+export function trackActions(track: Track, upstream: ImageDirection | null): TrackAction[] {
+  const id = track.track_id;
+  const unresolved: TrackAction = { label: "Unresolved (u)", key: "u", request: { action: "mark_unresolved", track_id: id } };
+  if (track.direction === null) {
+    return [
+      { label: "Keep uncounted (a)", key: "a", request: { action: "accept", track_id: id } },
+      ...(["right", "left"] as const).map((direction) => ({
+        label: `Count as passage ${directionLabel(direction, upstream)}`,
+        key: null,
+        request: { action: "set_direction" as const, track_id: id, direction },
+      })),
+      unresolved,
+    ];
+  }
+  const other = OPPOSITE[track.direction];
+  return [
+    { label: `Accept ${directionLabel(track.direction, upstream)} (a)`, key: "a", request: { action: "accept", track_id: id } },
+    {
+      label: `Change to ${directionLabel(other, upstream)} (${DIRECTION_KEYS[other]})`,
+      key: DIRECTION_KEYS[other],
+      request: { action: "set_direction", track_id: id, direction: other },
+    },
+    { label: "Not a fish: don't count (x)", key: "x", request: { action: "reject", track_id: id } },
+    unresolved,
+  ];
+}
+
+/** Why the release did not count a track; null for a counted passage. */
+export function uncountedReason(track: Track): string | null {
+  if (track.outcome === "stationary") return "Not counted: the track barely moves.";
+  if (track.outcome === "no_crossing")
+    return (
+      "Not counted: the track does not end on the other side of the counting line " +
+      "(a fish that crosses and comes back counts zero)."
+    );
+  return null;
 }
 
 export function formatTime(seconds: number): string {
