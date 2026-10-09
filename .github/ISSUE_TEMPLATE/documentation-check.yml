@@ -1,0 +1,51 @@
+name: Documentation check
+description: Report from the independent check of the documentation (docs/independent_check.md)
+title: "Documentation check: "
+labels: [documentation]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for checking PassageWatch's documentation. Follow
+        [docs/independent_check.md](https://github.com/professor3333/passagewatch/blob/main/docs/independent_check.md),
+        then fill in this form. Short answers are fine.
+  - type: dropdown
+    id: built
+    attributes:
+      label: Did you take part in building PassageWatch?
+      options:
+        - "No"
+        - "Yes"
+    validations:
+      required: true
+  - type: textarea
+    id: answers
+    attributes:
+      label: Your answers to the six questions (without looking back)
+      description: Problem and users; output and what a technician does; "crosses and comes back"; test accuracy and baselines; two things it is not for; data source and license.
+    validations:
+      required: true
+  - type: textarea
+    id: unclear
+    attributes:
+      label: What was unclear, wrong or missing in the documents?
+      description: Name the document and section for each point.
+    validations:
+      required: true
+  - type: textarea
+    id: run
+    attributes:
+      label: What happened when you ran it?
+      description: Which steps you ran (make install, make check, Quick start, demo review, export), what worked, and any error messages.
+    validations:
+      required: true
+  - type: input
+    id: machine
+    attributes:
+      label: Machine and operating system
+      placeholder: e.g. Ubuntu 24.04 on x86-64, Docker 28; or macOS 15 on Apple M2, no Docker
+  - type: input
+    id: times
+    attributes:
+      label: Time spent on reading / running / reporting
+      placeholder: e.g. 30 / 20 / 10 minutes

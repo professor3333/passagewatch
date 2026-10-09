@@ -205,7 +205,10 @@ A manifest can only be rewritten unchanged, apart from filling in the image dige
 Checked against a local deployment of `passagewatch-0.3.0`: it verified, and a manifest
 altered in one field (the threshold) was reported as that exact difference. `passagewatch-0.3.1` was verified the same way on 2026-10-09: its bundle downloaded
 from the GitHub release and matched its manifest, the deployment verified, and the demos
-loaded.
+loaded. The Docker Compose deployment was checked by the `quickstart` workflow (run
+37898091536, linux/amd64). It follows the README's Quick start on a fresh runner, and the
+deployment verified against its manifest. The demos counted exactly as in the image's
+host-parity record. The workflow runs again after every successful release.
 
 **Release 0.3.1 counts exactly like 0.3.0.** The `host-parity` workflow ran both releases'
 images (by their manifest digests) on the demo recordings. Every stage is bit-identical
