@@ -87,8 +87,8 @@ training and validation data from Kenai.
   dataset card, and architecture guide verified by another person.
   *Done when* the important work can be understood quickly and reproduced independently.
   *In progress:* [study design](usability_study.md) and [results](usability_results.md)
-  (target not met), and the [demo examples](demos.md); the documentation check by another
-  person remains.
+  (target not met), and the [demo examples](demos.md). Remaining: the
+  [independent check](independent_check.md) of the documentation by another person.
 
 ## Out of scope for Version 1
 

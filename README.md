@@ -420,11 +420,12 @@ GitHub releases), runs, caches and service data.
 | [Operations](docs/operations.md) | Performance profile, reliability, hardening, releases, monitoring |
 | [Architecture](docs/architecture.md) | API, worker, job lifecycle, storage, release bundles, configuration |
 | [Roadmap](docs/roadmap.md) | Twelve stages, each with its completion test |
+| [Independent check](docs/independent_check.md) | How someone who did not build it checks the documentation and reports back |
 | [Design](docs/design.md) | The full system design |
 
 **Status: Stage 12 of 12** ([roadmap](docs/roadmap.md)). The pipeline, review service and
 release are complete and evaluated, and the usability study and the demo examples are done.
-The remaining work is an independent check of the documentation.
+The remaining work is an [independent check](docs/independent_check.md) of the documentation.
 
 ## 🙏 Acknowledgements and license
 
