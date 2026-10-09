@@ -20,6 +20,8 @@ import {
   nextUnreviewed,
   reasonText,
   reviewOrder,
+  trackActions,
+  uncountedReason,
 } from "./review";
 import type { AddedPassage, Audit, Clip, ImageDirection, Job, Results, ReviewRequest, Track } from "./types";
 
@@ -273,7 +275,7 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
       el("kbd", {}, "n"), " next unreviewed · ",
       el("kbd", {}, "a"), " accept · ",
       el("kbd", {}, "x"), " reject · ",
-      el("kbd", {}, "r"), el("kbd", {}, "l"), " direction · ",
+      el("kbd", {}, "r"), el("kbd", {}, "l"), " change a counted passage's direction · ",
       el("kbd", {}, "u"), " unresolved",
     ),
   );
@@ -478,15 +480,10 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
             ),
           ]
         : []),
-      el(
-        "div",
-        { class: "actions" },
-        button("Accept (a)", { action: "accept", track_id: track.track_id }),
-        button("Reject (x)", { action: "reject", track_id: track.track_id }),
-        button(`Set ${directionLabel("right", upstream)} (r)`, { action: "set_direction", track_id: track.track_id, direction: "right" }),
-        button(`Set ${directionLabel("left", upstream)} (l)`, { action: "set_direction", track_id: track.track_id, direction: "left" }),
-        button("Unresolved (u)", { action: "mark_unresolved", track_id: track.track_id }),
-      ),
+      ...(uncountedReason(track) === null
+        ? []
+        : [el("p", {}, `${uncountedReason(track)} Count it only if the fish really crossed and stayed across.`)]),
+      el("div", { class: "actions" }, ...trackActions(track, upstream).map((a) => button(a.label, a.request))),
       addMissing,
     );
   }
@@ -628,7 +625,6 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
   const onKey = (event: KeyboardEvent): void => {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) return;
     const track = state.tracks.find((t) => t.track_id === state.selected);
-    const id = track?.track_id;
     const keys: Record<string, () => void> = {
       " ": togglePlay,
       ArrowLeft: () => seek(state.frame - 1),
@@ -636,12 +632,10 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
       j: () => selectRelative(-1),
       k: () => selectRelative(1),
       n: () => select(nextUnreviewed(state.tracks, state.selected)?.track_id ?? null),
-      a: () => id !== undefined && void act({ action: "accept", track_id: id }),
-      x: () => id !== undefined && void act({ action: "reject", track_id: id }),
-      r: () => id !== undefined && void act({ action: "set_direction", track_id: id, direction: "right" }),
-      l: () => id !== undefined && void act({ action: "set_direction", track_id: id, direction: "left" }),
-      u: () => id !== undefined && void act({ action: "mark_unresolved", track_id: id }),
     };
+    for (const action of track ? trackActions(track, upstream) : []) {
+      if (action.key !== null) keys[action.key] = () => void act(action.request);
+    }
     const handler = keys[event.key];
     if (handler) {
       event.preventDefault();

@@ -9,7 +9,9 @@ import {
   nextUnreviewed,
   reasonText,
   reviewOrder,
+  trackActions,
   tracksAt,
+  uncountedReason,
 } from "./review";
 import type { AuditWindow, Counts, Track } from "./types";
 
@@ -134,5 +136,43 @@ describe("counts panel", () => {
 describe("newIdempotencyKey", () => {
   it("prefixes a random value", () => {
     expect(newIdempotencyKey(() => "abc")).toBe("ui-abc");
+  });
+});
+
+describe("trackActions", () => {
+  const uncounted: Track = { ...track(7, 0), outcome: "no_crossing", direction: null, final_direction: null };
+
+  it("offers a counted passage acceptance, the other direction and rejection", () => {
+    const actions = trackActions(track(3, 0), null);
+    expect(actions.map((a) => [a.label, a.key])).toEqual([
+      ["Accept → right (a)", "a"],
+      ["Change to ← left (l)", "l"],
+      ["Not a fish: don't count (x)", "x"],
+      ["Unresolved (u)", "u"],
+    ]);
+    expect(actions[1]?.request).toEqual({ action: "set_direction", track_id: 3, direction: "left" });
+  });
+
+  it("counts an uncounted track only through an explicit button without a shortcut", () => {
+    const actions = trackActions(uncounted, null);
+    expect(actions.map((a) => a.label)).toEqual([
+      "Keep uncounted (a)",
+      "Count as passage → right",
+      "Count as passage ← left",
+      "Unresolved (u)",
+    ]);
+    const counting = actions.filter((a) => a.request.action === "set_direction");
+    expect(counting.map((a) => a.key)).toEqual([null, null]);
+    expect(actions[0]?.request).toEqual({ action: "accept", track_id: 7 });
+  });
+
+  it("uses river directions when orientation is configured", () => {
+    expect(trackActions(uncounted, "right")[1]?.label).toBe("Count as passage → upstream");
+  });
+
+  it("explains why a track was not counted", () => {
+    expect(uncountedReason(track(3, 0))).toBeNull();
+    expect(uncountedReason(uncounted)).toMatch(/does not end on the other side/);
+    expect(uncountedReason({ ...uncounted, outcome: "stationary" })).toMatch(/barely moves/);
   });
 });

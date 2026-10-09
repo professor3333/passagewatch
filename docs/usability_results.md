@@ -120,6 +120,12 @@ they are not results of the declared analysis.
   → / ←", so that a track is counted only on purpose. A bulk "accept the suggested tracks"
   action would also cut per-track clicks. Any re-test needs a newly declared design and
   participants who have not seen these clips.
+- *Update, 2026-10-09:* the review panel now offers different actions by the release's
+  decision. A counted passage has **Accept**, **Change to** the other direction, **Not a
+  fish: don't count** and **Unresolved**. A track that was not counted shows why, and has
+  **Keep uncounted**, **Count as passage → / ←** (buttons only, no keyboard shortcut) and
+  **Unresolved**. The API is unchanged. Whether this helps reviewers has **not been
+  measured**: the results above are for the interface as it was in the study.
 
 ## Limitations
 
