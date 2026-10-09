@@ -1,0 +1,917 @@
+{
+  "design": "docs/review_sample.md",
+  "release": "passagewatch-0.3.1",
+  "seed": 0,
+  "excluded": [
+    "2018-05-27-JD147_LeftFar_Stratum1_Set1_LO_2018-05-27_220004_4667_4867",
+    "2018-05-30-JD150_LeftFar_Stratum1_Set1_LO_2018-05-30_230004_2222_2422",
+    "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_151003_1536_1736",
+    "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_181004_3892_4109",
+    "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_211003_358_561",
+    "2018-05-30-JD150_LeftNear_Stratum1_Set1_LN_2018-05-30_150000_0_303",
+    "2018-06-02-JD153_LeftFar_Stratum1_Set1_LO_2018-06-02_100004_437_646",
+    "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_001003_0_321",
+    "2018-06-06-JD157_LeftFar_Stratum1_Set1_LO_2018-06-06_120004_2956_3156",
+    "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_010000_669_869",
+    "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_100000_4151_4351",
+    "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_120000_3529_3729",
+    "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_130000_1422_1622",
+    "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_190000_2060_2260",
+    "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_210000_3424_3624",
+    "2018-06-09-JD160_LeftNear_Stratum1_Set1_LN_2018-06-09_160000_633_833"
+  ],
+  "clips": {
+    "s01": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_160000_4408_4949",
+      "clip_id": "clip_385744485ea145e4",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        11,
+        0
+      ],
+      "automatic": [
+        10,
+        0
+      ]
+    },
+    "s02": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum3_Set1_LO_2018-05-27_042000_944_1144",
+      "clip_id": "clip_4669dbc071564dbf",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 6.6929030418396,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s03": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_071003_1756_1956",
+      "clip_id": "clip_1b537faf923249ad",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 8.0,
+      "reference": [
+        0,
+        2
+      ],
+      "automatic": [
+        0,
+        2
+      ]
+    },
+    "s04": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum1_Set1_LO_2018-05-27_160004_4822_5422",
+      "clip_id": "clip_4cff5abe04d94d95",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s05": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_190000_1627_1827",
+      "clip_id": "clip_166e6d0081d54392",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        5,
+        0
+      ],
+      "automatic": [
+        5,
+        0
+      ]
+    },
+    "s06": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_220000_1237_1778",
+      "clip_id": "clip_a1209f15a5084dd5",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        5,
+        0
+      ],
+      "automatic": [
+        5,
+        0
+      ]
+    },
+    "s07": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_220000_3106_3647",
+      "clip_id": "clip_d5c4d0ec280d4edd",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        2,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "s08": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum2_Set1_LO_2018-05-27_151003_823_1025",
+      "clip_id": "clip_c693e5ae3d484b5d",
+      "camera": "LeftFar",
+      "num_frames": 202,
+      "framerate": 8.0,
+      "reference": [
+        0,
+        1
+      ],
+      "automatic": [
+        1,
+        1
+      ]
+    },
+    "s09": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum3_Set1_LO_2018-05-30_192000_0_292",
+      "clip_id": "clip_a05a17c930c34603",
+      "camera": "LeftFar",
+      "num_frames": 292,
+      "framerate": 6.6929030418396,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s10": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_061003_397_877",
+      "clip_id": "clip_49bed6aa0d424bdf",
+      "camera": "LeftFar",
+      "num_frames": 480,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s11": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum3_Set1_LO_2018-05-30_232000_599_1000",
+      "clip_id": "clip_82454e6e004845b4",
+      "camera": "LeftFar",
+      "num_frames": 401,
+      "framerate": 6.6929030418396,
+      "reference": [
+        0,
+        0
+      ],
+      "automatic": [
+        0,
+        0
+      ]
+    },
+    "s12": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum1_Set1_LO_2018-06-02_170004_4795_5395",
+      "clip_id": "clip_00a6df8ad9f8488b",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        9,
+        0
+      ],
+      "automatic": [
+        8,
+        0
+      ]
+    },
+    "s13": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum1_Set1_LO_2018-06-02_150004_1365_1965",
+      "clip_id": "clip_6799b725e2d2435c",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        2,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "s14": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_161003_542_1022",
+      "clip_id": "clip_921d4cee467a40eb",
+      "camera": "LeftFar",
+      "num_frames": 480,
+      "framerate": 8.0,
+      "reference": [
+        3,
+        0
+      ],
+      "automatic": [
+        3,
+        0
+      ]
+    },
+    "s15": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_220000_2315_2856",
+      "clip_id": "clip_74bad8b0f0bd4cc5",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        8,
+        0
+      ],
+      "automatic": [
+        8,
+        0
+      ]
+    },
+    "s16": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum2_Set1_LO_2018-05-30_071003_1185_1385",
+      "clip_id": "clip_05cea2dad59c458f",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 8.0,
+      "reference": [
+        0,
+        2
+      ],
+      "automatic": [
+        1,
+        2
+      ]
+    },
+    "s17": {
+      "clip_name": "2018-05-30-JD150_LeftNear_Stratum1_Set1_LN_2018-05-30_200000_4646_5187",
+      "clip_id": "clip_e59ae3d8749c4777",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s18": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_170000_3423_3964",
+      "clip_id": "clip_d0915eeb7b6c4a41",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        27,
+        0
+      ],
+      "automatic": [
+        27,
+        0
+      ]
+    },
+    "s19": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum1_Set1_LO_2018-06-02_190004_3716_4316",
+      "clip_id": "clip_9167baa8b84e47d2",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        1,
+        1
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s20": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_101003_2886_3366",
+      "clip_id": "clip_3a0234c40146445d",
+      "camera": "LeftFar",
+      "num_frames": 480,
+      "framerate": 8.0,
+      "reference": [
+        0,
+        1
+      ],
+      "automatic": [
+        0,
+        0
+      ]
+    },
+    "s21": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_131004_0_469",
+      "clip_id": "clip_a9ae689aa4bd4a5d",
+      "camera": "LeftFar",
+      "num_frames": 469,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s22": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum1_Set1_LO_2018-05-27_190004_875_1092",
+      "clip_id": "clip_bc99cd37a2624a80",
+      "camera": "LeftFar",
+      "num_frames": 217,
+      "framerate": 10.0,
+      "reference": [
+        2,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "s23": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum1_Set1_LO_2018-06-02_170004_3288_3888",
+      "clip_id": "clip_bfb2ff478d124ea0",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        6,
+        0
+      ],
+      "automatic": [
+        7,
+        0
+      ]
+    },
+    "s24": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum1_Set1_LO_2018-05-30_000004_2202_2802",
+      "clip_id": "clip_5863273c0d7e409c",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        0,
+        0
+      ],
+      "automatic": [
+        1,
+        1
+      ]
+    },
+    "s25": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum1_Set1_LO_2018-05-27_160004_985_1585",
+      "clip_id": "clip_acb94648b6754d0d",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        2,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "s26": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_050000_3728_3928",
+      "clip_id": "clip_0ca6d735954b4a1b",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        4,
+        0
+      ],
+      "automatic": [
+        4,
+        0
+      ]
+    },
+    "s27": {
+      "clip_name": "2018-05-30-JD150_LeftNear_Stratum1_Set1_LN_2018-05-30_170000_1680_2221",
+      "clip_id": "clip_e9f05e5bba9849d0",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        2,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s28": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum1_Set1_LO_2018-05-27_230004_1594_1851",
+      "clip_id": "clip_e84afdbd7fed4778",
+      "camera": "LeftFar",
+      "num_frames": 257,
+      "framerate": 10.0,
+      "reference": [
+        3,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s29": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum1_Set1_LO_2018-05-27_110004_3216_3816",
+      "clip_id": "clip_d7e090e0120e4022",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        1,
+        1
+      ],
+      "automatic": [
+        1,
+        1
+      ]
+    },
+    "s30": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_230000_4162_4703",
+      "clip_id": "clip_975c12c9d0624d35",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        6,
+        0
+      ],
+      "automatic": [
+        5,
+        0
+      ]
+    },
+    "s31": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_151003_3655_3855",
+      "clip_id": "clip_c2ddd53d812c48d9",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        1
+      ],
+      "automatic": [
+        1,
+        1
+      ]
+    },
+    "s32": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_191003_2616_3096",
+      "clip_id": "clip_8bccdbb669644b08",
+      "camera": "LeftFar",
+      "num_frames": 480,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s33": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_200000_3113_3313",
+      "clip_id": "clip_0b6d509e3fb445f5",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        2,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "s34": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum3_Set1_LO_2018-05-27_102000_2558_2959",
+      "clip_id": "clip_fdc64eef24c44d0f",
+      "camera": "LeftFar",
+      "num_frames": 401,
+      "framerate": 6.6929030418396,
+      "reference": [
+        0,
+        1
+      ],
+      "automatic": [
+        0,
+        0
+      ]
+    },
+    "s35": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_210000_4424_4965",
+      "clip_id": "clip_2beeafb8c1d645be",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        7,
+        0
+      ],
+      "automatic": [
+        6,
+        0
+      ]
+    },
+    "s36": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum3_Set1_LO_2018-06-02_052000_2275_2676",
+      "clip_id": "clip_8136cd0a545d4f39",
+      "camera": "LeftFar",
+      "num_frames": 401,
+      "framerate": 6.6929030418396,
+      "reference": [
+        2,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "s37": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum1_Set1_LO_2018-05-30_040004_2708_2908",
+      "clip_id": "clip_8071485f28824cb1",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 10.0,
+      "reference": [
+        0,
+        1
+      ],
+      "automatic": [
+        0,
+        1
+      ]
+    },
+    "s38": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum1_Set1_LO_2018-05-27_130004_1433_2033",
+      "clip_id": "clip_0bf1ca0022414a81",
+      "camera": "LeftFar",
+      "num_frames": 600,
+      "framerate": 10.0,
+      "reference": [
+        0,
+        1
+      ],
+      "automatic": [
+        0,
+        0
+      ]
+    },
+    "s39": {
+      "clip_name": "2018-05-30-JD150_LeftNear_Stratum1_Set1_LN_2018-05-30_170000_3729_4270",
+      "clip_id": "clip_946c69cc8dee4a8c",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s40": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_181004_1389_1869",
+      "clip_id": "clip_b85639efc1de49b3",
+      "camera": "LeftFar",
+      "num_frames": 480,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s41": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_080000_2071_2612",
+      "clip_id": "clip_f18ae5c4a4b74e7e",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        3,
+        0
+      ],
+      "automatic": [
+        3,
+        0
+      ]
+    },
+    "s42": {
+      "clip_name": "2018-06-02-JD153_LeftFar_Stratum2_Set1_LO_2018-06-02_141003_1966_2446",
+      "clip_id": "clip_8b313e69cbee4420",
+      "camera": "LeftFar",
+      "num_frames": 480,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s43": {
+      "clip_name": "2018-06-06-JD157_LeftFar_Stratum1_Set1_LO_2018-06-06_060004_5032_5232",
+      "clip_id": "clip_9cf383c87bf74cb3",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 10.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        2,
+        0
+      ]
+    },
+    "s44": {
+      "clip_name": "2018-06-06-JD157_LeftNear_Stratum1_Set1_LN_2018-06-06_020000_1977_2177",
+      "clip_id": "clip_61ab0b1ff9db4a2b",
+      "camera": "LeftNear",
+      "num_frames": 200,
+      "framerate": 9.000008583068848,
+      "reference": [
+        6,
+        0
+      ],
+      "automatic": [
+        5,
+        0
+      ]
+    },
+    "s45": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum2_Set1_LO_2018-05-27_071003_1613_1813",
+      "clip_id": "clip_cb9356fb3a094e7d",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        1
+      ]
+    },
+    "s46": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_120000_4587_5128",
+      "clip_id": "clip_db48f8df927f41b1",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s47": {
+      "clip_name": "2018-06-02-JD153_LeftNear_Stratum1_Set1_LN_2018-06-02_210000_1411_1952",
+      "clip_id": "clip_f6f92643b6194a85",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        7,
+        0
+      ],
+      "automatic": [
+        7,
+        0
+      ]
+    },
+    "s48": {
+      "clip_name": "2018-05-27-JD147_LeftFar_Stratum2_Set1_LO_2018-05-27_161003_2985_3465",
+      "clip_id": "clip_99a4ae868a9840c9",
+      "camera": "LeftFar",
+      "num_frames": 480,
+      "framerate": 8.0,
+      "reference": [
+        1,
+        2
+      ],
+      "automatic": [
+        1,
+        1
+      ]
+    },
+    "s49": {
+      "clip_name": "2018-05-30-JD150_LeftFar_Stratum3_Set1_LO_2018-05-30_202000_2654_2854",
+      "clip_id": "clip_e0fa2dcbd56740c7",
+      "camera": "LeftFar",
+      "num_frames": 200,
+      "framerate": 6.6929030418396,
+      "reference": [
+        1,
+        0
+      ],
+      "automatic": [
+        1,
+        0
+      ]
+    },
+    "s50": {
+      "clip_name": "2018-05-30-JD150_LeftNear_Stratum1_Set1_LN_2018-05-30_080000_3518_4059",
+      "clip_id": "clip_090dcd79bb844dcd",
+      "camera": "LeftNear",
+      "num_frames": 541,
+      "framerate": 9.000008583068848,
+      "reference": [
+        5,
+        0
+      ],
+      "automatic": [
+        5,
+        0
+      ]
+    }
+  },
+  "assignments": {
+    "R1": [
+      "s01",
+      "s02",
+      "s03",
+      "s04",
+      "s05",
+      "s06",
+      "s07",
+      "s08",
+      "s09",
+      "s10",
+      "s11",
+      "s12",
+      "s13",
+      "s14",
+      "s15",
+      "s16",
+      "s17",
+      "s18",
+      "s19",
+      "s20",
+      "s21",
+      "s22",
+      "s23",
+      "s24",
+      "s25",
+      "s26",
+      "s27",
+      "s28",
+      "s29",
+      "s30",
+      "s31",
+      "s32",
+      "s33",
+      "s34",
+      "s35",
+      "s36",
+      "s37",
+      "s38",
+      "s39",
+      "s40",
+      "s41",
+      "s42",
+      "s43",
+      "s44",
+      "s45",
+      "s46",
+      "s47",
+      "s48",
+      "s49",
+      "s50"
+    ],
+    "R2": [
+      "s01",
+      "s02",
+      "s03",
+      "s04",
+      "s05",
+      "s06",
+      "s07",
+      "s08",
+      "s09",
+      "s10",
+      "s11",
+      "s12",
+      "s13",
+      "s14",
+      "s15"
+    ]
+  },
+  "jobs": {
+    "R1": {
+      "s01": "job_7dd3241cb03c42a9",
+      "s02": "job_ee756b95a9864045",
+      "s03": "job_6965065948af418f",
+      "s04": "job_f7ce35cbed7d420f",
+      "s05": "job_f49766f91027421f",
+      "s06": "job_1f43c2e01ba74775",
+      "s07": "job_15ed2986e16c4266",
+      "s08": "job_43e75b38b5a04245",
+      "s09": "job_6ca3c041879b4423",
+      "s10": "job_ca796e31b1a64513",
+      "s11": "job_f8eaea78cc4f4b3d",
+      "s12": "job_e6ea65f9706a44d6",
+      "s13": "job_c9daa12e531740e8",
+      "s14": "job_9a5fc6f3a3cb42ce",
+      "s15": "job_f58f689931d44396",
+      "s16": "job_6c10b7e9ba4b4d2f",
+      "s17": "job_35dfc0d891db41b6",
+      "s18": "job_63f85c7d01fa420e",
+      "s19": "job_d669eb434a6d47e8",
+      "s20": "job_b5c733c4921044fb",
+      "s21": "job_6884562c7f514af7",
+      "s22": "job_771fcff766c94029",
+      "s23": "job_2e7109c960b34cf3",
+      "s24": "job_42ca05f6592043da",
+      "s25": "job_acec9537992040a7",
+      "s26": "job_2a34840db8ea46fa",
+      "s27": "job_7fd6b21955cf4c03",
+      "s28": "job_c48ff24619e24c23",
+      "s29": "job_4b65fdd3c5984861",
+      "s30": "job_8991ae26487d45c3",
+      "s31": "job_07f7a5c3576c4607",
+      "s32": "job_0991e653a2154d16",
+      "s33": "job_37b182fffb484f9d",
+      "s34": "job_2ebf046e1a0b4f70",
+      "s35": "job_d8156369e41040f2",
+      "s36": "job_1304cb7dcb22419f",
+      "s37": "job_d2cf74e5b28e4a8a",
+      "s38": "job_59cfdae9c2b84e19",
+      "s39": "job_a06602fd904541f7",
+      "s40": "job_6c693e317be44a35",
+      "s41": "job_67442f3a776844c2",
+      "s42": "job_37ba406fdc3b4101",
+      "s43": "job_6c6c3d334d47463a",
+      "s44": "job_b5408917fd7f4237",
+      "s45": "job_56f971f66a774352",
+      "s46": "job_c6de129da2f14a00",
+      "s47": "job_ef7acb3b58f941d1",
+      "s48": "job_57b536570059469c",
+      "s49": "job_2f4b110b40fc4289",
+      "s50": "job_bd52608b35624521"
+    },
+    "R2": {
+      "s01": "job_55358760458848e2",
+      "s02": "job_608c2322dec54520",
+      "s03": "job_4f317f6493d843b5",
+      "s04": "job_8ab54cb7e5b847b2",
+      "s05": "job_d6fdeedd90bb4b0e",
+      "s06": "job_9a7dc642e6014953",
+      "s07": "job_e7f27aa0ed4a40d9",
+      "s08": "job_cd067ebdf5d0496e",
+      "s09": "job_bddad39c16d64adb",
+      "s10": "job_d23e20ef807c4732",
+      "s11": "job_094ade0b946b46ca",
+      "s12": "job_9c7dbbb134c0408a",
+      "s13": "job_cb2acd9bc7ed40c1",
+      "s14": "job_a4778f1b2ab44623",
+      "s15": "job_ccba14247e6b4a29"
+    }
+  }
+}

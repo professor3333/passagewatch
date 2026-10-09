@@ -24,18 +24,16 @@ Example:
 from __future__ import annotations
 
 import argparse
-import io
 import json
 import sys
-import time
-import zipfile
 from pathlib import Path
 from typing import Any
 
 import httpx
 
 from passagewatch.evaluation import study_design
-from passagewatch.ingestion.metadata import ClipMetadata, load_metadata
+from passagewatch.ingestion.metadata import load_metadata
+from passagewatch.service.client import create_job, upload, wait
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REPORT = REPO_ROOT / "runs/neural/yolox-tiny-t1/report-holdout.json"
@@ -43,53 +41,6 @@ METADATA = REPO_ROOT / "data/extracted/cfc/fish_counting_metadata/metadata/kenai
 FRAMES = REPO_ROOT / "data/extracted/cfc/kenai-holdout-v1/kenai-train"
 PLAN = REPO_ROOT / "study/plan.json"
 RELEASE = "passagewatch-0.3.0"
-
-
-def frames_zip(frame_dir: Path, num_frames: int) -> bytes:
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_STORED) as archive:  # JPEGs: no gain
-        for index in range(num_frames):
-            path = frame_dir / f"{index}.jpg"
-            if not path.is_file():
-                raise FileNotFoundError(f"missing frame {path}")
-            archive.write(path, f"{index}.jpg")
-    return buffer.getvalue()
-
-
-def upload(client: httpx.Client, frame_dir: Path, meta: ClipMetadata) -> str:
-    response = client.post(
-        "/v1/clips",
-        files={"file": (f"{meta.clip_name}.zip", frames_zip(frame_dir, meta.num_frames))},
-        data={
-            "x_meter_start": str(meta.x_meter_start),
-            "x_meter_stop": str(meta.x_meter_stop),
-            "y_meter_start": str(meta.y_meter_start),
-            "y_meter_stop": str(meta.y_meter_stop),
-            "framerate": str(meta.framerate),
-        },
-    )
-    response.raise_for_status()
-    return str(response.json()["clip_id"])
-
-
-def create_job(client: httpx.Client, clip_id: str, key: str) -> str:
-    response = client.post("/v1/jobs", json={"clip_id": clip_id}, headers={"Idempotency-Key": key})
-    response.raise_for_status()
-    return str(response.json()["job_id"])
-
-
-def wait(client: httpx.Client, job_id: str, timeout_s: float) -> dict[str, Any]:
-    deadline = time.monotonic() + timeout_s
-    while True:
-        job = client.get(f"/v1/jobs/{job_id}").json()
-        if job["status"] == "succeeded":
-            results: dict[str, Any] = client.get(f"/v1/jobs/{job_id}/results").json()
-            return results
-        if job["status"] in ("failed", "cancelled"):
-            raise RuntimeError(f"job {job_id} {job['status']}: {job.get('error')}")
-        if time.monotonic() > deadline:
-            raise TimeoutError(f"job {job_id} still {job['status']} after {timeout_s:.0f} s")
-        time.sleep(2)
 
 
 def main() -> int:

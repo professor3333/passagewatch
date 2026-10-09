@@ -67,7 +67,7 @@ training and validation data from Kenai.
   *Done when* strong and uncertain results are distinguishable, and the efficiency of
   prioritization is measured.
   *Done:* [review](review.md). Still open: the independently reviewed development sample,
-  which needs a second person's time.
+  prepared ([protocol](review_sample.md)) and waiting for the reviewers' time.
 - [x] **10. Hardening and optimization** — failure and recovery tests, a preprocessing
   parity test, model-regression tests, profiling, ONNX Runtime and quantization where
   profiling justifies them, Docker Compose, and immutable inference bundles.
