@@ -12,7 +12,8 @@ the reviewed counts and the passages the reviewer added, and writes
 - between R1 and R2, on the clips both reviewed: the share of tracks with the same final
   outcome, Cohen's kappa, and every disagreement.
 
-A clip with unreviewed tracks is reported as incomplete.
+A clip with unreviewed tracks is reported as incomplete. When the plan records amendments,
+only the clips assigned by the latest one are analysed.
 
 Example:
     scripts/review_sample_service.sh start
@@ -66,6 +67,13 @@ def nmae(clips: list[dict[str, Any]], key: str) -> float | None:
     return sum(c[key] for c in clips) / passages if passages else None
 
 
+def assignments(plan: dict[str, Any]) -> dict[str, list[str]]:
+    """Each reviewer's clips: the latest amendment's assignment, or the original one."""
+    amendments = plan.get("amendments") or []
+    chosen = amendments[-1]["assignments"] if amendments else plan["assignments"]
+    return {reviewer: list(keys) for reviewer, keys in chosen.items()}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--url", default="http://127.0.0.1:8011")
@@ -77,10 +85,11 @@ def main() -> int:
     labels: dict[str, dict[str, list[TrackLabel]]] = {}
     reviewers: dict[str, Any] = {}
     with httpx.Client(base_url=args.url, timeout=60) as client:
-        for reviewer, jobs in plan["jobs"].items():
+        for reviewer, keys in assignments(plan).items():
             labels[reviewer] = {}
             clips: dict[str, Any] = {}
-            for key, job_id in sorted(jobs.items()):
+            for key in sorted(keys):
+                job_id = plan["jobs"][reviewer][key]
                 clip = plan["clips"][key]
                 found, reviewed, added = fetch(client, job_id)
                 labels[reviewer][key] = found

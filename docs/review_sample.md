@@ -30,13 +30,24 @@ By `scripts/prepare_review_sample.py` (seed 0, run once; `passagewatch.evaluatio
 - **Strata:** camera (LeftFar, LeftNear) × reference passages (0, 1–2, 3–4, 5 or more).
 - **50 clips**, proportional to the pool per stratum, at least one per stratum, about 41
   minutes of recordings in all. They get neutral codes `s01`–`s50` in a random order.
-- **Reviewer R1** (the project owner) reviews all 50.
+- **Reviewer R1** (the project owner) reviews all 50 (amended to `s01`–`s15`, below).
 - **Reviewer R2** (someone who did not build PassageWatch) reviews `s01`–`s15`, a random
   subset because the codes are in random order.
 - **Separate jobs.** Each reviewer gets their own job per clip, a result-cache hit of the
   release's analysis, so neither sees the other's decisions.
 - **Reference counts** are in `review_sample/plan.json`. Reviewers do not open it until
   they have finished.
+
+### Amendment (2026-10-13, before any review)
+
+The project owner does not have time for 50 clips (about 2.5 hours of reviewing). **Both
+reviewers review the same 15 clips, `s01`–`s15`** (about 12 minutes of recordings), so the
+R1–R2 comparison is unchanged and covers every reviewed clip. `s16`–`s50` are not reviewed;
+their jobs stay in the service unused. The amendment is recorded in `review_sample/plan.json`
+(`amendments`), and the analysis follows its assignments. Because the codes are in random
+order, the 15 clips are a random subset of the stratified sample, so a stratum may be thin
+or missing; the results report gives the strata the 15 clips cover. Figures from 15 clips
+are descriptive and rough.
 
 ## Instructions for reviewers
 

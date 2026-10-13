@@ -913,5 +913,48 @@
       "s14": "job_a4778f1b2ab44623",
       "s15": "job_ccba14247e6b4a29"
     }
-  }
+  },
+  "amendments": [
+    {
+      "date": "2026-10-13",
+      "before_any_review": true,
+      "reason": "R1 does not have time for 50 clips (about 2.5 h of reviewing); both reviewers review the same 15 clips, s01-s15, so the R1-R2 agreement is unchanged.",
+      "assignments": {
+        "R1": [
+          "s01",
+          "s02",
+          "s03",
+          "s04",
+          "s05",
+          "s06",
+          "s07",
+          "s08",
+          "s09",
+          "s10",
+          "s11",
+          "s12",
+          "s13",
+          "s14",
+          "s15"
+        ],
+        "R2": [
+          "s01",
+          "s02",
+          "s03",
+          "s04",
+          "s05",
+          "s06",
+          "s07",
+          "s08",
+          "s09",
+          "s10",
+          "s11",
+          "s12",
+          "s13",
+          "s14",
+          "s15"
+        ]
+      }
+    }
+  ]
 }
