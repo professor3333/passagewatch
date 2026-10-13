@@ -36,3 +36,13 @@ def test_fetch_reads_verdicts_counts_and_added_passages(client: TestClient, sett
     assert verdicts == {1: "kept", 2: "removed", 3: "unresolved", 4: "counted"}
     assert counts == (2, 1)  # track 1 and the added fish right; track 4 left
     assert added == 1
+
+
+def test_the_latest_amendment_sets_each_reviewers_clips() -> None:
+    plan = {"assignments": {"R1": ["s01", "s02", "s03"], "R2": ["s01"]}}
+    assert analysis().assignments(plan) == plan["assignments"]
+    plan["amendments"] = [
+        {"assignments": {"R1": ["s01", "s02"], "R2": ["s01", "s02"]}},
+        {"assignments": {"R1": ["s01"], "R2": ["s01"]}},
+    ]
+    assert analysis().assignments(plan) == {"R1": ["s01"], "R2": ["s01"]}
