@@ -63,7 +63,7 @@ You need the service running (`scripts/review_sample_service.sh start`) and your
      another track of the same fish.
    - **Change to** the other direction for a passage counted the wrong way.
    - **Count as passage → / ←** for an uncounted track whose fish did cross the line and
-     stay across.
+     stay across, **and is not already counted by another track** (amendment 2, below).
    - **Unresolved** when you cannot tell. This is a valid answer; do not guess.
 3. Add every fish that crossed but has no track: **Add missed fish here** at the frame where
    it crosses. Check the **random audit** windows and mark them checked.
@@ -71,6 +71,27 @@ You need the service running (`scripts/review_sample_service.sh start`) and your
 
 A fish that crosses and comes back does not count. Directions are as seen in the image
 (→ right, ← left).
+
+**One passage per fish** (amendment 2). The tracker sometimes splits one fish into several
+tracks, for example one piece before the line and another after it, or puts two boxes on the
+same fish. Such a fish counts **once**:
+
+- If one of its tracks is already counted, keep its other tracks uncounted (**Keep
+  uncounted**), or remove a second counted one (**Not a fish: don't count**).
+- If none of its tracks is counted but the fish did cross and stay across, count it on
+  **one** track (**Count as passage**) and keep the others uncounted.
+- Before counting an uncounted track, look for another track on the same fish at the same
+  time or just before and after it.
+
+### Amendment 2 (2026-10-17, after R1 finished, before R2 started)
+
+The instruction for **Count as passage** said "an uncounted track whose fish did cross the
+line". Read literally, that covers every track of a fish that crossed, including pieces of a
+fish another track already counts. The rule **one passage per fish** above makes the intended
+meaning explicit. It applies to R2. R1 reviewed under the earlier wording, and R1's labels
+are kept unchanged. The results report says which wording each reviewer had, so the R1–R2
+comparison partly reflects the change of instructions. The assignments are unchanged
+(`review_sample/plan.json`, `amendments`).
 
 ## Measures
 
@@ -94,3 +115,6 @@ the figures.
   track is found only by watching, and only if the reviewer adds it.
 - **One river, two cameras, one season.** The same limits as the holdout.
 - **The reference is not ground truth.** Disagreements with it are reported both ways.
+- **The reviewers had different instructions** for counting a track the release did not count
+  (amendment 2). Agreement between them is not purely agreement between two readings of the
+  same footage.
