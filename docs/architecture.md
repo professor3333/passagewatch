@@ -152,7 +152,7 @@ image. Each release's bundle is attached to its GitHub release as a reproducible
 `scripts/fetch_bundle.py` downloads it and checks it against the release manifest in
 `releases/manifests/`.
 
-Current release: `passagewatch-0.3.1`. It is YOLOX-Tiny `yolox-tiny-t1` (temporal input,
+Current release: `passagewatch-0.3.2` (the pipeline of 0.3.0 and 0.3.1). It is YOLOX-Tiny `yolox-tiny-t1` (temporal input,
 `letterbox-temporal3-v1`) epoch 25, with score threshold 0.4, run by ONNX Runtime on CPU,
 the `classical-v2` tracker and calibration version `review-v0`, as selected in
 [error_analysis.md](error_analysis.md) and evaluated in [test_results.md](test_results.md).
@@ -195,7 +195,7 @@ result fields as top-level keys.
 
 ## Known limits
 
-- **CPU inference takes about 0.1 s per frame.** Release 0.3.0/0.3.1 runs at about 98.5
+- **CPU inference takes about 0.1 s per frame.** The release pipeline runs at about 98.5
   ms per frame (about 10 frames/s) on the development M1 CPU with 4 threads; the detector is
   about 97% of the time. INT8 and smaller input sizes were not tried
   ([operations](operations.md)). The image is about 2 GB.
