@@ -15,6 +15,12 @@ Disagreements, with the CFC reference or between reviewers, are recorded, never 
 - **Agreement.** Between two reviewers, on the tracks of the clips both reviewed (matched by
   clip and track ID): the share of tracks with the same final outcome (counted right,
   counted left, not counted, unresolved), and Cohen's kappa over those outcomes.
+- **Changed tracks.** Each track whose count contribution a reviewer changed is described,
+  without judging it: where its first and last boxes lie relative to the counting line
+  (whether the track crosses on its own, by the counting policy's start/end-side rule), and
+  which tracks the release counted overlap it in time or lie within ``ADJACENT_FRAMES`` of it.
+- **Timing.** When each reviewer's decisions were recorded, per clip and overall, from the
+  review events' timestamps.
 """
 
 from __future__ import annotations
@@ -23,6 +29,7 @@ import math
 from collections import Counter
 from collections.abc import Iterable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 import numpy as np
@@ -34,6 +41,8 @@ SAMPLE_SIZE = 50
 SECOND_REVIEWER_CLIPS = 15
 PASSAGE_BINS = ((0, 0), (1, 2), (3, 4), (5, 10_000))
 VERDICTS = ("kept", "removed", "counted", "redirected", "unresolved", "unreviewed")
+CHANGES = ("removed", "counted", "redirected")
+ADJACENT_FRAMES = 10
 
 
 def stratum(c: Candidate) -> tuple[str, int]:
@@ -199,4 +208,96 @@ def agreement(
             for clip, track in keys
             if a[(clip, track)] != b[(clip, track)]
         ],
+    }
+
+
+@dataclass(frozen=True)
+class TrackPath:
+    """A track's first and last box centers, x as a fraction of the image width."""
+
+    track_id: int
+    start_frame: int
+    end_frame: int
+    start_x: float
+    end_x: float
+
+
+def track_paths(boxes: Iterable[dict[str, Any]], width: int) -> dict[int, TrackPath]:
+    """Paths from ``/observations`` boxes (``frame_index``, ``x_min``, ``x_max``)."""
+    by_track: dict[int, list[dict[str, Any]]] = {}
+    for box in boxes:
+        by_track.setdefault(int(box["track_id"]), []).append(box)
+
+    def center(box: dict[str, Any]) -> float:
+        return (float(box["x_min"]) + float(box["x_max"])) / 2 / width
+
+    paths = {}
+    for track_id, found in by_track.items():
+        found.sort(key=lambda b: int(b["frame_index"]))
+        first, last = found[0], found[-1]
+        paths[track_id] = TrackPath(
+            track_id,
+            int(first["frame_index"]),
+            int(last["frame_index"]),
+            center(first),
+            center(last),
+        )
+    return paths
+
+
+def describe_changes(
+    labels: list[TrackLabel],
+    paths: dict[int, TrackPath],
+    line_x: float,
+    adjacent_frames: int = ADJACENT_FRAMES,
+) -> list[dict[str, Any]]:
+    """The tracks whose count contribution the reviewer changed, with where each lies
+    relative to the line and the counted tracks next to it in time. Descriptive only."""
+    counted = [label.track_id for label in labels if label.automatic is not None]
+    changes = []
+    for label in labels:
+        if label.verdict not in CHANGES:
+            continue
+        path = paths[label.track_id]
+        nearby = [
+            other
+            for other in counted
+            if other != label.track_id
+            and paths[other].start_frame <= path.end_frame + adjacent_frames
+            and path.start_frame <= paths[other].end_frame + adjacent_frames
+        ]
+        changes.append(
+            {
+                "track_id": label.track_id,
+                "verdict": label.verdict,
+                "automatic": label.automatic,
+                "final": label.final,
+                "frames": [path.start_frame, path.end_frame],
+                "start_x": round(path.start_x, 3),
+                "end_x": round(path.end_x, 3),
+                "crosses_line_alone": (path.start_x < line_x) != (path.end_x < line_x),
+                "counted_tracks_nearby": nearby,
+            }
+        )
+    return changes
+
+
+def review_timing(events_by_clip: dict[str, list[str]]) -> dict[str, Any]:
+    """First and last decision per clip and overall, from ISO timestamps."""
+    spans = {
+        key: (min(times), max(times), len(times)) for key, times in events_by_clip.items() if times
+    }
+    if not spans:
+        return {"clips": {}, "first": None, "last": None, "span_minutes": None}
+    first = min(f for f, _, _ in spans.values())
+    last = max(la for _, la, _ in spans.values())
+    clips = {
+        key: {"first": f, "last": la, "events": n} for key, (f, la, n) in sorted(spans.items())
+    }
+    span = datetime.fromisoformat(last) - datetime.fromisoformat(first)
+    return {
+        "clips": clips,
+        "first": first,
+        "last": last,
+        "span_minutes": round(span.total_seconds() / 60, 1),
     }
