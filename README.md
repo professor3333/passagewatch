@@ -39,11 +39,11 @@ export → monitoring), built and evaluated on the public
 
 | | |
 |---|---|
-| 🎯 **Counting error on unseen rivers** | macro nMAE **0.213** [0.189, 0.238] over the 4 official CFC test locations, against **0.388** for a tuned classical baseline ([test results](docs/test_results.md)) |
+| 🎯 **Counting error on unseen locations** | macro nMAE **0.213** [0.189, 0.238] over the 4 official CFC test locations (2 other rivers, 2 other Kenai cameras), against **0.388** for a tuned classical baseline ([test results](docs/test_results.md)) |
 | 🧪 **Counting error on unseen days** | nMAE **0.117** [0.089, 0.149] on 174 held-out Kenai clips ([error analysis](docs/error_analysis.md)) |
 | ⚡ **CPU serving** | about **10 frames/s** on an Apple M1 (4 threads), roughly real time for 8–10 fps sonar. Peak memory **≈1.35 GB**, flat up to the 6,000-frame upload limit ([operations](docs/operations.md)) |
 | 🔁 **Reproducible releases** | an immutable manifest per release (code commit, data manifest, checkpoint, ONNX and image hashes). Deployment is verified against it, and rollback is tested |
-| 🧑‍🔬 **Usability study** | 4 independent participants. Assisted review **did not save time** on short clips, and the review panel's direction button made counts worse. The panel has since been changed, without a new measurement ([results](docs/usability_results.md)) |
+| 🧑‍🔬 **Human review** | Usability study, 4 independent participants: assisted review **did not save time** on short clips ([results](docs/usability_results.md)). In it, and again in a 15-clip reviewed sample with the revised panel, reviewers counted pieces of already-counted fish, so **reviewed counts were less accurate than automatic ones** ([results](docs/review_sample_results.md)) |
 
 Numbers in brackets are 95% paired-bootstrap intervals over clips. All are measured, on the
 hardware and data named in the linked pages.
@@ -138,8 +138,11 @@ docker compose up -d --build
 curl http://127.0.0.1:8000/health/ready
 ```
 
+The first `docker compose up --build` builds the image (about 2 GB) and took about 9 minutes
+on the development Mac; later starts take seconds.
+
 Optionally load the three demo examples (a 187 MB download from the `demos-v1` release,
-analysed once by the running release):
+analysed once by the running release; about 7 minutes on the development Mac):
 
 ```bash
 uv run python scripts/load_demos.py --url http://127.0.0.1:8000

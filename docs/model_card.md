@@ -16,6 +16,11 @@ Counting dataset) to produce **suggested** directional passage counts. A fisheri
 reviews and corrects them before export. Every count comes with its trajectories, evidence
 frames and a review state; automatic and reviewed counts are kept separate.
 
+Review is not yet a safeguard. In the usability study and in a 15-clip reviewed sample,
+reviewers counted pieces of fish that another track already counted, and reviewed counts
+were further from the reference than the automatic ones
+([reviewed sample](review_sample_results.md)).
+
 ## Not for
 
 - Species identification. The model knows only "fish" versus "not fish".
@@ -117,9 +122,15 @@ rivers.
   rule written down before its results is met on `kenai-holdout-v1`. Review-state thresholds
   are chosen the same way (Stage 9).
 - **Promotion:** a release is an immutable bundle (`scripts/build_bundle.py`) with the
-  checkpoint's SHA-256, preprocessing version, tracker configuration, counting-policy and
-  calibration versions, and its config hash. The service checks all of them at start-up and
-  reports them at `/v1/model-info`. A regression test requires the service to count exactly
-  like the offline evaluation of the release.
-- **Rollback:** the `bundles/active` pointer is switched back to the previous bundle and the
-  worker restarted. Existing jobs keep the versions recorded for them.
+  checkpoint's and ONNX export's SHA-256, preprocessing version, tracker configuration,
+  counting-policy and calibration versions, and its config hash, plus an immutable release
+  manifest in `releases/manifests/` (code commit, lock hash, dataset manifest, training
+  config, evaluation reports, image digest). The service checks the bundle at start-up and
+  reports it at `/v1/model-info`. A regression test requires the service to count exactly
+  like the offline evaluation of the release. Tagging `passagewatch-*` runs the release
+  workflow (manifest check, tests, image push, GitHub release), and
+  `scripts/verify_deployment.py` checks a running deployment against the manifest.
+- **Rollback:** the previous release's bundle is restored (`scripts/fetch_bundle.py
+  --release <previous> --activate`, or the `bundles/active` symlink when it is already
+  downloaded) together with its image, and the services restarted. Existing jobs keep the
+  versions recorded for them. The A → B → A rollback is an integration test.

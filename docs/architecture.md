@@ -1,8 +1,8 @@
 # Service Architecture
 
-PassageWatch runs as two processes from one Docker image, sharing one data volume. The
-API never runs inference: it records jobs and serves results. A separate worker leases jobs,
-runs the release bundle's pipeline, and publishes results.
+PassageWatch runs as two processes from one Docker image, sharing one data volume, with
+Prometheus beside them. The API never runs inference: it records jobs and serves results. A
+separate worker leases jobs, runs the release bundle's pipeline, and publishes results.
 
 ```mermaid
 flowchart LR
@@ -15,6 +15,8 @@ flowchart LR
     B -->|bundle.json only| A
     W -->|tracks.parquet,<br/>observations.parquet| R[(artifacts/)]
     R --> A
+    P[Prometheus] -->|/metrics| A
+    P -->|:9100| W
 ```
 
 | Component | Code | Role |
@@ -26,6 +28,10 @@ flowchart LR
 | Media | `passagewatch.service.media` | Streamed uploads with a size limit, validation, bounded-memory frame reading |
 | Bundles | `passagewatch.service.bundle` | Immutable release bundles and the active-release pointer |
 | Artifacts | `passagewatch.service.artifacts` | Per-job Parquet files with trajectories and their boxes |
+| Reviews and export | `passagewatch.service.reviews`, `passagewatch.service.export` | Append-only review events, result revisions, JSON/CSV reports |
+| Demos | `passagewatch.service.demos` | The three demo examples and their cached results ([demos](demos.md)) |
+| Metrics | `passagewatch.service.metrics` | Prometheus metrics: the API's from the database, the worker's on port 9100 |
+| Releases | `passagewatch.service.release`, `passagewatch.service.bundle_archive` | Release manifests, deployment checks, bundle archives on GitHub releases |
 | Review interface | `frontend/` (TypeScript, Vite) | Upload, progress, playback with overlays, review actions, export; built into the image and served by the API at `/` |
 
 ## Analysis flow
@@ -128,26 +134,30 @@ stateDiagram-v2
 
 ## Release bundles
 
-A bundle (`bundles/<version>/`) holds `bundle.json` and the detector checkpoint. It is built
-by `scripts/build_bundle.py` from a training checkpoint, and records:
-- the checkpoint's SHA-256;
+A bundle (`bundles/<version>/`) holds `bundle.json`, the detector checkpoint
+(`detector.pt`) and, for an ONNX release, its ONNX export (`detector.onnx`). It is built by
+`scripts/build_bundle.py` from a training checkpoint, and records:
+- the checkpoint's SHA-256, and the ONNX file's SHA-256 and the runtime (`onnxruntime`);
 - the detector's size, input size, training run and epoch, and the score threshold;
 - the preprocessing version;
 - the tracker configuration;
-- the counting policy;
+- the counting policy and the calibration version;
 - provenance: the training manifest hash and where the selection is documented.
 
 Versions are immutable. `bundles/active` is a symlink to the active version. The API reads
 only `bundle.json`, to register the pipeline version and answer `/v1/model-info`. The
 worker loads the weights, after checking their SHA-256 and the preprocessing version.
 Bundles are mounted read-only into the containers and never committed or built into the
-image.
+image. Each release's bundle is attached to its GitHub release as a reproducible archive;
+`scripts/fetch_bundle.py` downloads it and checks it against the release manifest in
+`releases/manifests/`.
 
-Current release (local, not committed): `passagewatch-0.2.0`. It is YOLOX-Tiny
-`yolox-tiny-v1` epoch 25 (checkpoint SHA-256 `7c9bfedc…`), with score threshold 0.2 and the
-`classical-v2` tracker, as selected in [neural_baseline.md](neural_baseline.md). A
-regression test checks that the service counts a real kenai-val clip exactly as the offline
-evaluation did.
+Current release: `passagewatch-0.3.1`. It is YOLOX-Tiny `yolox-tiny-t1` (temporal input,
+`letterbox-temporal3-v1`) epoch 25, with score threshold 0.4, run by ONNX Runtime on CPU,
+the `classical-v2` tracker and calibration version `review-v0`, as selected in
+[error_analysis.md](error_analysis.md) and evaluated in [test_results.md](test_results.md).
+A regression test checks that the service counts a real kenai-val clip exactly as the
+offline evaluation did.
 
 ## Configuration
 
@@ -169,10 +179,13 @@ All settings are `PASSAGEWATCH_*` environment variables (`passagewatch.service.s
 | `PASSAGEWATCH_TRACKS_PAGE_LIMIT` | 200 | Maximum `limit` for `/tracks` |
 | `PASSAGEWATCH_DEVICE` | `cpu` | Inference device (`auto` tries CUDA, then MPS) |
 | `PASSAGEWATCH_INFERENCE_BATCH` | 8 | Frames per detector batch |
+| `PASSAGEWATCH_TORCH_THREADS` | unset | CPU threads for detection; set it to the host's performance cores ([operations](operations.md)) |
+| `PASSAGEWATCH_WORKER_METRICS_PORT` | unset (`9100` in Compose) | Port of the worker's Prometheus metrics; unset disables them |
 | `PASSAGEWATCH_WORKER_POLL_SECONDS` | 2 | Idle polling interval |
 | `PASSAGEWATCH_RETENTION_SWEEP_SECONDS` | 600 | How often expired uploads are deleted |
 | `PASSAGEWATCH_WORKER_STALE_SECONDS` | 60 | A worker silent this long no longer counts for readiness |
 | `PASSAGEWATCH_DEMO_CATALOG` | unset (`/app/demos/catalog.json` in the image) | Demo catalog ([demos](demos.md)); unset means no demos |
+| `PASSAGEWATCH_STUDY_MODE`, `PASSAGEWATCH_STUDY_PLAN` | off, unset | Study pages for the usability study ([usability_study.md](usability_study.md)) |
 
 ## Logs
 
@@ -182,11 +195,13 @@ result fields as top-level keys.
 
 ## Known limits
 
-- **CPU inference is slow.** YOLOX-Tiny at 960 × 416 takes about 247 ms per frame on the
-  development M1 CPU. Stage 10 profiles this and tries ONNX Runtime, a smaller input size
-  and INT8. ONNX Runtime would also remove PyTorch from the image, which is now 1.98 GB,
-  647 MB of it PyTorch.
+- **CPU inference takes about 0.1 s per frame.** Release 0.3.0/0.3.1 runs at about 98.5
+  ms per frame (about 10 frames/s) on the development M1 CPU with 4 threads; the detector is
+  about 97% of the time. INT8 and smaller input sizes were not tried
+  ([operations](operations.md)). The image is about 2 GB.
+- **Counts can differ slightly between CPU architectures**, because OpenCV's resize rounds a
+  few pixels differently on arm64 and x86 ([demos](demos.md#results-depend-slightly-on-the-host)).
 - **One host, one worker.** SQLite and local volumes are deliberate for this scale (see
   [design](design.md) §17).
-- **Not yet built:** review prioritization by uncertainty and random audit sampling
-  (Stage 9), the reverse proxy with HTTPS, Prometheus metrics and alerts (Stage 11).
+- **Not built:** a reverse proxy with HTTPS in front of the API, needed for a public
+  deployment. The Compose file publishes the API on 127.0.0.1 only.

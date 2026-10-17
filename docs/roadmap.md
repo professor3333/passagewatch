@@ -54,7 +54,7 @@ training and validation data from Kenai.
   counts and unresolved cases, jump-to-evidence, accept/reject/correct, preserved
   revisions, and CSV/JSON export.
   *Done when* someone can upload, inspect, correct, and export reviewed counts.
-  *Done:* the review interface served at `/` ([README](../README.md#running-the-service)).
+  *Done:* the review interface served at `/` ([README](../README.md#-quick-start)).
 - [x] **8. Error analysis and controlled improvements** — categorized development-set
   failures, a single-frame vs. temporal-input comparison, tracker tuning on fixed
   detections, and slice evaluation.
@@ -87,9 +87,11 @@ training and validation data from Kenai.
   three demo examples (clear, difficult, unfamiliar camera), and a README, model card,
   dataset card, and architecture guide verified by another person.
   *Done when* the important work can be understood quickly and reproduced independently.
-  *In progress:* [study design](usability_study.md) and [results](usability_results.md)
-  (target not met), and the [demo examples](demos.md). Remaining: the
-  [independent check](independent_check.md) of the documentation by another person.
+  *Done:* [study design](usability_study.md) and [results](usability_results.md)
+  (target not met), the [demo examples](demos.md), and a developer run-through of the
+  documentation on a fresh clone. *Not done:* the
+  [independent check](independent_check.md) of the documentation by another person, so the
+  "verified by another person" part of this stage is not met.
 
 ## Out of scope for Version 1
 
