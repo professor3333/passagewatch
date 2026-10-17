@@ -209,6 +209,10 @@ loaded. The Docker Compose deployment was checked by the `quickstart` workflow (
 37898091536, linux/amd64). It follows the README's Quick start on a fresh runner, and the
 deployment verified against its manifest. The demos counted exactly as in the image's
 host-parity record. The workflow runs again after every successful release.
+`passagewatch-0.3.2` passed the same way on 2026-10-17 (quickstart run 39029116541): bundle
+fetched and verified, deployment verified, demos counted as in its host-parity record. (The
+automatic run right after the release workflow failed because the bundle archive had not
+yet been attached; attach it before that run, or rerun the workflow by hand.)
 
 **Releases 0.3.1 and 0.3.2 count exactly like 0.3.0.** The `host-parity` workflow ran the
 releases' images (by their manifest digests) on the demo recordings. Every stage is
