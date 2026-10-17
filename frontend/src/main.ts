@@ -18,6 +18,7 @@ import {
   formatTime,
   newIdempotencyKey,
   nextUnreviewed,
+  serialQueue,
   DEMO_KIND_LABELS,
   demoForClip,
   reasonText,
@@ -663,7 +664,14 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
     renderAll();
   }
 
-  async function act(request: Omit<ReviewRequest, "base_revision">): Promise<void> {
+  // Review actions and the keys that change the selection run one at a time (serialQueue).
+  const enqueue = serialQueue();
+
+  function act(request: Omit<ReviewRequest, "base_revision">): Promise<void> {
+    return enqueue(() => submit(request));
+  }
+
+  async function submit(request: Omit<ReviewRequest, "base_revision">): Promise<void> {
     try {
       const response = await api.submitReview(job.job_id, { ...request, base_revision: state.revision });
       await reload();
@@ -703,24 +711,38 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
   });
   timeline.addEventListener("input", () => seek(Number(timeline.value)));
 
+  const playbackKeys: Record<string, () => void> = {
+    " ": togglePlay,
+    ArrowLeft: () => seek(state.frame - 1),
+    ArrowRight: () => seek(state.frame + 1),
+  };
+  const selectionKeys: Record<string, () => void> = {
+    j: () => selectRelative(-1),
+    k: () => selectRelative(1),
+    n: () => select(nextUnreviewed(state.tracks, state.selected)?.track_id ?? null),
+  };
+  const reviewKeys = new Set(["a", "x", "r", "l", "u"]);
+
+  /** A selection or review key, resolved against the tracks when its turn comes. */
+  async function runKey(key: string): Promise<void> {
+    if (selectionKeys[key]) {
+      selectionKeys[key]();
+      return;
+    }
+    const track = state.tracks.find((t) => t.track_id === state.selected);
+    const action = track ? trackActions(track, upstream).find((a) => a.key === key) : undefined;
+    if (action) await submit(action.request);
+  }
+
   const onKey = (event: KeyboardEvent): void => {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) return;
-    const track = state.tracks.find((t) => t.track_id === state.selected);
-    const keys: Record<string, () => void> = {
-      " ": togglePlay,
-      ArrowLeft: () => seek(state.frame - 1),
-      ArrowRight: () => seek(state.frame + 1),
-      j: () => selectRelative(-1),
-      k: () => selectRelative(1),
-      n: () => select(nextUnreviewed(state.tracks, state.selected)?.track_id ?? null),
-    };
-    for (const action of track ? trackActions(track, upstream) : []) {
-      if (action.key !== null) keys[action.key] = () => void act(action.request);
-    }
-    const handler = keys[event.key];
-    if (handler) {
+    const key = event.key;
+    if (playbackKeys[key]) {
       event.preventDefault();
-      handler();
+      playbackKeys[key]();
+    } else if (selectionKeys[key] || reviewKeys.has(key)) {
+      event.preventDefault();
+      void enqueue(() => runKey(key));
     }
   };
   document.addEventListener("keydown", onKey);
