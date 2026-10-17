@@ -226,3 +226,17 @@ export function countRows(automatic: Counts, reviewed: Counts | null): CountRow[
 export function newIdempotencyKey(random: () => string = () => crypto.randomUUID()): string {
   return `ui-${random()}`;
 }
+
+/**
+ * Runs tasks one at a time, in the order they were queued. Review actions go through it:
+ * each request names the revision it was based on, so an action sent while the previous
+ * one is still saving would be refused as stale (409), and a key pressed meanwhile would
+ * act on tracks not yet reloaded. A failed task does not stop the ones after it.
+ */
+export function serialQueue(): (task: () => Promise<void> | void) => Promise<void> {
+  let tail: Promise<void> = Promise.resolve();
+  return (task) => {
+    tail = tail.then(task).catch(() => undefined);
+    return tail;
+  };
+}

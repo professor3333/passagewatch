@@ -11,6 +11,7 @@ import {
   reasonText,
   referenceText,
   reviewOrder,
+  serialQueue,
   trackActions,
   tracksAt,
   uncountedReason,
@@ -202,5 +203,20 @@ describe("demo examples", () => {
 
   it("gives the reference counts in image directions", () => {
     expect(referenceText(demo)).toBe("→ right 11 · ← left 0");
+  });
+});
+
+describe("serialQueue", () => {
+  it("runs each task after the previous one has finished, even after a failure", async () => {
+    const enqueue = serialQueue();
+    const log: string[] = [];
+    const slow = (name: string, ms: number) => () =>
+      new Promise<void>((resolve) => setTimeout(() => (log.push(name), resolve()), ms));
+    void enqueue(slow("first", 20));
+    void enqueue(() => {
+      throw new Error("refused");
+    });
+    await enqueue(slow("second", 0));
+    expect(log).toEqual(["first", "second"]);
   });
 });
