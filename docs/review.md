@@ -180,7 +180,10 @@ What this establishes, on new days of the same cameras:
   only a matching fraction of them, as expected from random sampling: they estimate how many
   are missed rather than finding them all.
 
-The design's independently reviewed sample (a reviewer other than the reference labels) is
-prepared: 15 kenai-holdout-v1 clips, each reviewed by the project owner and by a second
-reviewer ([protocol](review_sample.md); amended from 50 clips for the owner before any
-review). It waits for the reviewers' time.
+The design's independently reviewed sample (a reviewer other than the reference labels) was
+reviewed on 15 kenai-holdout-v1 clips by the project owner and a second reviewer
+([protocol](review_sample.md), [results](review_sample_results.md)). Reviewing made the counts
+differ more from the reference (nMAE automatic 0.058, reviewed 0.212 and 0.346): nearly every
+change counted an uncounted track that does not cross the line on its own, often next to a
+track already counted. The labels are not usable as independent review-quality labels; they
+show a weakness of the review interface.

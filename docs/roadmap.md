@@ -66,8 +66,9 @@ training and validation data from Kenai.
   if the data supports it, and random audits of unflagged footage.
   *Done when* strong and uncertain results are distinguishable, and the efficiency of
   prioritization is measured.
-  *Done:* [review](review.md). Still open: the independently reviewed development sample,
-  prepared ([protocol](review_sample.md)) and waiting for the reviewers' time.
+  *Done:* [review](review.md); the independently reviewed development sample, 15 clips by two
+  reviewers ([results](review_sample_results.md)): reviewing moved the counts away from the
+  reference, so the labels show an interface weakness rather than serving as labels.
 - [x] **10. Hardening and optimization** — failure and recovery tests, a preprocessing
   parity test, model-regression tests, profiling, ONNX Runtime and quantization where
   profiling justifies them, Docker Compose, and immutable inference bundles.

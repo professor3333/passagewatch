@@ -10,7 +10,10 @@ the reviewed counts and the passages the reviewer added, and writes
 - per reviewer: nMAE of the automatic and the reviewed counts against the reference, and how
   often the reviewer changed a track's decision in each triage state;
 - between R1 and R2, on the clips both reviewed: the share of tracks with the same final
-  outcome, Cohen's kappa, and every disagreement.
+  outcome, Cohen's kappa, and every disagreement;
+- per changed track: where it lies relative to the counting line and which counted tracks
+  are next to it in time (descriptive, not a judgment);
+- per reviewer: when the decisions were recorded, per clip and overall.
 
 A clip with unreviewed tracks is reported as incomplete. When the plan records amendments,
 only the clips assigned by the latest one are analysed.
@@ -34,12 +37,16 @@ from passagewatch.evaluation.review_sample import (
     TrackLabel,
     agreement,
     clip_summary,
+    describe_changes,
+    review_timing,
     track_labels,
+    track_paths,
     triage_table,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PAGE = 200
+OBSERVATION_FRAMES = 500  # the API's limit per request
 
 
 def fetch(client: httpx.Client, job_id: str) -> tuple[list[TrackLabel], tuple[int, int], int]:
@@ -60,6 +67,27 @@ def fetch(client: httpx.Client, job_id: str) -> tuple[list[TrackLabel], tuple[in
     report = client.get(f"/v1/jobs/{job_id}/export", params={"format": "json"}).json()
     added = sum(p["state"] == "added" for p in report.get("added_passages", []))
     return track_labels(tracks), (counts["right"], counts["left"]), added
+
+
+def changes(client: httpx.Client, job_id: str, labels: list[TrackLabel]) -> list[dict[str, Any]]:
+    """The changed tracks of a job, described from its observations."""
+    if not any(label.verdict in ("removed", "counted", "redirected") for label in labels):
+        return []
+    job = client.get(f"/v1/jobs/{job_id}").raise_for_status().json()
+    clip = client.get(f"/v1/clips/{job['clip_id']}").raise_for_status().json()
+    boxes: list[dict[str, Any]] = []
+    for start in range(0, clip["num_frames"], OBSERVATION_FRAMES):
+        stop = min(clip["num_frames"], start + OBSERVATION_FRAMES)
+        params = {"start": start, "stop": stop}
+        page = client.get(f"/v1/jobs/{job_id}/observations", params=params)
+        boxes += page.raise_for_status().json()["boxes"]
+    paths = track_paths(boxes, clip["width"])
+    return describe_changes(labels, paths, job["counting"]["line_x_normalized"])
+
+
+def event_times(client: httpx.Client, job_id: str) -> list[str]:
+    events = client.get(f"/v1/jobs/{job_id}/reviews").raise_for_status().json()["events"]
+    return [e["created_at"] for e in events]
 
 
 def nmae(clips: list[dict[str, Any]], key: str) -> float | None:
@@ -88,6 +116,7 @@ def main() -> int:
         for reviewer, keys in assignments(plan).items():
             labels[reviewer] = {}
             clips: dict[str, Any] = {}
+            times: dict[str, list[str]] = {}
             for key in sorted(keys):
                 job_id = plan["jobs"][reviewer][key]
                 clip = plan["clips"][key]
@@ -100,6 +129,8 @@ def main() -> int:
                     (clip["reference"][0], clip["reference"][1]),
                     added,
                 )
+                clips[key]["changes"] = changes(client, job_id, found)
+                times[key] = event_times(client, job_id)
             complete = [c for c in clips.values() if c["verdicts"]["unreviewed"] == 0]
             every = [label for found in labels[reviewer].values() for label in found]
             reviewers[reviewer] = {
@@ -109,6 +140,15 @@ def main() -> int:
                 "nmae_automatic": nmae(complete, "automatic_error"),
                 "nmae_reviewed": nmae(complete, "reviewed_error"),
                 "triage": triage_table(every),
+                "timing": review_timing(times),
+                "recording_minutes": round(
+                    sum(
+                        plan["clips"][k]["num_frames"] / plan["clips"][k]["framerate"]
+                        for k in clips
+                    )
+                    / 60,
+                    1,
+                ),
                 "disagreements_with_reference": [
                     {"clip": key, "reference": c["reference"], "reviewed": c["reviewed"]}
                     for key, c in clips.items()

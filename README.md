@@ -400,6 +400,11 @@ GitHub releases), runs, caches and service data.
   ([details](docs/demos.md#results-depend-slightly-on-the-host)).
 - **No time-saved claim.** The usability study (4 independent participants, short clips) did
   not show a time saving ([results](docs/usability_results.md)).
+- **Review can make counts worse.** In the usability study and in the reviewed sample (15
+  clips, two reviewers), reviewers counted pieces of fish split across several tracks, and
+  reviewed counts were further from the reference than the automatic ones
+  ([results](docs/review_sample_results.md)). The review page does not yet show which tracks
+  may be the same fish.
 
 ## 📚 Documentation
 
@@ -413,7 +418,8 @@ GitHub releases), runs, caches and service data.
 | [Neural baseline](docs/neural_baseline.md) | YOLOX-Tiny through the same tracker; the ByteTrack experiment |
 | [Error analysis](docs/error_analysis.md) | Why counts are wrong, and the one-factor experiments |
 | [Review](docs/review.md) | Review scores, triage, random audits, and how prioritization is measured |
-| [Reviewed sample](docs/review_sample.md) | Protocol for the independently reviewed development sample (prepared, awaiting reviewers) |
+| [Reviewed sample](docs/review_sample.md) | Protocol for the independently reviewed development sample |
+| [Reviewed sample results](docs/review_sample_results.md) | 15 clips, two reviewers: reviewing made counts worse against the reference; why |
 | [Test results](docs/test_results.md) | The release's one-time evaluation on the official test locations |
 | [Demo examples](docs/demos.md) | The three cached demo recordings: how they were chosen, loaded and labelled |
 | [Usability study](docs/usability_results.md) | Manual counting vs. assisted review: [design](docs/usability_study.md) and results |

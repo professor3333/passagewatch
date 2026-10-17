@@ -1,0 +1,1778 @@
+{
+  "design": "docs/review_sample.md",
+  "release": "passagewatch-0.3.1",
+  "reviewers": {
+    "R1": {
+      "clips": {
+        "s01": {
+          "reference": [
+            11,
+            0
+          ],
+          "automatic": [
+            10,
+            0
+          ],
+          "reviewed": [
+            10,
+            0
+          ],
+          "automatic_error": 1,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 13,
+          "verdicts": {
+            "kept": 13,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s02": {
+          "reference": [
+            1,
+            0
+          ],
+          "automatic": [
+            1,
+            0
+          ],
+          "reviewed": [
+            1,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 2,
+          "verdicts": {
+            "kept": 2,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s03": {
+          "reference": [
+            0,
+            2
+          ],
+          "automatic": [
+            0,
+            2
+          ],
+          "reviewed": [
+            0,
+            2
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 5,
+          "verdicts": {
+            "kept": 5,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s04": {
+          "reference": [
+            1,
+            0
+          ],
+          "automatic": [
+            1,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 2,
+          "verdicts": {
+            "kept": 1,
+            "removed": 0,
+            "counted": 1,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 1,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                89,
+                99
+              ],
+              "start_x": 0.077,
+              "end_x": 0.065,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": []
+            }
+          ]
+        },
+        "s05": {
+          "reference": [
+            5,
+            0
+          ],
+          "automatic": [
+            5,
+            0
+          ],
+          "reviewed": [
+            5,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 8,
+          "verdicts": {
+            "kept": 8,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s06": {
+          "reference": [
+            5,
+            0
+          ],
+          "automatic": [
+            5,
+            0
+          ],
+          "reviewed": [
+            5,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 11,
+          "verdicts": {
+            "kept": 11,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s07": {
+          "reference": [
+            2,
+            0
+          ],
+          "automatic": [
+            2,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 5,
+          "verdicts": {
+            "kept": 5,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s08": {
+          "reference": [
+            0,
+            1
+          ],
+          "automatic": [
+            1,
+            1
+          ],
+          "reviewed": [
+            4,
+            0
+          ],
+          "automatic_error": 1,
+          "reviewed_error": 5,
+          "agrees_with_reference": false,
+          "tracks": 4,
+          "verdicts": {
+            "kept": 1,
+            "removed": 0,
+            "counted": 2,
+            "redirected": 1,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 1,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                43,
+                110
+              ],
+              "start_x": 0.824,
+              "end_x": 0.559,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                3,
+                4
+              ]
+            },
+            {
+              "track_id": 2,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                61,
+                82
+              ],
+              "start_x": 0.604,
+              "end_x": 0.571,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                3
+              ]
+            },
+            {
+              "track_id": 3,
+              "verdict": "redirected",
+              "automatic": "left",
+              "final": "right",
+              "frames": [
+                70,
+                198
+              ],
+              "start_x": 0.504,
+              "end_x": 0.449,
+              "crosses_line_alone": true,
+              "counted_tracks_nearby": [
+                4
+              ]
+            }
+          ]
+        },
+        "s09": {
+          "reference": [
+            1,
+            0
+          ],
+          "automatic": [
+            1,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 2,
+          "verdicts": {
+            "kept": 1,
+            "removed": 0,
+            "counted": 1,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 2,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                110,
+                149
+              ],
+              "start_x": 0.613,
+              "end_x": 0.893,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                1
+              ]
+            }
+          ]
+        },
+        "s10": {
+          "reference": [
+            1,
+            0
+          ],
+          "automatic": [
+            1,
+            0
+          ],
+          "reviewed": [
+            1,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 6,
+          "verdicts": {
+            "kept": 6,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s11": {
+          "reference": [
+            0,
+            0
+          ],
+          "automatic": [
+            0,
+            0
+          ],
+          "reviewed": [
+            0,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 1,
+          "verdicts": {
+            "kept": 1,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s12": {
+          "reference": [
+            9,
+            0
+          ],
+          "automatic": [
+            8,
+            0
+          ],
+          "reviewed": [
+            8,
+            0
+          ],
+          "automatic_error": 1,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 14,
+          "verdicts": {
+            "kept": 14,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s13": {
+          "reference": [
+            2,
+            0
+          ],
+          "automatic": [
+            2,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 2,
+          "verdicts": {
+            "kept": 2,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s14": {
+          "reference": [
+            3,
+            0
+          ],
+          "automatic": [
+            3,
+            0
+          ],
+          "reviewed": [
+            5,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 2,
+          "agrees_with_reference": false,
+          "tracks": 6,
+          "verdicts": {
+            "kept": 4,
+            "removed": 0,
+            "counted": 2,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 3,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                234,
+                245
+              ],
+              "start_x": 0.43,
+              "end_x": 0.398,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                1,
+                2,
+                4
+              ]
+            },
+            {
+              "track_id": 5,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                251,
+                262
+              ],
+              "start_x": 0.565,
+              "end_x": 0.691,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                1,
+                2,
+                4
+              ]
+            }
+          ]
+        },
+        "s15": {
+          "reference": [
+            8,
+            0
+          ],
+          "automatic": [
+            8,
+            0
+          ],
+          "reviewed": [
+            8,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 17,
+          "verdicts": {
+            "kept": 17,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        }
+      },
+      "complete_clips": 15,
+      "assigned_clips": 15,
+      "nmae_automatic": 0.057692307692307696,
+      "nmae_reviewed": 0.21153846153846154,
+      "triage": {
+        "needs_review": {
+          "reviewed_tracks": 1,
+          "changed": 0,
+          "unresolved": 0,
+          "changed_share": 0.0
+        },
+        "suggested": {
+          "reviewed_tracks": 93,
+          "changed": 6,
+          "unresolved": 0,
+          "changed_share": 0.06451612903225806
+        },
+        "unresolved": {
+          "reviewed_tracks": 4,
+          "changed": 1,
+          "unresolved": 0,
+          "changed_share": 0.25
+        }
+      },
+      "timing": {
+        "clips": {
+          "s01": {
+            "first": "2026-10-17T09:13:29.696714+00:00",
+            "last": "2026-10-17T09:48:44.578559+00:00",
+            "events": 14
+          },
+          "s02": {
+            "first": "2026-10-17T09:14:51.805786+00:00",
+            "last": "2026-10-17T09:28:58.548801+00:00",
+            "events": 5
+          },
+          "s03": {
+            "first": "2026-10-17T09:29:42.815910+00:00",
+            "last": "2026-10-17T09:30:18.908287+00:00",
+            "events": 7
+          },
+          "s04": {
+            "first": "2026-10-17T09:31:04.634557+00:00",
+            "last": "2026-10-17T09:31:19.206081+00:00",
+            "events": 3
+          },
+          "s05": {
+            "first": "2026-10-17T09:32:16.263943+00:00",
+            "last": "2026-10-17T09:32:54.787508+00:00",
+            "events": 9
+          },
+          "s06": {
+            "first": "2026-10-17T09:33:29.232471+00:00",
+            "last": "2026-10-17T09:34:32.222771+00:00",
+            "events": 12
+          },
+          "s07": {
+            "first": "2026-10-17T09:35:00.635226+00:00",
+            "last": "2026-10-17T09:37:55.202710+00:00",
+            "events": 6
+          },
+          "s08": {
+            "first": "2026-10-17T09:38:26.257315+00:00",
+            "last": "2026-10-17T09:38:47.113230+00:00",
+            "events": 5
+          },
+          "s09": {
+            "first": "2026-10-17T09:39:58.438723+00:00",
+            "last": "2026-10-17T09:40:04.156921+00:00",
+            "events": 3
+          },
+          "s10": {
+            "first": "2026-10-17T09:40:55.117273+00:00",
+            "last": "2026-10-17T09:41:10.829470+00:00",
+            "events": 7
+          },
+          "s11": {
+            "first": "2026-10-17T09:41:36.076954+00:00",
+            "last": "2026-10-17T09:50:10.438523+00:00",
+            "events": 3
+          },
+          "s12": {
+            "first": "2026-10-17T09:42:10.610846+00:00",
+            "last": "2026-10-17T09:50:25.790157+00:00",
+            "events": 16
+          },
+          "s13": {
+            "first": "2026-10-17T09:43:48.085128+00:00",
+            "last": "2026-10-17T09:43:52.418075+00:00",
+            "events": 3
+          },
+          "s14": {
+            "first": "2026-10-17T09:44:03.354622+00:00",
+            "last": "2026-10-17T09:50:41.747694+00:00",
+            "events": 8
+          },
+          "s15": {
+            "first": "2026-10-17T09:45:06.436115+00:00",
+            "last": "2026-10-17T09:45:31.451452+00:00",
+            "events": 18
+          }
+        },
+        "first": "2026-10-17T09:13:29.696714+00:00",
+        "last": "2026-10-17T09:50:41.747694+00:00",
+        "span_minutes": 37.2
+      },
+      "recording_minutes": 12.4,
+      "disagreements_with_reference": [
+        {
+          "clip": "s01",
+          "reference": [
+            11,
+            0
+          ],
+          "reviewed": [
+            10,
+            0
+          ]
+        },
+        {
+          "clip": "s04",
+          "reference": [
+            1,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ]
+        },
+        {
+          "clip": "s08",
+          "reference": [
+            0,
+            1
+          ],
+          "reviewed": [
+            4,
+            0
+          ]
+        },
+        {
+          "clip": "s09",
+          "reference": [
+            1,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ]
+        },
+        {
+          "clip": "s12",
+          "reference": [
+            9,
+            0
+          ],
+          "reviewed": [
+            8,
+            0
+          ]
+        },
+        {
+          "clip": "s14",
+          "reference": [
+            3,
+            0
+          ],
+          "reviewed": [
+            5,
+            0
+          ]
+        }
+      ]
+    },
+    "R2": {
+      "clips": {
+        "s01": {
+          "reference": [
+            11,
+            0
+          ],
+          "automatic": [
+            10,
+            0
+          ],
+          "reviewed": [
+            10,
+            0
+          ],
+          "automatic_error": 1,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 13,
+          "verdicts": {
+            "kept": 13,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s02": {
+          "reference": [
+            1,
+            0
+          ],
+          "automatic": [
+            1,
+            0
+          ],
+          "reviewed": [
+            1,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 2,
+          "verdicts": {
+            "kept": 2,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s03": {
+          "reference": [
+            0,
+            2
+          ],
+          "automatic": [
+            0,
+            2
+          ],
+          "reviewed": [
+            0,
+            4
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 2,
+          "agrees_with_reference": false,
+          "tracks": 5,
+          "verdicts": {
+            "kept": 3,
+            "removed": 0,
+            "counted": 2,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 2,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "left",
+              "frames": [
+                82,
+                127
+              ],
+              "start_x": 0.785,
+              "end_x": 0.685,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                3,
+                4
+              ]
+            },
+            {
+              "track_id": 5,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "left",
+              "frames": [
+                138,
+                151
+              ],
+              "start_x": 0.113,
+              "end_x": 0.137,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                4
+              ]
+            }
+          ]
+        },
+        "s04": {
+          "reference": [
+            1,
+            0
+          ],
+          "automatic": [
+            1,
+            0
+          ],
+          "reviewed": [
+            1,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 2,
+          "verdicts": {
+            "kept": 2,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s05": {
+          "reference": [
+            5,
+            0
+          ],
+          "automatic": [
+            5,
+            0
+          ],
+          "reviewed": [
+            6,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 8,
+          "verdicts": {
+            "kept": 7,
+            "removed": 0,
+            "counted": 1,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 5,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                72,
+                92
+              ],
+              "start_x": 0.107,
+              "end_x": 0.32,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                2,
+                3,
+                4,
+                6,
+                7
+              ]
+            }
+          ]
+        },
+        "s06": {
+          "reference": [
+            5,
+            0
+          ],
+          "automatic": [
+            5,
+            0
+          ],
+          "reviewed": [
+            6,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 11,
+          "verdicts": {
+            "kept": 10,
+            "removed": 0,
+            "counted": 1,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 2,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                19,
+                30
+              ],
+              "start_x": 0.026,
+              "end_x": 0.072,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                3,
+                4,
+                5,
+                6
+              ]
+            }
+          ]
+        },
+        "s07": {
+          "reference": [
+            2,
+            0
+          ],
+          "automatic": [
+            2,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 5,
+          "verdicts": {
+            "kept": 5,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s08": {
+          "reference": [
+            0,
+            1
+          ],
+          "automatic": [
+            1,
+            1
+          ],
+          "reviewed": [
+            4,
+            0
+          ],
+          "automatic_error": 1,
+          "reviewed_error": 5,
+          "agrees_with_reference": false,
+          "tracks": 4,
+          "verdicts": {
+            "kept": 1,
+            "removed": 0,
+            "counted": 2,
+            "redirected": 1,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 1,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                43,
+                110
+              ],
+              "start_x": 0.824,
+              "end_x": 0.559,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                3,
+                4
+              ]
+            },
+            {
+              "track_id": 2,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                61,
+                82
+              ],
+              "start_x": 0.604,
+              "end_x": 0.571,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                3
+              ]
+            },
+            {
+              "track_id": 3,
+              "verdict": "redirected",
+              "automatic": "left",
+              "final": "right",
+              "frames": [
+                70,
+                198
+              ],
+              "start_x": 0.504,
+              "end_x": 0.449,
+              "crosses_line_alone": true,
+              "counted_tracks_nearby": [
+                4
+              ]
+            }
+          ]
+        },
+        "s09": {
+          "reference": [
+            1,
+            0
+          ],
+          "automatic": [
+            1,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 2,
+          "verdicts": {
+            "kept": 1,
+            "removed": 0,
+            "counted": 1,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 2,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                110,
+                149
+              ],
+              "start_x": 0.613,
+              "end_x": 0.893,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                1
+              ]
+            }
+          ]
+        },
+        "s10": {
+          "reference": [
+            1,
+            0
+          ],
+          "automatic": [
+            1,
+            0
+          ],
+          "reviewed": [
+            1,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 6,
+          "verdicts": {
+            "kept": 6,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s11": {
+          "reference": [
+            0,
+            0
+          ],
+          "automatic": [
+            0,
+            0
+          ],
+          "reviewed": [
+            0,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 1,
+          "verdicts": {
+            "kept": 1,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s12": {
+          "reference": [
+            9,
+            0
+          ],
+          "automatic": [
+            8,
+            0
+          ],
+          "reviewed": [
+            10,
+            0
+          ],
+          "automatic_error": 1,
+          "reviewed_error": 1,
+          "agrees_with_reference": false,
+          "tracks": 14,
+          "verdicts": {
+            "kept": 12,
+            "removed": 0,
+            "counted": 2,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 7,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                297,
+                308
+              ],
+              "start_x": 0.692,
+              "end_x": 0.677,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                3,
+                4,
+                5,
+                6,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            {
+              "track_id": 12,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                307,
+                321
+              ],
+              "start_x": 0.677,
+              "end_x": 0.892,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                3,
+                4,
+                5,
+                6,
+                8,
+                9,
+                10,
+                11
+              ]
+            }
+          ]
+        },
+        "s13": {
+          "reference": [
+            2,
+            0
+          ],
+          "automatic": [
+            2,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 0,
+          "agrees_with_reference": true,
+          "tracks": 2,
+          "verdicts": {
+            "kept": 2,
+            "removed": 0,
+            "counted": 0,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": []
+        },
+        "s14": {
+          "reference": [
+            3,
+            0
+          ],
+          "automatic": [
+            3,
+            0
+          ],
+          "reviewed": [
+            5,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 2,
+          "agrees_with_reference": false,
+          "tracks": 6,
+          "verdicts": {
+            "kept": 4,
+            "removed": 0,
+            "counted": 2,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 3,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                234,
+                245
+              ],
+              "start_x": 0.43,
+              "end_x": 0.398,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                1,
+                2,
+                4
+              ]
+            },
+            {
+              "track_id": 5,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                251,
+                262
+              ],
+              "start_x": 0.565,
+              "end_x": 0.691,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                1,
+                2,
+                4
+              ]
+            }
+          ]
+        },
+        "s15": {
+          "reference": [
+            8,
+            0
+          ],
+          "automatic": [
+            8,
+            0
+          ],
+          "reviewed": [
+            12,
+            0
+          ],
+          "automatic_error": 0,
+          "reviewed_error": 4,
+          "agrees_with_reference": false,
+          "tracks": 17,
+          "verdicts": {
+            "kept": 13,
+            "removed": 0,
+            "counted": 4,
+            "redirected": 0,
+            "unresolved": 0,
+            "unreviewed": 0
+          },
+          "added_passages": 0,
+          "changes": [
+            {
+              "track_id": 5,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                239,
+                269
+              ],
+              "start_x": 0.126,
+              "end_x": 0.375,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                4,
+                6,
+                7,
+                9,
+                10,
+                11,
+                12
+              ]
+            },
+            {
+              "track_id": 8,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                250,
+                272
+              ],
+              "start_x": 0.031,
+              "end_x": 0.206,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                4,
+                6,
+                7,
+                9,
+                10,
+                11,
+                12
+              ]
+            },
+            {
+              "track_id": 14,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                325,
+                349
+              ],
+              "start_x": 0.646,
+              "end_x": 0.864,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                4,
+                6,
+                7,
+                9,
+                10,
+                12,
+                13
+              ]
+            },
+            {
+              "track_id": 15,
+              "verdict": "counted",
+              "automatic": null,
+              "final": "right",
+              "frames": [
+                340,
+                362
+              ],
+              "start_x": 0.94,
+              "end_x": 0.896,
+              "crosses_line_alone": false,
+              "counted_tracks_nearby": [
+                4,
+                7,
+                9,
+                10,
+                12
+              ]
+            }
+          ]
+        }
+      },
+      "complete_clips": 15,
+      "assigned_clips": 15,
+      "nmae_automatic": 0.057692307692307696,
+      "nmae_reviewed": 0.34615384615384615,
+      "triage": {
+        "needs_review": {
+          "reviewed_tracks": 1,
+          "changed": 0,
+          "unresolved": 0,
+          "changed_share": 0.0
+        },
+        "suggested": {
+          "reviewed_tracks": 93,
+          "changed": 15,
+          "unresolved": 0,
+          "changed_share": 0.16129032258064516
+        },
+        "unresolved": {
+          "reviewed_tracks": 4,
+          "changed": 1,
+          "unresolved": 0,
+          "changed_share": 0.25
+        }
+      },
+      "timing": {
+        "clips": {
+          "s01": {
+            "first": "2026-10-17T09:59:36.607825+00:00",
+            "last": "2026-10-17T09:59:52.705908+00:00",
+            "events": 15
+          },
+          "s02": {
+            "first": "2026-10-17T10:00:13.589408+00:00",
+            "last": "2026-10-17T10:00:19.203025+00:00",
+            "events": 3
+          },
+          "s03": {
+            "first": "2026-10-17T10:00:53.161542+00:00",
+            "last": "2026-10-17T10:01:12.762579+00:00",
+            "events": 6
+          },
+          "s04": {
+            "first": "2026-10-17T10:01:29.689079+00:00",
+            "last": "2026-10-17T10:01:39.526826+00:00",
+            "events": 3
+          },
+          "s05": {
+            "first": "2026-10-17T10:02:01.049242+00:00",
+            "last": "2026-10-17T10:02:18.668246+00:00",
+            "events": 9
+          },
+          "s06": {
+            "first": "2026-10-17T10:02:36.611932+00:00",
+            "last": "2026-10-17T10:03:23.597547+00:00",
+            "events": 12
+          },
+          "s07": {
+            "first": "2026-10-17T10:03:48.896970+00:00",
+            "last": "2026-10-17T10:04:01.306776+00:00",
+            "events": 6
+          },
+          "s08": {
+            "first": "2026-10-17T10:05:18.358666+00:00",
+            "last": "2026-10-17T10:05:31.381977+00:00",
+            "events": 5
+          },
+          "s09": {
+            "first": "2026-10-17T10:05:55.726405+00:00",
+            "last": "2026-10-17T10:05:59.885817+00:00",
+            "events": 3
+          },
+          "s10": {
+            "first": "2026-10-17T10:06:27.913112+00:00",
+            "last": "2026-10-17T10:06:38.990737+00:00",
+            "events": 7
+          },
+          "s11": {
+            "first": "2026-10-17T10:07:01.186489+00:00",
+            "last": "2026-10-17T10:07:12.567748+00:00",
+            "events": 3
+          },
+          "s12": {
+            "first": "2026-10-17T10:07:55.000110+00:00",
+            "last": "2026-10-17T10:08:26.506419+00:00",
+            "events": 17
+          },
+          "s13": {
+            "first": "2026-10-17T10:08:49.458908+00:00",
+            "last": "2026-10-17T10:08:53.247050+00:00",
+            "events": 3
+          },
+          "s14": {
+            "first": "2026-10-17T10:09:11.587421+00:00",
+            "last": "2026-10-17T10:09:34.245969+00:00",
+            "events": 8
+          },
+          "s15": {
+            "first": "2026-10-17T10:10:27.144815+00:00",
+            "last": "2026-10-17T10:11:11.222828+00:00",
+            "events": 18
+          }
+        },
+        "first": "2026-10-17T09:59:36.607825+00:00",
+        "last": "2026-10-17T10:11:11.222828+00:00",
+        "span_minutes": 11.6
+      },
+      "recording_minutes": 12.4,
+      "disagreements_with_reference": [
+        {
+          "clip": "s01",
+          "reference": [
+            11,
+            0
+          ],
+          "reviewed": [
+            10,
+            0
+          ]
+        },
+        {
+          "clip": "s03",
+          "reference": [
+            0,
+            2
+          ],
+          "reviewed": [
+            0,
+            4
+          ]
+        },
+        {
+          "clip": "s05",
+          "reference": [
+            5,
+            0
+          ],
+          "reviewed": [
+            6,
+            0
+          ]
+        },
+        {
+          "clip": "s06",
+          "reference": [
+            5,
+            0
+          ],
+          "reviewed": [
+            6,
+            0
+          ]
+        },
+        {
+          "clip": "s08",
+          "reference": [
+            0,
+            1
+          ],
+          "reviewed": [
+            4,
+            0
+          ]
+        },
+        {
+          "clip": "s09",
+          "reference": [
+            1,
+            0
+          ],
+          "reviewed": [
+            2,
+            0
+          ]
+        },
+        {
+          "clip": "s12",
+          "reference": [
+            9,
+            0
+          ],
+          "reviewed": [
+            10,
+            0
+          ]
+        },
+        {
+          "clip": "s14",
+          "reference": [
+            3,
+            0
+          ],
+          "reviewed": [
+            5,
+            0
+          ]
+        },
+        {
+          "clip": "s15",
+          "reference": [
+            8,
+            0
+          ],
+          "reviewed": [
+            12,
+            0
+          ]
+        }
+      ]
+    }
+  },
+  "agreement_R1_R2": {
+    "clips": [
+      "s01",
+      "s02",
+      "s03",
+      "s04",
+      "s05",
+      "s06",
+      "s07",
+      "s08",
+      "s09",
+      "s10",
+      "s11",
+      "s12",
+      "s13",
+      "s14",
+      "s15"
+    ],
+    "tracks": 98,
+    "same_outcome": 87,
+    "share": 0.8877551020408163,
+    "kappa": 0.7788264259335247,
+    "disagreements": [
+      {
+        "clip": "s03",
+        "track_id": 2,
+        "first": "none",
+        "second": "left"
+      },
+      {
+        "clip": "s03",
+        "track_id": 5,
+        "first": "none",
+        "second": "left"
+      },
+      {
+        "clip": "s04",
+        "track_id": 1,
+        "first": "right",
+        "second": "none"
+      },
+      {
+        "clip": "s05",
+        "track_id": 5,
+        "first": "none",
+        "second": "right"
+      },
+      {
+        "clip": "s06",
+        "track_id": 2,
+        "first": "none",
+        "second": "right"
+      },
+      {
+        "clip": "s12",
+        "track_id": 7,
+        "first": "none",
+        "second": "right"
+      },
+      {
+        "clip": "s12",
+        "track_id": 12,
+        "first": "none",
+        "second": "right"
+      },
+      {
+        "clip": "s15",
+        "track_id": 5,
+        "first": "none",
+        "second": "right"
+      },
+      {
+        "clip": "s15",
+        "track_id": 8,
+        "first": "none",
+        "second": "right"
+      },
+      {
+        "clip": "s15",
+        "track_id": 14,
+        "first": "none",
+        "second": "right"
+      },
+      {
+        "clip": "s15",
+        "track_id": 15,
+        "first": "none",
+        "second": "right"
+      }
+    ],
+    "clips_complete_for_both": [
+      "s01",
+      "s02",
+      "s03",
+      "s04",
+      "s05",
+      "s06",
+      "s07",
+      "s08",
+      "s09",
+      "s10",
+      "s11",
+      "s12",
+      "s13",
+      "s14",
+      "s15"
+    ],
+    "clips_with_same_counts": 9
+  }
+}
