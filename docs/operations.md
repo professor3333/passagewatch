@@ -210,10 +210,11 @@ loaded. The Docker Compose deployment was checked by the `quickstart` workflow (
 deployment verified against its manifest. The demos counted exactly as in the image's
 host-parity record. The workflow runs again after every successful release.
 
-**Release 0.3.1 counts exactly like 0.3.0.** The `host-parity` workflow ran both releases'
-images (by their manifest digests) on the demo recordings. Every stage is bit-identical
-between the two, from decoded frames to trajectories, with ONNX Runtime and with PyTorch
-(`releases/evaluations/passagewatch-0.3.{0,1}-host-parity/`).
+**Releases 0.3.1 and 0.3.2 count exactly like 0.3.0.** The `host-parity` workflow ran the
+releases' images (by their manifest digests) on the demo recordings. Every stage is
+bit-identical between them, from decoded frames to trajectories, with ONNX Runtime and with
+PyTorch (`releases/evaluations/passagewatch-0.3.{0,1,2}-host-parity/`; 0.3.2: run
+39028309946).
 
 **Rollback.** Point `bundles/active` back at the previous release (for example
 `ln -sfn passagewatch-0.2.0 bundles/active`), restart the API and worker, and run
