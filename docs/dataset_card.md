@@ -1,8 +1,10 @@
 # Dataset Card: Caltech Fish Counting (CFC)
 
-> **Status: complete for Stage 2** (tiny subset downloaded; full imagery not yet). Every
-> number below was computed by PassageWatch from the published files on 2026-09-30 and
-> 2026-10-01, unless it is attributed to the paper.
+> **Status:** covers every part of CFC that PassageWatch uses: the tiny subset, the Kenai
+> development subset and internal holdout (stored locally), and the official test
+> locations (evaluated on Kaggle, not stored). Every number below was computed by
+> PassageWatch from the published files between 2026-09-30 and 2026-10-05, unless it is
+> attributed to the paper.
 
 ## Source and license
 
@@ -163,6 +165,20 @@ pipeline) and never choose among several. `make data-kenai-holdout` streams it a
 
 Being days of the training period, the holdout measures generalization to new recordings
 and days of the same cameras. It says nothing about other cameras or rivers.
+
+## Official test locations (Stage 11 only)
+
+kenai-rightbank, kenai-channel, elwha and nushagak (1,021 clips, about 87 GB of images) were
+opened once, to evaluate the declared release `passagewatch-0.3.0`. The images do not fit
+on the development machine, so the evaluation ran on Kaggle: each location's archive was
+streamed with its MD5 checked, its frames inventoried by SHA-256, evaluated, and deleted.
+All 1,021 clips were evaluated and none was quarantined ([test results](test_results.md)).
+The test set is now a known benchmark: its failures have been inspected, so stronger claims
+need fresh data.
+
+One kenai-channel recording day (2018-08-17, 36 clips) is stored locally for the
+unfamiliar-camera demo example (`configs/data/demo_channel.yaml`, [demos](demos.md)), and
+was also used to compare counts between CPU architectures. Nothing was tuned on it.
 
 ## Validation
 
