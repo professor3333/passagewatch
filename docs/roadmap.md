@@ -12,7 +12,7 @@ training and validation data from Kenai.
 | Usable MVP | 6–7 | Upload, analysis, human correction, export | `v0.3` |
 | Stronger decision support | 8–9 | Evidence-based improvements and uncertainty handling | `v0.4` |
 | Reliable deployment | 10–11 | Tested, optimized, evaluated, and monitored application | `v1.0` |
-| Validated usefulness | 12 | Measured review study and reproducible documentation | — |
+| Validated usefulness | 12 | Measured review study and reproducible documentation | `v1.1` |
 
 ## Stages
 
