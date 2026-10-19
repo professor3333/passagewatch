@@ -35,6 +35,16 @@ It is a complete, measured workflow (data → detection → tracking → countin
 export → monitoring), built and evaluated on the public
 [Caltech Fish Counting dataset](https://data.caltech.edu/records/g945x-41103).
 
+## 📌 What to know first
+
+| | |
+|---|---|
+| **Who it is for** | Fisheries technicians who count fish passing a sonar camera. PassageWatch suggests the counts; the technician checks and corrects them before using them. |
+| **How a fish is counted** | Only the two ends of a fish's track matter: the side of the counting line where it **starts** and the side where it **ends**. Starts left, ends right: one passage → right. Crosses the line and comes back to the side it started on: **zero**, not two, because it ends where it began. Never crosses: zero. |
+| **How accurate it is** | On four locations the model never saw during training or setting selection, the count errors add up to about **21 passages per 100 true passages** (nMAE 0.213). A tuned classical baseline: 39 per 100. The dataset authors' published Baseline and Baseline++: 28 and 12 per 100 ([results](#-results)). |
+| **What it is not for** | Identifying species. Using counts as final figures without review. Recognising the same fish across recordings. Estimating false alarms on long, mostly empty footage: the data were selected around fish activity ([limitations](#-limitations)). |
+| **Data** | The [Caltech Fish Counting dataset](https://data.caltech.edu/records/g945x-41103) (CFC), MIT license ([data](#-data)). |
+
 ## ✨ At a glance
 
 | | |
@@ -131,11 +141,25 @@ Requires Docker, and [uv](https://docs.astral.sh/uv/) for the helper scripts. Mo
 are not in git: each release's bundle (configuration, trained detector and its ONNX export,
 38 MB) is attached to its [GitHub release](https://github.com/professor3333/passagewatch/releases).
 
+> [!IMPORTANT]
+> **Is port 8000 free?** The service listens on `127.0.0.1:8000`. If another program on your
+> machine already uses that port, Docker Desktop can start PassageWatch without an error
+> while requests still reach the other program: `curl` then shows something other than
+> `passagewatch-0.3.2`, and the helper scripts stop with "is not a PassageWatch
+> service". Check first with `lsof -nP -iTCP:8000 -sTCP:LISTEN` (macOS/Linux; no output
+> means free). If it is taken, run this instead of the `docker compose up` line below, and use
+> port 8010 in every URL:
+>
+> ```bash
+> PASSAGEWATCH_HTTP_PORT=8010 docker compose up -d --build
+> curl http://127.0.0.1:8010/v1/model-info
+> ```
+
 ```bash
 git clone https://github.com/professor3333/passagewatch.git && cd passagewatch
 uv run python scripts/fetch_bundle.py --release passagewatch-0.3.2 --activate   # verified against the release manifest
 docker compose up -d --build
-curl http://127.0.0.1:8000/health/ready
+curl http://127.0.0.1:8000/v1/model-info   # must start with {"pipeline_version":"passagewatch-0.3.2"
 ```
 
 The first `docker compose up --build` builds the image (about 2 GB) and took about 9 minutes
@@ -148,7 +172,8 @@ analysed once by the running release; about 7 minutes on the development Mac):
 uv run python scripts/load_demos.py --url http://127.0.0.1:8000
 ```
 
-Then open **http://127.0.0.1:8000/**:
+Then open **http://127.0.0.1:8000/**. To try it without a recording of your own, open one
+of the demo examples on the home page and start at step 3. With your own recording:
 
 1. Upload a recording, with its frame rate, the sonar window in meters, the upstream
    direction and the counting line.
@@ -178,7 +203,8 @@ Other endpoints: `/v1/jobs/{id}/tracks` (paginated, `order=queue`), `/reviews`, 
 
 </details>
 
-If port 8000 is taken, set another with `PASSAGEWATCH_HTTP_PORT=8010 docker compose up -d`.
+`uv run python scripts/verify_deployment.py --url http://127.0.0.1:8000` checks that the
+running service is the release in its manifest and completes an example job.
 `./scripts/compose_smoke_test.sh` checks a deployment end to end with a random-weights
 bundle (CI runs it).
 
@@ -192,7 +218,7 @@ apply to all three.
 ### Official test locations
 
 This is a one-time evaluation of the frozen release on 1,021 clips with 5,296 passages, at
-four locations never used for training or tuning
+four locations the model never saw during training or setting selection
 ([details](docs/test_results.md)). Directional nMAE = Σ(|R̂−R| + |L̂−L|) / Σ(R+L); lower is
 better.
 
@@ -435,8 +461,8 @@ GitHub releases), runs, caches and service data.
 | [Design](docs/design.md) | The full system design |
 
 **Status: Stage 12 of 12** ([roadmap](docs/roadmap.md)). The pipeline, review service and
-release are complete and evaluated, and the usability study and the demo examples are done.
-The remaining work is an [independent check](docs/independent_check.md) of the documentation.
+release are complete and evaluated; the usability study, the demo examples and an
+[independent check](docs/independent_check.md) of the documentation are done.
 
 ## 🙏 Acknowledgements and license
 

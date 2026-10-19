@@ -60,7 +60,7 @@
         "dataset": "Caltech Fish Counting (CFC) v1.1",
         "location": "kenai-channel",
         "clip_name": "2018-08-17-JD229_Channel_Stratum1_Set1_CH_2018-08-17_110006_385_585",
-        "split_note": "official test location kenai-channel, evaluated once for release passagewatch-0.3.0; never used for training or tuning"
+        "split_note": "official test location kenai-channel, evaluated once for release passagewatch-0.3.0; the model never saw it during training or setting selection"
       },
       "reference": {
         "right": 4,
