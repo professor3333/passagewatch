@@ -1,5 +1,7 @@
 """Verify that a running deployment is the release it claims to be, and that it works.
 
+0. ``/v1/model-info`` answers like a PassageWatch service (another program can hold the
+   port and still answer a readiness check).
 1. ``/health/ready`` answers 200: the API is up and a worker with the release loaded is alive.
 2. ``/v1/model-info`` matches the release manifest field by field: pipeline version and
    config hash, checkpoint and ONNX hashes, input size, threshold, preprocessing version,
@@ -20,6 +22,7 @@ import io
 import json
 import sys
 import time
+import urllib.error
 import urllib.request
 import uuid
 import zipfile
@@ -29,7 +32,12 @@ from typing import Any
 import cv2
 import numpy as np
 
-from passagewatch.service.release import check_model_info, read_manifest
+from passagewatch.service.release import (
+    check_model_info,
+    not_passagewatch,
+    read_manifest,
+    service_release,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -40,6 +48,17 @@ def request(
     req = urllib.request.Request(url, data=body, method=method, headers=headers or {})
     with urllib.request.urlopen(req, timeout=30) as response:
         return json.loads(response.read())
+
+
+def fetch(url: str) -> tuple[int, bytes]:
+    """Status and body of a GET, whatever the status; (0, b"") when nothing answers."""
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            return response.status, response.read()
+    except urllib.error.HTTPError as exc:
+        return exc.code, exc.read()
+    except OSError:
+        return 0, b""
 
 
 def example_clip() -> bytes:
@@ -77,6 +96,13 @@ def main(argv: list[str] | None = None) -> int:
     url = args.url.rstrip("/")
     failures: list[str] = []
 
+    info_status, info_body = fetch(f"{url}/v1/model-info")
+    if info_status == 0:
+        print(f"ready: NO (nothing answers at {url})")
+        return 1
+    if service_release(info_status, info_body) is None:
+        print(not_passagewatch(url))
+        return 1
     try:
         request("GET", f"{url}/health/ready")
         print("ready: yes")

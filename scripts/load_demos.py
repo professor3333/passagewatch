@@ -2,7 +2,8 @@
 
 Downloads ``passagewatch-<version>.tar.gz`` from the GitHub release named in ``--tag`` (or
 uses ``--archive``), checks every frames ZIP against ``demos/catalog.json``, and uploads each
-demo that the service does not list as available yet. The service's active release analyses
+demo that the service does not list as available yet. It stops first if the URL reaches a
+program other than PassageWatch. The service's active release analyses
 each one once; that job becomes the demo's precomputed (cached) result. The service must
 run with the same catalog (``PASSAGEWATCH_DEMO_CATALOG``), so that the uploads are kept.
 
@@ -23,6 +24,7 @@ from typing import Any
 import httpx
 
 from passagewatch.service.demos import DemoEntry, load_catalog, unpack_demos
+from passagewatch.service.release import not_passagewatch, service_release
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DOWNLOADS = "https://github.com/professor3333/passagewatch/releases/download"
@@ -89,6 +91,9 @@ def main() -> int:
         tempfile.TemporaryDirectory() as tmp,
         httpx.Client(base_url=args.url, timeout=300) as client,
     ):
+        info = client.get("/v1/model-info")
+        if service_release(info.status_code, info.content) is None:
+            raise SystemExit(not_passagewatch(args.url))
         listing = client.get("/v1/demos").raise_for_status().json()
         if listing["version"] != catalog.version:
             raise SystemExit(
