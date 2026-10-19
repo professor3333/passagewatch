@@ -14,6 +14,8 @@ records everything that determines the release's results and how it was evaluate
 
 :func:`check_model_info` compares a running service's ``/v1/model-info`` with a manifest
 field by field; a deployment is the evaluated release only if nothing differs.
+:func:`service_release` first checks that the service is a PassageWatch service at all: on a
+shared machine another program can answer on the same port, readiness checks included.
 """
 
 from __future__ import annotations
@@ -28,6 +30,12 @@ from passagewatch.service.bundle import ReleaseBundle
 from passagewatch.service.jobs import canonical_json
 
 MANIFEST_VERSION = 1
+IDENTITY_FIELDS = (
+    "pipeline_version",
+    "pipeline_config_sha256",
+    "preprocessing_version",
+    "counting_policy",
+)
 
 
 class ManifestExistsError(ValueError):
@@ -122,3 +130,27 @@ def check_model_info(manifest: ReleaseManifest, info: dict[str, Any]) -> list[st
         elif got != want:
             problems.append(f"{key}: {got} != {want}")
     return problems
+
+
+def service_release(status: int, body: bytes) -> str | None:
+    """The release a PassageWatch service names in its ``/v1/model-info`` response (status
+    and body), or None when the response is not one: another program answered."""
+    if status != 200:
+        return None
+    try:
+        info = json.loads(body)
+    except ValueError:
+        return None
+    if not isinstance(info, dict) or not all(isinstance(info.get(k), str) for k in IDENTITY_FIELDS):
+        return None
+    return str(info["pipeline_version"])
+
+
+def not_passagewatch(url: str) -> str:
+    """What to tell someone whose ``--url`` reaches a program other than PassageWatch."""
+    return (
+        f"{url} is not a PassageWatch service: its /v1/model-info is missing or different. "
+        "Another program is probably using the port. Start PassageWatch on a free one, for "
+        "example: docker compose down && PASSAGEWATCH_HTTP_PORT=8010 docker compose up -d, "
+        "then pass --url http://127.0.0.1:8010"
+    )
