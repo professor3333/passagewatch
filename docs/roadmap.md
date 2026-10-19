@@ -83,15 +83,16 @@ training and validation data from Kenai.
   limitations are documented.
   *Done:* [test results](test_results.md); release `passagewatch-0.3.0` with its manifest in
   `releases/manifests/`, and its bundle downloadable from the GitHub release.
-- [ ] **12. Usefulness study and documentation** — a counterbalanced review-time study,
+- [x] **12. Usefulness study and documentation** — a counterbalanced review-time study,
   three demo examples (clear, difficult, unfamiliar camera), and a README, model card,
   dataset card, and architecture guide verified by another person.
   *Done when* the important work can be understood quickly and reproduced independently.
   *Done:* [study design](usability_study.md) and [results](usability_results.md)
-  (target not met), the [demo examples](demos.md), and a developer run-through of the
-  documentation on a fresh clone. *Not done:* the
-  [independent check](independent_check.md) of the documentation by another person, so the
-  "verified by another person" part of this stage is not met.
+  (target not met), the [demo examples](demos.md), a developer run-through of the
+  documentation on a fresh clone, and the [independent check](independent_check.md) by a
+  person who did not build PassageWatch, whose findings are fixed. That reader ran it on the
+  developer's machine, needed one hint (a port clash), and missed three of six key points in
+  the documents, which were then rewritten; no second reader has checked the rewrite.
 
 ## Out of scope for Version 1
 

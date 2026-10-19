@@ -53,7 +53,7 @@ were further from the reference than the automatic ones
 - Split design: the publisher's train/val/test separation is kept, whole clips only, never
   frames. kenai-val (one day) selects settings. `kenai-holdout-v1` (five other kenai-train
   days, no shared day) confirms them. The four test locations (kenai-rightbank,
-  kenai-channel, elwha, nushagak) are never used for training or tuning.
+  kenai-channel, elwha, nushagak) are kept out of training and out of every choice of settings.
 
 ## Metrics on the official test locations
 

@@ -36,13 +36,14 @@ body:
     id: run
     attributes:
       label: What happened when you ran it?
-      description: Which steps you ran (make install, make check, Quick start, demo review, export), what worked, and any error messages.
+      description: Which steps you ran (make install, make check, Quick start, demo review, export), whether make check passed, whether the export worked, and any error messages.
     validations:
       required: true
   - type: input
     id: machine
     attributes:
       label: Machine and operating system
+      description: If it is not your own machine, say whose. If someone else posts this form for you, say so here.
       placeholder: e.g. Ubuntu 24.04 on x86-64, Docker 28; or macOS 15 on Apple M2, no Docker
   - type: input
     id: times
