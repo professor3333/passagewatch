@@ -214,8 +214,9 @@ fetched and verified, deployment verified, demos counted as in its host-parity r
 automatic run right after the release workflow failed because the bundle archive had not
 yet been attached; attach it before that run, or rerun the workflow by hand.)
 For `passagewatch-0.3.3` the archive was attached about 20 seconds before the automatic run
-fetched it, and that run still got a 404. The run that counts is the manual one after the host-parity
-record (see below).
+fetched it, and that run still got a 404. The manual run after the host-parity record passed (quickstart run
+39372257387): bundle fetched and verified, deployment verified, demos counted as in its
+host-parity record.
 
 **Releases 0.3.1, 0.3.2 and 0.3.3 count exactly like 0.3.0.** The `host-parity` workflow ran
 the releases' images (by their manifest digests) on the demo recordings. Every stage is
