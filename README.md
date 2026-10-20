@@ -146,7 +146,7 @@ are not in git: each release's bundle (configuration, trained detector and its O
 > **Is port 8000 free?** The service listens on `127.0.0.1:8000`. If another program on your
 > machine already uses that port, Docker Desktop can start PassageWatch without an error
 > while requests still reach the other program: `curl` then shows something other than
-> `passagewatch-0.3.2`, and the helper scripts stop with "is not a PassageWatch
+> `passagewatch-0.3.3`, and the helper scripts stop with "is not a PassageWatch
 > service". Check first with `lsof -nP -iTCP:8000 -sTCP:LISTEN` (macOS/Linux; no output
 > means free). If it is taken, run this instead of the `docker compose up` line below, and use
 > port 8010 in every URL:
@@ -158,9 +158,9 @@ are not in git: each release's bundle (configuration, trained detector and its O
 
 ```bash
 git clone https://github.com/professor3333/passagewatch.git && cd passagewatch
-uv run python scripts/fetch_bundle.py --release passagewatch-0.3.2 --activate   # verified against the release manifest
+uv run python scripts/fetch_bundle.py --release passagewatch-0.3.3 --activate   # verified against the release manifest
 docker compose up -d --build
-curl http://127.0.0.1:8000/v1/model-info   # must start with {"pipeline_version":"passagewatch-0.3.2"
+curl http://127.0.0.1:8000/v1/model-info   # must start with {"pipeline_version":"passagewatch-0.3.3"
 ```
 
 The first `docker compose up --build` builds the image (about 2 GB) and took about 9 minutes
@@ -211,10 +211,10 @@ bundle (CI runs it).
 
 ## 📊 Results
 
-Releases `passagewatch-0.3.1` and `passagewatch-0.3.2` run the same pipeline as
+Releases `passagewatch-0.3.1`, `0.3.2` and `0.3.3` run the same pipeline as
 `passagewatch-0.3.0`: only the version name differs, and their release manifests record the
 same checkpoint, ONNX export and evaluations. The results below were measured as 0.3.0 and
-apply to all three.
+apply to all four.
 
 ### Official test locations
 
@@ -379,7 +379,7 @@ release bundle yourself from the trained checkpoint (`models/runs/yolox-tiny-t1/
 uv run python scripts/export_onnx.py --checkpoint models/runs/yolox-tiny-t1/epoch-025.pt \
     --out models/onnx/yolox-tiny-t1-epoch-025.onnx \
     --frames data/extracted/cfc/kenai-dev-v1/kenai-val/2018-06-03-JD154_LeftNear_Stratum1_Set1_LN_2018-06-03_210000_2467_3008
-uv run python scripts/build_bundle.py --version passagewatch-0.3.2 \
+uv run python scripts/build_bundle.py --version passagewatch-0.3.3 \
     --checkpoint models/runs/yolox-tiny-t1/epoch-025.pt --score-threshold 0.4 \
     --tracking-config configs/tracking/classical-v2.yaml --selection docs/error_analysis.md \
     --calibration-version review-v0 --onnx models/onnx/yolox-tiny-t1-epoch-025.onnx --activate
@@ -400,8 +400,8 @@ the GitHub release.
   must complete (`scripts/verify_deployment.py`).
 - **Roll back.** Point `bundles/active` at the previous bundle and restart with the matching
   image:
-  - `scripts/fetch_bundle.py --release passagewatch-0.3.1 --activate`, the previous release
-  - or `ln -sfn passagewatch-0.3.1 bundles/active` when it is already downloaded
+  - `scripts/fetch_bundle.py --release passagewatch-0.3.2 --activate`, the previous release
+  - or `ln -sfn passagewatch-0.3.2 bundles/active` when it is already downloaded
 
   Existing jobs keep the versions recorded for them. The A → B → A rollback is an
   integration test.
@@ -436,8 +436,8 @@ GitHub releases), runs, caches and service data.
   reviewed counts were further from the reference than the automatic ones
   ([results](docs/review_sample_results.md)). The review page now asks "different fish?"
   before counting a track next to an already-counted one. That reaches nearly every recorded
-  case of this error, but its effect on reviewers is not measured, and it is not in a
-  release yet ([same-fish question](docs/review.md#same-fish-question-on-the-review-page)).
+  case of this error, but its effect on reviewers is not measured (release 0.3.3,
+  [same-fish question](docs/review.md#same-fish-question-on-the-review-page)).
 
 ## 📚 Documentation
 

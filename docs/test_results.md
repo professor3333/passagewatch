@@ -4,9 +4,9 @@ The one-time evaluation of the declared release on the four official test locati
 Caltech Fish Counting dataset: kenai-rightbank (another camera on the training river),
 kenai-channel (a side channel), elwha and nushagak (other rivers). Run on 2026-10-04/05.
 
-Releases `passagewatch-0.3.1` (2026-10-09) and `passagewatch-0.3.2` (2026-10-17) have the
-same pipeline: their bundles differ from 0.3.0's only in the version name, so these results
-apply to them unchanged.
+Releases `passagewatch-0.3.1` (2026-10-09), `passagewatch-0.3.2` (2026-10-17) and
+`passagewatch-0.3.3` (2026-10-20) have the same pipeline: their bundles differ from 0.3.0's
+only in the version name, so these results apply to them unchanged.
 
 ## Protocol
 

@@ -234,6 +234,5 @@ before it:
   have appeared, not how reviewers would answer. The developer chose the 10-frame window
   after seeing these reviews. Measuring the effect needs a new declared study with reviewers
   who have not seen the page, compared against the reference.
-- **Not yet in a release.** The page ships inside the image. The published image of
-  `passagewatch-0.3.2` does not have the question. An image built from `main`, as the Quick
-  start's `docker compose up --build` does, has it.
+- **Released in `passagewatch-0.3.3`.** The page ships inside the image; images of earlier
+  releases do not have the question.
