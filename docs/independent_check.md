@@ -98,8 +98,10 @@ Findings and what was done (PR #76):
   and gives the build time.
 - **The reader counted every uncounted track in the Difficult demo.** This is the review-page
   weakness found in the usability study and the reviewed sample
-  ([results](review_sample_results.md)), the third time. Documentation cannot fix it; it needs
-  a change to the review page and its own measured check. Not done.
+  ([results](review_sample_results.md)), the third time. Documentation cannot fix it. The
+  review page now asks whether such a track is a different fish from the counted tracks at
+  overlapping times ([same-fish question](review.md#same-fish-question-on-the-review-page)).
+  Its effect is not measured.
 
 ### Developer run-through (2026-10-17, not independent)
 

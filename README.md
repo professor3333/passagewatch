@@ -118,7 +118,8 @@ What exists today, not a roadmap:
   a review queue ordered by a heuristic **review score** (shown as a score, never as a
   probability), and use the triage states `suggested` / `needs_review` / `unresolved`. You
   can accept, reject, change a direction, mark a track unresolved, or add a fish the model
-  missed.
+  missed. Before a track the model did not count is counted, the page names the counted
+  tracks at overlapping times and asks whether it is a different fish.
 - **Random audits** of footage the model did not flag, the only way to find fish the
   detector missed entirely.
 - **Immutable history.** The original predictions never change. Every correction is an
@@ -433,8 +434,10 @@ GitHub releases), runs, caches and service data.
 - **Review can make counts worse.** In the usability study and in the reviewed sample (15
   clips, two reviewers), reviewers counted pieces of fish split across several tracks, and
   reviewed counts were further from the reference than the automatic ones
-  ([results](docs/review_sample_results.md)). The review page does not yet show which tracks
-  may be the same fish.
+  ([results](docs/review_sample_results.md)). The review page now asks "different fish?"
+  before counting a track next to an already-counted one. That reaches nearly every recorded
+  case of this error, but its effect on reviewers is not measured, and it is not in a
+  release yet ([same-fish question](docs/review.md#same-fish-question-on-the-review-page)).
 
 ## 📚 Documentation
 

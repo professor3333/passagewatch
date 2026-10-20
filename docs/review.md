@@ -187,3 +187,53 @@ differ more from the reference (nMAE automatic 0.058, reviewed 0.212 and 0.346):
 change counted an uncounted track that does not cross the line on its own, often next to a
 track already counted. The labels are not usable as independent review-quality labels; they
 show a weakness of the review interface.
+
+## Same-fish question on the review page
+
+Three times, reviewers counted tracks the release had left uncounted: in the usability
+study, in the reviewed sample, and in the independent documentation check's demo review.
+Nearly all of these tracks were pieces of a fish that another track already counted. The
+tracker splits a fish when it loses it for a few frames. The piece that does not cross the
+line on its own stays uncounted, and a reviewer who has watched the fish cross counts it
+again.
+
+The review page now asks before counting such a track:
+
+- **When it asks.** When the reviewer chooses **Count as passage** on a track the release did
+  not count, and some track that currently counts overlaps it in time or comes within 10
+  frames of it. "Currently counts" includes the reviewer's own earlier decisions. The window
+  is the reviewed-sample analysis's `ADJACENT_FRAMES`.
+- **What it shows.** The panel lists those counted tracks with their times, as links that
+  select them, and outlines them in yellow on the video while they are visible. The question
+  reads "Is track #N a different fish from those?" with three answers: **Different fish:
+  count as passage**, **Same fish: keep uncounted**, and **Back**.
+- **Without a counted track nearby,** counting works as before, in one click.
+
+The rule lives in `countedNearby` (`frontend/src/review.ts`). Its Python copy in
+`passagewatch.evaluation.same_fish` replays recorded reviews.
+
+### Would it have appeared? (replay of recorded reviews)
+
+`scripts/same_fish_coverage.py` goes through each recorded review in order. For every
+"count" decision, it checks whether the page would have asked, given the decisions recorded
+before it:
+
+| Recorded reviews | Count decisions that would have met the question | Uncounted tracks that show the question before any review |
+|---|---|---|
+| Usability study, P1–P4, assisted clips | 35 of 36 | 40 of 52 |
+| Reviewed sample, R1 | 5 of 6 | 30 of 47 |
+| Reviewed sample, R2 | 15 of 15 | 30 of 47 |
+| Documentation check, Difficult demo | 13 of 13 | 11 of 13 |
+
+- **The question reaches nearly every recorded count decision:** 68 of 70. The one it misses
+  is s04 #1, which ends 50 frames before the counted track appears.
+- **It also appears on most uncounted tracks** (70–85%), including any that are real
+  separate fish. In busy clips, nearly every count meets it. A fish the release missed but
+  tracked needs one more click, and an answer of "same fish" would lose it.
+- **Its effect on reviewers is not measured.** The replay shows only that the question would
+  have appeared, not how reviewers would answer. The developer chose the 10-frame window
+  after seeing these reviews. Measuring the effect needs a new declared study with reviewers
+  who have not seen the page, compared against the reference.
+- **Not yet in a release.** The page ships inside the image. The published image of
+  `passagewatch-0.3.2` does not have the question. An image built from `main`, as the Quick
+  start's `docker compose up --build` does, has it.
