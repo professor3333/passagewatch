@@ -455,6 +455,7 @@ GitHub releases), runs, caches and service data.
 | [Review](docs/review.md) | Review scores, triage, random audits, and how prioritization is measured |
 | [Reviewed sample](docs/review_sample.md) | Protocol for the independently reviewed development sample |
 | [Reviewed sample results](docs/review_sample_results.md) | 15 clips, two reviewers: reviewing made counts worse against the reference; why |
+| [Same-fish re-test](docs/review_retest.md) | Declared design for testing the review page's same-fish question with new reviewers |
 | [Test results](docs/test_results.md) | The release's one-time evaluation on the official test locations |
 | [Demo examples](docs/demos.md) | The three cached demo recordings: how they were chosen, loaded and labelled |
 | [Usability study](docs/usability_results.md) | Manual counting vs. assisted review: [design](docs/usability_study.md) and results |

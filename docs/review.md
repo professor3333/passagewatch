@@ -232,7 +232,7 @@ before it:
   tracked needs one more click, and an answer of "same fish" would lose it.
 - **Its effect on reviewers is not measured.** The replay shows only that the question would
   have appeared, not how reviewers would answer. The developer chose the 10-frame window
-  after seeing these reviews. Measuring the effect needs a new declared study with reviewers
-  who have not seen the page, compared against the reference.
+  after seeing these reviews. A re-test with new reviewers is declared in
+  [review_retest.md](review_retest.md); it has not been run.
 - **Released in `passagewatch-0.3.3`.** The page ships inside the image; images of earlier
   releases do not have the question.
