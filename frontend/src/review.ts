@@ -102,6 +102,9 @@ export const STATE_COLORS: Record<ReviewState, string> = {
   unresolved: "#d16dff",
 };
 
+/** Outline of counted tracks that may be the same fish as the selected uncounted one. */
+export const SAME_FISH_COLOR = "#ffe14d";
+
 export function directionArrow(direction: ImageDirection | null): string {
   if (direction === "right") return "→";
   if (direction === "left") return "←";
@@ -116,11 +119,46 @@ export function directionLabel(direction: ImageDirection | null, upstream: Image
   return `${arrow} ${direction === upstream ? "upstream" : "downstream"}`;
 }
 
-/** One review action offered for a track; ``key`` is its keyboard shortcut, if any. */
+/**
+ * Two tracks this many frames apart or closer in time may be pieces of one fish: the
+ * tracker splits a fish when it loses it for a few frames. The same window as the reviewed
+ * sample's analysis (ADJACENT_FRAMES in evaluation/review_sample.py).
+ */
+export const SAME_FISH_FRAMES = 10;
+
+/** Whether a track currently adds to the reviewed count (after any review decision). */
+export function countsNow(track: Track): boolean {
+  return track.review_state !== "unresolved" && track.final_direction !== null;
+}
+
+/**
+ * The tracks that currently count and overlap ``track`` in time, or come within
+ * ``SAME_FISH_FRAMES`` of it: the pieces of a fish that may already be counted.
+ */
+export function countedNearby(track: Track, tracks: Track[], gap: number = SAME_FISH_FRAMES): Track[] {
+  return tracks.filter(
+    (other) =>
+      other.track_id !== track.track_id &&
+      countsNow(other) &&
+      other.start_frame <= track.end_frame + gap &&
+      track.start_frame <= other.end_frame + gap,
+  );
+}
+
+/** "#3 → (0:01.0–0:02.0)": a track with its current counted direction and its time. */
+export function trackName(track: Track): string {
+  return `#${track.track_id} ${directionArrow(track.final_direction)} (${formatTime(track.start_time_s)}–${formatTime(track.end_time_s)})`;
+}
+
+/**
+ * One review action offered for a track; ``key`` is its keyboard shortcut, if any. With
+ * ``confirm``, the page asks that question first, and acts only on "Different fish".
+ */
 export interface TrackAction {
   label: string;
   key: string | null;
   request: Omit<ReviewRequest, "base_revision">;
+  confirm?: string;
 }
 
 const OPPOSITE: Record<ImageDirection, ImageDirection> = { right: "left", left: "right" };
@@ -134,17 +172,30 @@ const DIRECTION_KEYS: Record<ImageDirection, string> = { right: "r", left: "l" }
  * say "Count as passage" and have no keyboard shortcut. (In the usability study, "Set →
  * right" offered on every track was read as describing the fish's movement, and 36 of 38
  * uses turned non-passing tracks into passages; docs/usability_results.md.)
+ *
+ * When counted tracks overlap it in time (``nearby``), counting asks first whether this is
+ * a different fish from those. In the reviewed sample, 22 of 23 changes were on tracks next
+ * to an already-counted one: reviewers counted a second piece of a fish already counted
+ * (docs/review_sample_results.md).
  */
-export function trackActions(track: Track, upstream: ImageDirection | null): TrackAction[] {
+export function trackActions(track: Track, upstream: ImageDirection | null, nearby: Track[] = []): TrackAction[] {
   const id = track.track_id;
   const unresolved: TrackAction = { label: "Unresolved (u)", key: "u", request: { action: "mark_unresolved", track_id: id } };
   if (track.direction === null) {
+    const confirm =
+      nearby.length === 0
+        ? undefined
+        : `${nearby.length === 1 ? "Track" : "Tracks"} ${nearby.map(trackName).join(", ")} ` +
+          `${nearby.length === 1 ? "is" : "are"} already counted at overlapping times (outlined in yellow on ` +
+          `the video while visible). The tracker often splits one fish into several tracks. Is track #${id} ` +
+          `a different fish from ${nearby.length === 1 ? "that one" : "those"}?`;
     return [
       { label: "Keep uncounted (a)", key: "a", request: { action: "accept", track_id: id } },
       ...(["right", "left"] as const).map((direction) => ({
         label: `Count as passage ${directionLabel(direction, upstream)}`,
         key: null,
         request: { action: "set_direction" as const, track_id: id, direction },
+        ...(confirm ? { confirm } : {}),
       })),
       unresolved,
     ];
@@ -168,7 +219,8 @@ export function uncountedReason(track: Track): string | null {
   if (track.outcome === "no_crossing")
     return (
       "Not counted: the track does not end on the other side of the counting line " +
-      "(a fish that crosses and comes back counts zero)."
+      "(a fish that crosses and comes back counts zero). It may be a piece of a fish that " +
+      "another track already counts."
     );
   return null;
 }

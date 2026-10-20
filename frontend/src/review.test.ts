@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   auditWindowAt,
+  countedNearby,
   countRows,
+  countsNow,
   demoForClip,
   directionLabel,
   formatTime,
@@ -173,6 +175,16 @@ describe("trackActions", () => {
     expect(trackActions(uncounted, "right")[1]?.label).toBe("Count as passage → upstream");
   });
 
+  it("asks whether it is a different fish when counted tracks overlap it in time", () => {
+    const counted = { ...track(3, 5), final_direction: "right" as const };
+    const actions = trackActions(uncounted, null, [counted]);
+    const counting = actions.filter((a) => a.request.action === "set_direction");
+    expect(counting.map((a) => a.confirm)).toEqual([expect.stringContaining("Track #3 → (0:00.5–0:01.5) is already counted"), expect.anything()]);
+    expect(counting[0]?.confirm).toMatch(/Is track #7 a different fish from that one\?/);
+    expect(actions[0]?.confirm).toBeUndefined(); // keeping it uncounted needs no question
+    expect(trackActions(uncounted, null).every((a) => a.confirm === undefined)).toBe(true);
+  });
+
   it("explains why a track was not counted", () => {
     expect(uncountedReason(track(3, 0))).toBeNull();
     expect(uncountedReason(uncounted)).toMatch(/does not end on the other side/);
@@ -218,5 +230,30 @@ describe("serialQueue", () => {
     });
     await enqueue(slow("second", 0));
     expect(log).toEqual(["first", "second"]);
+  });
+});
+
+describe("countedNearby", () => {
+  const piece: Track = { ...track(9, 100), outcome: "no_crossing", direction: null, final_direction: null }; // frames 100-110
+
+  it("finds counted tracks that overlap in time or come within ten frames", () => {
+    const tracks = [
+      piece,
+      track(1, 95), // overlaps
+      track(2, 120), // starts 10 frames after the piece ends
+      track(3, 121), // 11 frames after
+      track(4, 79), // ends at 89, 11 frames before
+      { ...track(5, 100), direction: null, final_direction: null, outcome: "no_crossing" as const }, // not counted
+    ];
+    expect(countedNearby(piece, tracks).map((t) => t.track_id)).toEqual([1, 2]);
+  });
+
+  it("follows review decisions: rejected and unresolved tracks no longer count, a counted piece does", () => {
+    const rejected = track(1, 100, "rejected");
+    const unresolved = { ...track(2, 100, "unresolved"), final_direction: "right" as const };
+    const countedPiece = { ...track(3, 100, "corrected"), direction: null, final_direction: "left" as const };
+    expect(countsNow(rejected)).toBe(false);
+    expect(countsNow(unresolved)).toBe(false);
+    expect(countedNearby(piece, [piece, rejected, unresolved, countedPiece]).map((t) => t.track_id)).toEqual([3]);
   });
 });
