@@ -115,6 +115,18 @@ def run_demo(pipeline: InferencePipeline, demo: dict[str, Any], media: Path) -> 
     }
 
 
+def cpu_model() -> str | None:
+    """The CPU model name (Linux): detector outputs can differ in the last digits between
+    CPU models, even with the same image."""
+    try:
+        for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
+            if line.startswith("model name"):
+                return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    return platform.processor() or None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--archive", type=Path, required=True)
@@ -150,6 +162,7 @@ def main() -> int:
             "opencv": cv2.__version__,
             "onnxruntime": onnxruntime.__version__,
             "torch": torch.__version__,
+            "cpu": cpu_model(),
         },
         "demos": {},
     }
