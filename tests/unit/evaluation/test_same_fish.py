@@ -52,3 +52,16 @@ def test_replay_names_the_counted_tracks_at_each_count_decision() -> None:
 
 def test_question_rate_counts_uncounted_tracks_with_a_counted_neighbour() -> None:
     assert question_rate(TRACKS) == (3, 1)
+
+
+def test_the_answer_reasons_match_the_review_page() -> None:
+    import re
+    from pathlib import Path
+
+    from passagewatch.evaluation.same_fish import SAME_FISH_REASONS
+
+    source = (Path(__file__).resolve().parents[3] / "frontend/src/review.ts").read_text()
+    block = re.search(r"SAME_FISH_REASONS = \{(.*?)\} as const", source, re.S)
+    assert block is not None
+    found = dict(re.findall(r'(\w+): "([^"]+)"', block.group(1)))
+    assert found == SAME_FISH_REASONS
