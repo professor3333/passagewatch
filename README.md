@@ -428,7 +428,9 @@ GitHub releases), runs, caches and service data.
   input pixels differently on Apple arm64 than on x86, which changed 4 of 36 kenai-channel
   clips' counts. The deployed x86 image reproduces the x86 test evaluation. The development
   results were measured on the Mac
-  ([details](docs/demos.md#results-depend-slightly-on-the-host)).
+  ([details](docs/demos.md#results-depend-slightly-on-the-host)). Different x86 CPU models
+  change the detector's scores only in the last digits; the demo counts stay the same
+  ([operations](docs/operations.md)).
 - **No time-saved claim.** The usability study (4 independent participants, short clips) did
   not show a time saving ([results](docs/usability_results.md)).
 - **Review can make counts worse.** In the usability study and in the reviewed sample (15

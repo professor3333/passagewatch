@@ -213,12 +213,31 @@ host-parity record. The workflow runs again after every successful release.
 fetched and verified, deployment verified, demos counted as in its host-parity record. (The
 automatic run right after the release workflow failed because the bundle archive had not
 yet been attached; attach it before that run, or rerun the workflow by hand.)
+For `passagewatch-0.3.3` the archive was attached about 20 seconds before the automatic run
+fetched it, and that run still got a 404. The run that counts is the manual one after the host-parity
+record (see below).
 
-**Releases 0.3.1 and 0.3.2 count exactly like 0.3.0.** The `host-parity` workflow ran the
-releases' images (by their manifest digests) on the demo recordings. Every stage is
+**Releases 0.3.1, 0.3.2 and 0.3.3 count exactly like 0.3.0.** The `host-parity` workflow ran
+the releases' images (by their manifest digests) on the demo recordings. Every stage is
 bit-identical between them, from decoded frames to trajectories, with ONNX Runtime and with
-PyTorch (`releases/evaluations/passagewatch-0.3.{0,1,2}-host-parity/`; 0.3.2: run
-39028309946).
+PyTorch (`releases/evaluations/passagewatch-0.3.{0,1,2,3}-host-parity/`; 0.3.2: run
+39028309946; 0.3.3: run 39370970006, AMD EPYC 7763).
+
+**The CPU model changes the detector's last digits, not the demo counts.** GitHub's x86
+runners have different CPU models. The first host-parity run of 0.3.3 (run 39367100486)
+landed on an Intel Xeon 6973P-C. Its frames and detector inputs were identical, but boxes
+differed by up to 2×10⁻⁴ px and scores by up to 1.4×10⁻⁵. Detections, tracks and counts
+were the same. Four more runs on 2026-10-20 settled the cause:
+
+- the 0.3.2 and 0.3.3 images gave bit-identical results on AMD EPYC 7763 runners;
+- the 0.3.3 image repeated the Intel result on another Intel runner;
+- both images contain the same third-party files.
+
+Since then the report records the CPU model (`host.cpu`). Differences this small change a
+count only when a score or a box sits right at a threshold, as with the arm64/x86 resize
+difference ([demos](demos.md#results-depend-slightly-on-the-host)). The committed host-parity
+records match the AMD EPYC 7763 results (only 0.3.3's names the CPU). The Kaggle test
+evaluation did not record its CPU model.
 
 **Rollback.** Point `bundles/active` back at the previous release (for example
 `ln -sfn passagewatch-0.2.0 bundles/active`), restart the API and worker, and run
