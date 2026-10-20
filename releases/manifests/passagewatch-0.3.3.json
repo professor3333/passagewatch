@@ -110,5 +110,5 @@
   ],
   "test_locations": "not evaluated (Stage 11, once, for a declared release)"
  },
- "image_digest": null
+ "image_digest": "sha256:4679136822bcbe8739014eb46dc1d3d7e0d081bff50e4672077254cbc6fd1e6c"
 }
