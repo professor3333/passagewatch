@@ -13,7 +13,9 @@ import {
   TRIAGE_COLORS,
   TRIAGE_LABELS,
   auditWindowAt,
+  countedNearby,
   countRows,
+  directionArrow,
   directionLabel,
   formatTime,
   newIdempotencyKey,
@@ -24,9 +26,12 @@ import {
   reasonText,
   referenceText,
   reviewOrder,
+  SAME_FISH_COLOR,
   trackActions,
+  trackName,
   uncountedReason,
 } from "./review";
+import type { TrackAction } from "./review";
 import type { AddedPassage, Audit, Clip, Demo, DemoListing, ImageDirection, Job, Results, ReviewRequest, Track } from "./types";
 
 const api = new PassageWatchApi();
@@ -269,6 +274,8 @@ interface ReviewState {
   revision: number;
   frame: number;
   selected: number | null;
+  /** A "Count as passage" waiting for the reviewer's answer to its same-fish question. */
+  confirming: TrackAction | null;
   playing: boolean;
   speed: number;
 }
@@ -295,6 +302,7 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
     revision,
     frame: 0,
     selected: null,
+    confirming: null,
     playing: false,
     speed: 1,
   };
@@ -412,6 +420,11 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
   // Rendering -------------------------------------------------------------------------
   const context = canvas.getContext("2d") as CanvasRenderingContext2D;
   const trackById = (): Map<number, Track> => new Map(state.tracks.map((t) => [t.track_id, t]));
+  /** For a selected track the release did not count: the counted tracks at the same time. */
+  const sameFishCandidates = (): Track[] => {
+    const track = state.tracks.find((t) => t.track_id === state.selected);
+    return track && track.direction === null ? countedNearby(track, state.tracks) : [];
+  };
 
   async function draw(): Promise<void> {
     const frameIndex = state.frame;
@@ -441,12 +454,22 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
     context.stroke();
 
     const byId = trackById();
+    const counted = new Set(sameFishCandidates().map((t) => t.track_id));
     context.font = `${12 * ratio}px system-ui`;
     for (const box of boxes) {
       const track = byId.get(box.track_id);
       const reviewState = track?.review_state ?? "automatic";
       const rect = boxToCanvas(box, fit);
       const selected = box.track_id === state.selected;
+      if (counted.has(box.track_id)) {
+        // An already-counted track that may be the same fish as the selected one.
+        context.setLineDash([]);
+        context.strokeStyle = SAME_FISH_COLOR;
+        context.lineWidth = 2 * ratio;
+        context.strokeRect(rect.x - 4 * ratio, rect.y - 4 * ratio, rect.w + 8 * ratio, rect.h + 8 * ratio);
+        context.fillStyle = SAME_FISH_COLOR;
+        context.fillText(`counted ${directionArrow(track?.final_direction ?? null)}`, rect.x, rect.y + rect.h + 14 * ratio);
+      }
       context.setLineDash(reviewState === "rejected" ? [4 * ratio, 4 * ratio] : []);
       context.strokeStyle = STATE_COLORS[reviewState];
       context.lineWidth = (selected ? 3 : 1.5) * ratio;
@@ -543,6 +566,44 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
       b.addEventListener("click", () => void act(request));
       return b;
     };
+    const actionButton = (action: TrackAction): HTMLButtonElement => {
+      if (!action.confirm) return button(action.label, action.request);
+      const b = el("button", { type: "button" }, action.label);
+      b.addEventListener("click", () => {
+        state.confirming = action;
+        renderSelected();
+      });
+      return b;
+    };
+    const nearby = sameFishCandidates();
+    const confirming = state.confirming;
+    let actions: HTMLElement;
+    if (confirming?.confirm && confirming.request.track_id === track.track_id) {
+      const back = el("button", { type: "button" }, "Back");
+      back.addEventListener("click", () => {
+        state.confirming = null;
+        renderSelected();
+      });
+      actions = el(
+        "div",
+        { class: "confirm", role: "group", "aria-label": "Same fish?" },
+        el("p", {}, el("strong", {}, confirming.confirm)),
+        el(
+          "div",
+          { class: "actions" },
+          button(`Different fish: ${confirming.label.toLowerCase()}`, confirming.request),
+          button("Same fish: keep uncounted", { action: "accept", track_id: track.track_id }),
+          back,
+        ),
+      );
+    } else {
+      actions = el("div", { class: "actions" }, ...trackActions(track, upstream, nearby).map(actionButton));
+    }
+    const jump = (other: Track): HTMLButtonElement => {
+      const b = el("button", { type: "button", class: "link" }, trackName(other));
+      b.addEventListener("click", () => select(other.track_id));
+      return b;
+    };
     selectedPanel.replaceChildren(
       el(
         "p",
@@ -564,8 +625,17 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
         : []),
       ...(uncountedReason(track) === null
         ? []
-        : [el("p", {}, `${uncountedReason(track)} Count it only if the fish really crossed and stayed across.`)]),
-      el("div", { class: "actions" }, ...trackActions(track, upstream).map((a) => button(a.label, a.request))),
+        : [
+            el(
+              "p",
+              {},
+              `${uncountedReason(track)} Count it only if it is a fish that crossed and stayed across, and that no counted track already covers.`,
+            ),
+          ]),
+      ...(nearby.length === 0
+        ? []
+        : [el("p", { class: "same-fish" }, "Counted at overlapping times (outlined in yellow while visible): ", ...nearby.flatMap((t, i) => (i ? [", ", jump(t)] : [jump(t)])))]),
+      actions,
       addMissing,
     );
   }
@@ -635,6 +705,7 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
 
   function select(trackId: number | null): void {
     state.selected = trackId;
+    state.confirming = null;
     const track = state.tracks.find((t) => t.track_id === trackId);
     if (track) seek(track.start_frame);
     renderTracks();
@@ -668,6 +739,7 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
   const enqueue = serialQueue();
 
   function act(request: Omit<ReviewRequest, "base_revision">): Promise<void> {
+    state.confirming = null;
     return enqueue(() => submit(request));
   }
 
