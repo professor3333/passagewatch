@@ -169,11 +169,14 @@ how long each clip was watched. The owner confirms R2 watched each clip.
   review-quality labels for the release's counts, which was the protocol's aim. They should
   not be used as training data. They are evidence that, in this interface, an unaided
   reviewer can make good automatic counts worse.
-- **What would address it** (not done; each needs its own measured check):
+- **What would address it** (each needs its own measured check):
   showing tracks that overlap in time and space as a group, with the group's count; asking
   "Is this fish already counted by another track?" before "Count as passage"; and, in the
   review guidance, putting the counted tracks of the same moment next to the track being
-  decided.
+  decided. *Added later:* the review page now lists the counted tracks at overlapping times
+  and asks whether the track is a different fish before counting it
+  ([same-fish question](review.md#same-fish-question-on-the-review-page)). Its effect is not
+  measured.
 
 ## Threats to validity
 
