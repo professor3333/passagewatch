@@ -162,4 +162,12 @@ resolved.
 
 ## Status
 
-Declared 2026-10-20. Tooling built. No reviewer has started; the plan has not been prepared.
+Declared 2026-10-20. Tooling built. **Prepared 2026-10-20:** `retest/plan.json` and the link
+lists `retest/T1.md`–`T4.md` are committed. All 21 clips were analysed by release 0.3.3 with
+the same automatic counts as in the reviewed sample, and the review page is commit `63748b6`.
+No reviewer has started.
+
+**Running a session.** Start the service with `scripts/retest_service.sh start`, on the
+machine that holds `var/retest/`. Send the next reviewer their link list, in the order
+T1, T2, ... Do not send this page or the plan. Keep the computer awake while it serves.
+When all reviewers are done, run `scripts/analyze_retest.py` and write the results report.
