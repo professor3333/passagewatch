@@ -8,15 +8,18 @@
 #
 # Its database and uploads live in var/review-sample/ (not committed), apart from any
 # other deployment. Uploads are kept for 90 days. Stopping keeps all data.
+# REVIEW_SERVICE_DATA, REVIEW_SERVICE_PORT and REVIEW_SERVICE_BUNDLE run another such
+# service (scripts/retest_service.sh).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-DATA="var/review-sample"
-PORT="${PASSAGEWATCH_HTTP_PORT:-8011}"
+DATA="${REVIEW_SERVICE_DATA:-var/review-sample}"
+PORT="${REVIEW_SERVICE_PORT:-${PASSAGEWATCH_HTTP_PORT:-8011}}"
+BUNDLE="${REVIEW_SERVICE_BUNDLE:-bundles/active}"
 URL="http://127.0.0.1:${PORT}"
 
 export PASSAGEWATCH_DATA_DIR="$PWD/$DATA"
-export PASSAGEWATCH_BUNDLE_DIR="$PWD/bundles/active"
+export PASSAGEWATCH_BUNDLE_DIR="$PWD/$BUNDLE"
 export PASSAGEWATCH_FRONTEND_DIR="$PWD/frontend/dist"
 export PASSAGEWATCH_UPLOAD_RETENTION_HOURS=2160
 export PASSAGEWATCH_TORCH_THREADS="${PASSAGEWATCH_TORCH_THREADS:-4}"

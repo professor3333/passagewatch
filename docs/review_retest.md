@@ -93,7 +93,7 @@ track has a decision enter the figures. An incomplete clip is listed and left ou
 | Reviewed and automatic count error against the reference (Σ\|R̂−R\|+\|L̂−L\|), and nMAE | reviewer, set A, set B, all | Target 1 |
 | **Fragment counts:** count decisions on a track the release did not count, whose first and last boxes lie on the same side of the line, with a track the release counted overlapping it in time or within 10 frames (`describe_changes` in `passagewatch.evaluation.review_sample`, the definition behind R2's 15) | reviewer, set A | Target 2 |
 | The same, on set B | reviewer | reported |
-| **Answers to the question:** times shown, "Different fish", "Same fish", "Back" | reviewer, set | reported |
+| **Answers to the question:** "Different fish" and "Same fish" (amendment 1) | reviewer, set | reported |
 | Missed passages recovered on set B: how much of the automatic counts' shortfall the reviewed counts close | reviewer | the question's cost, reported |
 | Every changed track, described as in the reviewed sample (where it starts and ends, counted tracks near it) | track | reported |
 | Time from first to last decision, per clip and in total | reviewer | reported |
@@ -129,19 +129,37 @@ resolved.
   under test, not the instructions.
 - **One river, two cameras, one season**, as for the holdout.
 
-## Tooling (to build before the first reviewer)
+## Tooling
 
-- **Logging of the question's answers.** The page sends a `reason` with "Same fish: keep
-  uncounted" and "Different fish: count", and records when the question was shown and when
-  "Back" was chosen, so the answers can be counted. API and counts are unchanged.
-- **`scripts/prepare_retest.py`** (run once): writes `retest/plan.json` with the clips, codes,
-  order, reference and automatic counts, the release and the frontend commit. It creates
-  each reviewer's jobs on a separate service (data in `var/retest/`, port 8012), and writes
-  each reviewer's link list `retest/T<n>.md`. It refuses to run if the plan exists.
-- **`scripts/analyze_retest.py`**: computes the measures and targets above into
-  `retest/results.json`, reusing `passagewatch.evaluation.review_sample` and
-  `passagewatch.evaluation.same_fish`.
+- **Answers to the question are logged.** The page sends a `reason` with "Same fish: keep
+  uncounted" and "Different fish: count" (`SAME_FISH_REASONS` in `frontend/src/review.ts` and
+  `passagewatch.evaluation.same_fish`). API and counts are unchanged.
+- **`scripts/retest_service.sh start|status|stop`** runs the re-test's service on this
+  machine: data in `var/retest/` (not committed), port 8012, release `passagewatch-0.3.3`.
+- **`scripts/prepare_retest.py`** (run once, from a clean checkout) writes `retest/plan.json`
+  with the clips, codes, sets, order, reference and automatic counts, the release and the
+  commit whose review page is served. It creates each reviewer's jobs and checks that the
+  automatic counts equal the reviewed sample's. It writes each reviewer's link list
+  `retest/T<n>.md`, with the instructions under Procedure. It refuses to run if the plan
+  exists.
+- **`scripts/analyze_retest.py`** computes the measures and both targets into
+  `retest/results.json` (`passagewatch.evaluation.retest`). It also gives R1's and R2's
+  set-A figures from the reviewed sample: fragment counts 5 and 15, reviewed errors 11 and
+  18.
+
+## Amendments
+
+### Amendment 1 (2026-10-20, before any reviewer)
+
+- **Not recorded: when the question was shown, and "Back".** Recording them would need a
+  new kind of event in the service, because review events change the result and these must
+  not. Only the two answers are recorded, so a question closed with "Back" leaves no trace.
+- **The reviewers' instructions** are the protocol's (`docs/review_sample.md`, "Instructions
+  for reviewers" with "One passage per fish") with three changes: an opening paragraph, no
+  line about starting the service, and the new clip codes. R2 also had a one-line reminder
+  to count each fish once in their link list. Here, "One passage per fish" is part of the
+  instructions in each link list.
 
 ## Status
 
-Declared 2026-10-20. Tooling not built. No reviewer has started.
+Declared 2026-10-20. Tooling built. No reviewer has started; the plan has not been prepared.

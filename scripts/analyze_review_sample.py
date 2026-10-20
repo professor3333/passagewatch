@@ -37,57 +37,16 @@ from passagewatch.evaluation.review_sample import (
     TrackLabel,
     agreement,
     clip_summary,
-    describe_changes,
     review_timing,
-    track_labels,
-    track_paths,
     triage_table,
 )
+from passagewatch.service.client import changes, fetch, review_events
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PAGE = 200
-OBSERVATION_FRAMES = 500  # the API's limit per request
-
-
-def fetch(client: httpx.Client, job_id: str) -> tuple[list[TrackLabel], tuple[int, int], int]:
-    tracks: list[dict[str, Any]] = []
-    offset = 0
-    while True:
-        page = (
-            client.get(f"/v1/jobs/{job_id}/tracks", params={"offset": offset, "limit": PAGE})
-            .raise_for_status()
-            .json()
-        )
-        tracks += page["tracks"]
-        offset += PAGE
-        if offset >= page["total"]:
-            break
-    results = client.get(f"/v1/jobs/{job_id}/results").raise_for_status().json()
-    counts = results["reviewed"] or results["automatic"]
-    report = client.get(f"/v1/jobs/{job_id}/export", params={"format": "json"}).json()
-    added = sum(p["state"] == "added" for p in report.get("added_passages", []))
-    return track_labels(tracks), (counts["right"], counts["left"]), added
-
-
-def changes(client: httpx.Client, job_id: str, labels: list[TrackLabel]) -> list[dict[str, Any]]:
-    """The changed tracks of a job, described from its observations."""
-    if not any(label.verdict in ("removed", "counted", "redirected") for label in labels):
-        return []
-    job = client.get(f"/v1/jobs/{job_id}").raise_for_status().json()
-    clip = client.get(f"/v1/clips/{job['clip_id']}").raise_for_status().json()
-    boxes: list[dict[str, Any]] = []
-    for start in range(0, clip["num_frames"], OBSERVATION_FRAMES):
-        stop = min(clip["num_frames"], start + OBSERVATION_FRAMES)
-        params = {"start": start, "stop": stop}
-        page = client.get(f"/v1/jobs/{job_id}/observations", params=params)
-        boxes += page.raise_for_status().json()["boxes"]
-    paths = track_paths(boxes, clip["width"])
-    return describe_changes(labels, paths, job["counting"]["line_x_normalized"])
 
 
 def event_times(client: httpx.Client, job_id: str) -> list[str]:
-    events = client.get(f"/v1/jobs/{job_id}/reviews").raise_for_status().json()["events"]
-    return [e["created_at"] for e in events]
+    return [e["created_at"] for e in review_events(client, job_id)]
 
 
 def nmae(clips: list[dict[str, Any]], key: str) -> float | None:
