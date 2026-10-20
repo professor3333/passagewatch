@@ -126,6 +126,16 @@ export function directionLabel(direction: ImageDirection | null, upstream: Image
  */
 export const SAME_FISH_FRAMES = 10;
 
+/**
+ * The ``reason`` sent with each answer to the same-fish question, so recorded reviews show
+ * how it was answered (docs/review_retest.md). Must equal SAME_FISH_REASONS in
+ * passagewatch.evaluation.same_fish.
+ */
+export const SAME_FISH_REASONS = {
+  same: "same-fish question: same fish",
+  different: "same-fish question: different fish",
+} as const;
+
 /** Whether a track currently adds to the reviewed count (after any review decision). */
 export function countsNow(track: Track): boolean {
   return track.review_state !== "unresolved" && track.final_direction !== null;

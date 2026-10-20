@@ -19,6 +19,12 @@ from dataclasses import dataclass
 from typing import Any
 
 SAME_FISH_FRAMES = 10
+# The ``reason`` the review page sends with each answer to the question
+# (SAME_FISH_REASONS in frontend/src/review.ts).
+SAME_FISH_REASONS = {
+    "same": "same-fish question: same fish",
+    "different": "same-fish question: different fish",
+}
 
 
 def counts_now(track: Mapping[str, Any], decisions: Mapping[str, Any]) -> bool:

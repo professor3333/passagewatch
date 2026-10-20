@@ -27,6 +27,7 @@ import {
   referenceText,
   reviewOrder,
   SAME_FISH_COLOR,
+  SAME_FISH_REASONS,
   trackActions,
   trackName,
   uncountedReason,
@@ -591,8 +592,8 @@ async function reviewView(job: Job, studyBar?: HTMLElement): Promise<void> {
         el(
           "div",
           { class: "actions" },
-          button(`Different fish: ${confirming.label.toLowerCase()}`, confirming.request),
-          button("Same fish: keep uncounted", { action: "accept", track_id: track.track_id }),
+          button(`Different fish: ${confirming.label.toLowerCase()}`, { ...confirming.request, reason: SAME_FISH_REASONS.different }),
+          button("Same fish: keep uncounted", { action: "accept", track_id: track.track_id, reason: SAME_FISH_REASONS.same }),
           back,
         ),
       );
