@@ -100,27 +100,13 @@ baseline results ([counting policy](docs/counting_policy.md)).
 
 ### The service
 
-```mermaid
-flowchart LR
-    UI["Review UI<br/>browser · TypeScript"]
-    subgraph host["One CPU host · Docker Compose"]
-        direction LR
-        API["API<br/>FastAPI + Pydantic"]
-        DB[("SQLite · WAL<br/>jobs · revisions ·<br/>append-only reviews")]
-        W["Inference worker<br/>one job at a time<br/>lease + heartbeat"]
-        FS[("Media + artifacts<br/>tracks · audits")]
-        B["Release bundle<br/>ONNX detector · tracker ·<br/>counting · review config"]
-        P["Prometheus<br/>+ alerts"]
-    end
-    UI -- "upload · poll ·<br/>review · export" --> API
-    API <--> DB
-    API --> FS
-    DB <-- "lease jobs · publish<br/>results atomically" --> W
-    W --> FS
-    B -. "loaded once,<br/>hash-checked" .-> W
-    P -. scrape .-> API
-    P -. scrape .-> W
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/service-dark.svg">
+  <img src="docs/images/service-light.svg" alt="Service on one CPU host under Docker Compose: the browser review page calls the FastAPI API; the API and one inference worker share SQLite in WAL mode and a media and artifacts volume; the worker leases one job at a time and loads a hash-checked release bundle; Prometheus scrapes the API and the worker" width="100%">
+</picture>
+
+The worker publishes each job's results in one transaction, so a retried or recovered job
+never duplicates them ([architecture guide](docs/architecture.md)).
 
 ## 🧰 Features
 
@@ -257,8 +243,8 @@ manifest.
 ## 📊 Results
 
 Measured on release `passagewatch-0.3.0` in a single evaluation on the **official CFC test
-locations** ([details](docs/test_results.md)); 0.3.1–0.3.3 run the identical pipeline (same
-checkpoint, ONNX export and evaluations in their manifests).
+locations** ([details](docs/test_results.md)). Releases 0.3.1 to 0.3.3 run the identical
+pipeline (same checkpoint, ONNX export and evaluations in their manifests).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/test-results-dark.svg">
