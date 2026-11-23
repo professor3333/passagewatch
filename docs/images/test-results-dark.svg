@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="679" viewBox="0 0 1100 679" role="img" aria-labelledby="title desc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif">
+<title id="title">Test results</title>
+<desc id="desc">Count errors per 100 true passages at the four official CFC test locations and their macro average. elwha: PassageWatch 0.3.0 16.8, Tuned classical baseline 41.9, CFC Baseline (published) 32.3, CFC Baseline++ (published) 21.3. kenai-channel: PassageWatch 0.3.0 25.6, Tuned classical baseline 50.6, CFC Baseline (published) 53.0, CFC Baseline++ (published) 12.2. kenai-rightbank: PassageWatch 0.3.0 7.5, Tuned classical baseline 24.1, CFC Baseline (published) 11.8, CFC Baseline++ (published) 3.7. nushagak: PassageWatch 0.3.0 35.5, Tuned classical baseline 38.4, CFC Baseline (published) 14.0, CFC Baseline++ (published) 8.8. Macro average: PassageWatch 0.3.0 21.3, Tuned classical baseline 38.8, CFC Baseline (published) 27.8, CFC Baseline++ (published) 11.5.</desc>
+<text x="30" y="40" font-size="24" fill="#f0f6fc" font-weight="700">Count errors per 100 true passages, official CFC test locations</text>
+<text x="30" y="70" font-size="16" fill="#9198a1">Frozen release, evaluated once on 1,021 clips (5,296 passages) at locations never used for training or setting selection. Lower is better.</text>
+<rect x="30" y="96" width="14" height="14" rx="3" fill="#3987e5"/>
+<text x="52" y="108" font-size="16" fill="#f0f6fc" font-weight="600">PassageWatch 0.3.0</text>
+<rect x="290" y="96" width="14" height="14" rx="3" fill="#d95926"/>
+<text x="312" y="108" font-size="16" fill="#f0f6fc">Tuned classical baseline</text>
+<rect x="550" y="96" width="14" height="14" rx="3" fill="#199e70"/>
+<text x="572" y="108" font-size="16" fill="#f0f6fc">CFC Baseline (published)</text>
+<rect x="810" y="96" width="14" height="14" rx="3" fill="#c98500"/>
+<text x="832" y="108" font-size="16" fill="#f0f6fc">CFC Baseline++ (published)</text>
+<line x1="262" y1="132" x2="262" y2="591" stroke="#3d444d" stroke-width="1"/>
+<text x="262" y="613" font-size="14" fill="#9198a1" text-anchor="middle" font-variant-numeric="tabular-nums">0</text>
+<line x1="400.93" y1="132" x2="400.93" y2="591" stroke="#262c36" stroke-width="1"/>
+<text x="400.93" y="613" font-size="14" fill="#9198a1" text-anchor="middle" font-variant-numeric="tabular-nums">10</text>
+<line x1="539.86" y1="132" x2="539.86" y2="591" stroke="#262c36" stroke-width="1"/>
+<text x="539.86" y="613" font-size="14" fill="#9198a1" text-anchor="middle" font-variant-numeric="tabular-nums">20</text>
+<line x1="678.79" y1="132" x2="678.79" y2="591" stroke="#262c36" stroke-width="1"/>
+<text x="678.79" y="613" font-size="14" fill="#9198a1" text-anchor="middle" font-variant-numeric="tabular-nums">30</text>
+<line x1="817.71" y1="132" x2="817.71" y2="591" stroke="#262c36" stroke-width="1"/>
+<text x="817.71" y="613" font-size="14" fill="#9198a1" text-anchor="middle" font-variant-numeric="tabular-nums">40</text>
+<line x1="956.64" y1="132" x2="956.64" y2="591" stroke="#262c36" stroke-width="1"/>
+<text x="956.64" y="613" font-size="14" fill="#9198a1" text-anchor="middle" font-variant-numeric="tabular-nums">50</text>
+<text x="651" y="639" font-size="14" fill="#9198a1" text-anchor="middle">count errors per 100 true passages (directional nMAE × 100)</text>
+<text x="30" y="169.5" font-size="17" fill="#f0f6fc" font-weight="600">elwha</text>
+<text x="30" y="190.5" font-size="14" fill="#9198a1">223 clips · 334 passages</text>
+<path d="M262 140 H490.98 A4 4 0 0 1 494.98 144 V150 A4 4 0 0 1 490.98 154 H262 Z" fill="#3987e5"/>
+<text x="501.98" y="152" font-size="14" fill="#f0f6fc" font-weight="700" font-variant-numeric="tabular-nums">16.8</text>
+<path d="M262 157 H840.39 A4 4 0 0 1 844.39 161 V167 A4 4 0 0 1 840.39 171 H262 Z" fill="#d95926"/>
+<text x="851.39" y="169" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">41.9</text>
+<path d="M262 174 H707.23 A4 4 0 0 1 711.23 178 V184 A4 4 0 0 1 707.23 188 H262 Z" fill="#199e70"/>
+<text x="718.23" y="186" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">32.3</text>
+<path d="M262 191 H553.33 A4 4 0 0 1 557.33 195 V201 A4 4 0 0 1 553.33 205 H262 Z" fill="#c98500"/>
+<text x="564.33" y="203" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">21.3</text>
+<text x="30" y="260.5" font-size="17" fill="#f0f6fc" font-weight="600">kenai-channel</text>
+<text x="30" y="281.5" font-size="14" fill="#9198a1">69 clips · 164 passages</text>
+<path d="M262 231 H613.8 A4 4 0 0 1 617.8 235 V241 A4 4 0 0 1 613.8 245 H262 Z" fill="#3987e5"/>
+<text x="624.8" y="243" font-size="14" fill="#f0f6fc" font-weight="700" font-variant-numeric="tabular-nums">25.6</text>
+<path d="M262 248 H961.12 A4 4 0 0 1 965.12 252 V258 A4 4 0 0 1 961.12 262 H262 Z" fill="#d95926"/>
+<text x="972.12" y="260" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">50.6</text>
+<path d="M262 265 H995 A4 4 0 0 1 999 269 V275 A4 4 0 0 1 995 279 H262 Z" fill="#199e70"/>
+<text x="1006" y="277" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">53.0</text>
+<path d="M262 282 H427.43 A4 4 0 0 1 431.43 286 V292 A4 4 0 0 1 427.43 296 H262 Z" fill="#c98500"/>
+<text x="438.43" y="294" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">12.2</text>
+<text x="30" y="351.5" font-size="17" fill="#f0f6fc" font-weight="600">kenai-rightbank</text>
+<text x="30" y="372.5" font-size="14" fill="#9198a1">657 clips · 2,144 passages</text>
+<path d="M262 322 H361.64 A4 4 0 0 1 365.64 326 V332 A4 4 0 0 1 361.64 336 H262 Z" fill="#3987e5"/>
+<text x="372.64" y="334" font-size="14" fill="#f0f6fc" font-weight="700" font-variant-numeric="tabular-nums">7.5</text>
+<path d="M262 339 H592.96 A4 4 0 0 1 596.96 343 V349 A4 4 0 0 1 592.96 353 H262 Z" fill="#d95926"/>
+<text x="603.96" y="351" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">24.1</text>
+<path d="M262 356 H421.29 A4 4 0 0 1 425.29 360 V366 A4 4 0 0 1 421.29 370 H262 Z" fill="#199e70"/>
+<text x="432.29" y="368" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">11.8</text>
+<path d="M262 373 H309.19 A4 4 0 0 1 313.19 377 V383 A4 4 0 0 1 309.19 387 H262 Z" fill="#c98500"/>
+<text x="320.19" y="385" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">3.7</text>
+<text x="30" y="442.5" font-size="17" fill="#f0f6fc" font-weight="600">nushagak</text>
+<text x="30" y="463.5" font-size="14" fill="#9198a1">72 clips · 2,654 passages</text>
+<path d="M262 413 H750.64 A4 4 0 0 1 754.64 417 V423 A4 4 0 0 1 750.64 427 H262 Z" fill="#3987e5"/>
+<text x="761.64" y="425" font-size="14" fill="#f0f6fc" font-weight="700" font-variant-numeric="tabular-nums">35.5</text>
+<path d="M262 430 H790.93 A4 4 0 0 1 794.93 434 V440 A4 4 0 0 1 790.93 444 H262 Z" fill="#d95926"/>
+<text x="801.93" y="442" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">38.4</text>
+<path d="M262 447 H452.21 A4 4 0 0 1 456.21 451 V457 A4 4 0 0 1 452.21 461 H262 Z" fill="#199e70"/>
+<text x="463.21" y="459" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">14.0</text>
+<path d="M262 464 H380.49 A4 4 0 0 1 384.49 468 V474 A4 4 0 0 1 380.49 478 H262 Z" fill="#c98500"/>
+<text x="391.49" y="476" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">8.8</text>
+<line x1="30" y1="496" x2="1040" y2="496" stroke="#3d444d" stroke-width="1"/>
+<text x="30" y="551.5" font-size="17" fill="#f0f6fc" font-weight="600">Macro average</text>
+<text x="30" y="572.5" font-size="14" fill="#9198a1">4 locations, equal weight</text>
+<path d="M262 522 H554.27 A4 4 0 0 1 558.27 526 V532 A4 4 0 0 1 554.27 536 H262 Z" fill="#3987e5"/>
+<text x="565.27" y="534" font-size="14" fill="#f0f6fc" font-weight="700" font-variant-numeric="tabular-nums">21.3</text>
+<path d="M262 539 H796.35 A4 4 0 0 1 800.35 543 V549 A4 4 0 0 1 796.35 553 H262 Z" fill="#d95926"/>
+<text x="807.35" y="551" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">38.8</text>
+<path d="M262 556 H643.93 A4 4 0 0 1 647.93 560 V566 A4 4 0 0 1 643.93 570 H262 Z" fill="#199e70"/>
+<text x="654.93" y="568" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">27.8</text>
+<path d="M262 573 H417.61 A4 4 0 0 1 421.61 577 V583 A4 4 0 0 1 417.61 587 H262 Z" fill="#c98500"/>
+<text x="428.61" y="585" font-size="14" fill="#9198a1" font-variant-numeric="tabular-nums">11.5</text>
+</svg>

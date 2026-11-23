@@ -1,4 +1,4 @@
-.PHONY: install lint format typecheck test check data-tiny validate-tiny manifest-tiny data-kenai-dev data-kenai-holdout mlflow-import mlflow-ui
+.PHONY: install lint format typecheck test check figures data-tiny validate-tiny manifest-tiny data-kenai-dev data-kenai-holdout mlflow-import mlflow-ui
 
 install:
 	uv sync
@@ -18,6 +18,10 @@ test:
 	uv run pytest -m "not slow"
 
 check: lint typecheck test
+
+# README figures, drawn from the committed results (a unit test fails when they are stale).
+figures:
+	uv run python scripts/make_readme_figures.py
 
 data-tiny:
 	uv run python scripts/download_data.py --bundle tiny

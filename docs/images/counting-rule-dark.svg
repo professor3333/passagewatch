@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="318" viewBox="0 0 1140 318" role="img" aria-labelledby="title desc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif">
+<title id="title">How a track is counted</title>
+<desc id="desc">Policy cfc-compatible-v1 counts a completed track by the side of the counting line where it starts and where it ends. Starting left and ending right counts one passage to the right; starting right and ending left counts one to the left. A track that crosses and comes back counts zero, not two, and a track that never crosses counts zero.</desc>
+<g transform="translate(30 12)">
+<rect width="252" height="150" rx="12" fill="#0b1119" stroke="#3d444d"/>
+<path d="M74 8 L14 142 Q126 158 238 142 L178 8 Z" fill="#18212c"/>
+<line x1="126" y1="8" x2="126" y2="142" stroke="#e6edf3" stroke-opacity="0.75" stroke-width="2" stroke-dasharray="5 5"/>
+<text x="14" y="26" font-size="13" fill="#8b949e" font-weight="600">left</text>
+<text x="238" y="26" font-size="13" fill="#8b949e" font-weight="600" text-anchor="end">right</text>
+<path d="M38 104 L41.1 103.67 L45.1 103.28 L49.84 102.83 L55.15 102.32 L60.88 101.75 L66.85 101.12 L72.91 100.43 L78.9 99.68 L84.65 98.87 L90 98 L95.07 97.04 L100.1 95.98 L105.08 94.84 L110.05 93.63 L115 92.38 L119.95 91.09 L124.92 89.79 L129.9 88.5 L134.93 87.23 L140 86 L145.22 84.76 L150.62 83.47 L156.15 82.15 L161.71 80.82 L167.25 79.5 L172.69 78.22 L177.95 77.01 L182.98 75.89 L187.68 74.88 L192 74 L196.03 73.26 L199.89 72.62 L203.56 72.09 L207.02 71.63 L210.25 71.25 L213.22 70.93 L215.9 70.65 L218.27 70.42 L220.31 70.2 L222 70" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+<circle cx="49.84" cy="102.83" r="3" fill="#58a6ff" opacity="0.36"/>
+<circle cx="66.85" cy="101.12" r="3" fill="#58a6ff" opacity="0.42"/>
+<circle cx="84.65" cy="98.87" r="3" fill="#58a6ff" opacity="0.47"/>
+<circle cx="100.1" cy="95.98" r="3" fill="#58a6ff" opacity="0.53"/>
+<circle cx="115" cy="92.38" r="3" fill="#58a6ff" opacity="0.59"/>
+<circle cx="129.9" cy="88.5" r="3" fill="#58a6ff" opacity="0.65"/>
+<circle cx="145.22" cy="84.76" r="3" fill="#58a6ff" opacity="0.71"/>
+<circle cx="161.71" cy="80.82" r="3" fill="#58a6ff" opacity="0.77"/>
+<circle cx="177.95" cy="77.01" r="3" fill="#58a6ff" opacity="0.82"/>
+<circle cx="192" cy="74" r="3" fill="#58a6ff" opacity="0.88"/>
+<circle cx="203.56" cy="72.09" r="3" fill="#58a6ff" opacity="0.94"/>
+<circle cx="213.22" cy="70.93" r="3" fill="#58a6ff" opacity="1"/>
+<circle cx="38" cy="104" r="6" fill="#0b1119" stroke="#58a6ff" stroke-width="2.5"/>
+<polygon points="230.94,69 212.56,80.11 210.57,62.22" fill="#58a6ff"/>
+</g>
+<text x="156" y="198" font-size="18" fill="#f0f6fc" font-weight="600" text-anchor="middle">Starts left, ends right</text>
+<rect x="104.01" y="217.85" width="103.99" height="32.3" rx="16.15" fill="#0d2a4d"/><text x="156" y="239.95" font-size="17" fill="#4493f8" font-weight="600" text-anchor="middle">+1 → right</text>
+<g transform="translate(306 12)">
+<rect width="252" height="150" rx="12" fill="#0b1119" stroke="#3d444d"/>
+<path d="M74 8 L14 142 Q126 158 238 142 L178 8 Z" fill="#18212c"/>
+<line x1="126" y1="8" x2="126" y2="142" stroke="#e6edf3" stroke-opacity="0.75" stroke-width="2" stroke-dasharray="5 5"/>
+<text x="14" y="26" font-size="13" fill="#8b949e" font-weight="600">left</text>
+<text x="238" y="26" font-size="13" fill="#8b949e" font-weight="600" text-anchor="end">right</text>
+<path d="M218 58 L215.03 58.45 L211.23 58.99 L206.74 59.62 L201.7 60.34 L196.25 61.12 L190.54 61.98 L184.72 62.91 L178.93 63.89 L173.31 64.92 L168 66 L162.87 67.17 L157.7 68.45 L152.48 69.82 L147.25 71.26 L142 72.75 L136.75 74.26 L131.52 75.76 L126.3 77.23 L121.13 78.65 L116 80 L110.84 81.32 L105.58 82.66 L100.29 84 L94.99 85.33 L89.75 86.62 L84.61 87.87 L79.61 89.05 L74.82 90.14 L70.26 91.13 L66 92 L61.93 92.74 L57.94 93.38 L54.07 93.91 L50.37 94.37 L46.88 94.75 L43.63 95.07 L40.68 95.35 L38.06 95.58 L35.82 95.8 L34 96" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+<circle cx="206.74" cy="59.62" r="3" fill="#58a6ff" opacity="0.36"/>
+<circle cx="190.54" cy="61.98" r="3" fill="#58a6ff" opacity="0.42"/>
+<circle cx="173.31" cy="64.92" r="3" fill="#58a6ff" opacity="0.47"/>
+<circle cx="157.7" cy="68.45" r="3" fill="#58a6ff" opacity="0.53"/>
+<circle cx="142" cy="72.75" r="3" fill="#58a6ff" opacity="0.59"/>
+<circle cx="126.3" cy="77.23" r="3" fill="#58a6ff" opacity="0.65"/>
+<circle cx="110.84" cy="81.32" r="3" fill="#58a6ff" opacity="0.71"/>
+<circle cx="94.99" cy="85.33" r="3" fill="#58a6ff" opacity="0.77"/>
+<circle cx="79.61" cy="89.05" r="3" fill="#58a6ff" opacity="0.82"/>
+<circle cx="66" cy="92" r="3" fill="#58a6ff" opacity="0.88"/>
+<circle cx="54.07" cy="93.91" r="3" fill="#58a6ff" opacity="0.94"/>
+<circle cx="43.63" cy="95.07" r="3" fill="#58a6ff" opacity="1"/>
+<circle cx="218" cy="58" r="6" fill="#0b1119" stroke="#58a6ff" stroke-width="2.5"/>
+<polygon points="25.05,96.92 43.53,85.98 45.36,103.88" fill="#58a6ff"/>
+</g>
+<text x="432" y="198" font-size="18" fill="#f0f6fc" font-weight="600" text-anchor="middle">Starts right, ends left</text>
+<rect x="385.14" y="217.85" width="93.72" height="32.3" rx="16.15" fill="#0d2a4d"/><text x="432" y="239.95" font-size="17" fill="#4493f8" font-weight="600" text-anchor="middle">+1 ← left</text>
+<g transform="translate(582 12)">
+<rect width="252" height="150" rx="12" fill="#0b1119" stroke="#3d444d"/>
+<path d="M74 8 L14 142 Q126 158 238 142 L178 8 Z" fill="#18212c"/>
+<line x1="126" y1="8" x2="126" y2="142" stroke="#e6edf3" stroke-opacity="0.75" stroke-width="2" stroke-dasharray="5 5"/>
+<text x="14" y="26" font-size="13" fill="#8b949e" font-weight="600">left</text>
+<text x="238" y="26" font-size="13" fill="#8b949e" font-weight="600" text-anchor="end">right</text>
+<path d="M40 116 L43.82 115.56 L48.74 115.04 L54.56 114.44 L61.09 113.76 L68.12 113 L75.47 112.16 L82.93 111.24 L90.3 110.24 L97.39 109.16 L104 108 L110.42 106.75 L117.04 105.41 L123.76 103.98 L130.48 102.46 L137.12 100.88 L143.6 99.22 L149.81 97.49 L155.68 95.71 L161.1 93.88 L166 92 L170.59 90.03 L175.1 87.95 L179.43 85.78 L183.47 83.54 L187.12 81.25 L190.29 78.94 L192.86 76.64 L194.74 74.37 L195.82 72.15 L196 70 L195.2 67.86 L193.47 65.68 L190.93 63.48 L187.7 61.28 L183.88 59.12 L179.58 57.04 L174.94 55.05 L170.05 53.2 L165.03 51.5 L160 50 L154.59 48.69 L148.48 47.54 L141.85 46.53 L134.88 45.65 L127.75 44.88 L120.64 44.19 L113.73 43.58 L107.2 43.02 L101.23 42.5 L96 42 L91.36 41.55 L87.04 41.18 L83.04 40.9 L79.36 40.67 L76 40.5 L72.96 40.37 L70.24 40.26 L67.84 40.18 L65.76 40.09 L64 40" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+<circle cx="54.56" cy="114.44" r="3" fill="#58a6ff" opacity="0.34"/>
+<circle cx="75.47" cy="112.16" r="3" fill="#58a6ff" opacity="0.37"/>
+<circle cx="97.39" cy="109.16" r="3" fill="#58a6ff" opacity="0.41"/>
+<circle cx="117.04" cy="105.41" r="3" fill="#58a6ff" opacity="0.45"/>
+<circle cx="137.12" cy="100.88" r="3" fill="#58a6ff" opacity="0.48"/>
+<circle cx="155.68" cy="95.71" r="3" fill="#58a6ff" opacity="0.52"/>
+<circle cx="170.59" cy="90.03" r="3" fill="#58a6ff" opacity="0.56"/>
+<circle cx="183.47" cy="83.54" r="3" fill="#58a6ff" opacity="0.59"/>
+<circle cx="192.86" cy="76.64" r="3" fill="#58a6ff" opacity="0.63"/>
+<circle cx="196" cy="70" r="3" fill="#58a6ff" opacity="0.67"/>
+<circle cx="190.93" cy="63.48" r="3" fill="#58a6ff" opacity="0.71"/>
+<circle cx="179.58" cy="57.04" r="3" fill="#58a6ff" opacity="0.74"/>
+<circle cx="165.03" cy="51.5" r="3" fill="#58a6ff" opacity="0.78"/>
+<circle cx="148.48" cy="47.54" r="3" fill="#58a6ff" opacity="0.82"/>
+<circle cx="127.75" cy="44.88" r="3" fill="#58a6ff" opacity="0.85"/>
+<circle cx="107.2" cy="43.02" r="3" fill="#58a6ff" opacity="0.89"/>
+<circle cx="91.36" cy="41.55" r="3" fill="#58a6ff" opacity="0.93"/>
+<circle cx="79.36" cy="40.67" r="3" fill="#58a6ff" opacity="0.96"/>
+<circle cx="70.24" cy="40.26" r="3" fill="#58a6ff" opacity="1"/>
+<circle cx="40" cy="116" r="6" fill="#0b1119" stroke="#58a6ff" stroke-width="2.5"/>
+<polygon points="55.01,39.59 74.9,31.49 74.08,49.47" fill="#58a6ff"/>
+</g>
+<text x="708" y="198" font-size="18" fill="#f0f6fc" font-weight="600" text-anchor="middle">Crosses, then comes back</text>
+<rect x="664.02" y="217.85" width="87.95" height="32.3" rx="16.15" fill="#212830"/><text x="708" y="239.95" font-size="17" fill="#9198a1" font-weight="600" text-anchor="middle">0, not 2</text>
+<g transform="translate(858 12)">
+<rect width="252" height="150" rx="12" fill="#0b1119" stroke="#3d444d"/>
+<path d="M74 8 L14 142 Q126 158 238 142 L178 8 Z" fill="#18212c"/>
+<line x1="126" y1="8" x2="126" y2="142" stroke="#e6edf3" stroke-opacity="0.75" stroke-width="2" stroke-dasharray="5 5"/>
+<text x="14" y="26" font-size="13" fill="#8b949e" font-weight="600">left</text>
+<text x="238" y="26" font-size="13" fill="#8b949e" font-weight="600" text-anchor="end">right</text>
+<path d="M30 52 L32.04 52.44 L34.69 52.96 L37.83 53.56 L41.34 54.24 L45.12 55 L49.06 55.84 L53.02 56.76 L56.91 57.76 L60.61 58.84 L64 60 L67.28 61.26 L70.67 62.62 L74.11 64.09 L77.54 65.63 L80.88 67.25 L84.06 68.93 L87.04 70.65 L89.73 72.42 L92.07 74.2 L94 76 L95.59 77.86 L96.94 79.84 L98.06 81.89 L98.91 84 L99.5 86.12 L99.81 88.24 L99.82 90.31 L99.54 92.32 L98.93 94.23 L98 96 L96.64 97.69 L94.82 99.34 L92.59 100.96 L90.05 102.51 L87.25 104 L84.27 105.41 L81.19 106.72 L78.06 107.94 L74.98 109.03 L72 110 L68.9 110.82 L65.47 111.5 L61.83 112.06 L58.1 112.51 L54.38 112.88 L50.78 113.17 L47.44 113.41 L44.45 113.62 L41.93 113.81 L40 114" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+<circle cx="37.83" cy="53.56" r="3" fill="#58a6ff" opacity="0.35"/>
+<circle cx="49.06" cy="55.84" r="3" fill="#58a6ff" opacity="0.39"/>
+<circle cx="60.61" cy="58.84" r="3" fill="#58a6ff" opacity="0.44"/>
+<circle cx="70.67" cy="62.62" r="3" fill="#58a6ff" opacity="0.49"/>
+<circle cx="80.88" cy="67.25" r="3" fill="#58a6ff" opacity="0.53"/>
+<circle cx="89.73" cy="72.42" r="3" fill="#58a6ff" opacity="0.58"/>
+<circle cx="95.59" cy="77.86" r="3" fill="#58a6ff" opacity="0.63"/>
+<circle cx="98.91" cy="84" r="3" fill="#58a6ff" opacity="0.67"/>
+<circle cx="99.82" cy="90.31" r="3" fill="#58a6ff" opacity="0.72"/>
+<circle cx="98" cy="96" r="3" fill="#58a6ff" opacity="0.77"/>
+<circle cx="92.59" cy="100.96" r="3" fill="#58a6ff" opacity="0.81"/>
+<circle cx="84.27" cy="105.41" r="3" fill="#58a6ff" opacity="0.86"/>
+<circle cx="74.98" cy="109.03" r="3" fill="#58a6ff" opacity="0.91"/>
+<circle cx="65.47" cy="111.5" r="3" fill="#58a6ff" opacity="0.95"/>
+<circle cx="54.38" cy="112.88" r="3" fill="#58a6ff" opacity="1"/>
+<circle cx="30" cy="52" r="6" fill="#0b1119" stroke="#58a6ff" stroke-width="2.5"/>
+<polygon points="31.03,114.77 49.69,104.13 51.24,122.06" fill="#58a6ff"/>
+</g>
+<text x="984" y="198" font-size="18" fill="#f0f6fc" font-weight="600" text-anchor="middle">Approaches, never crosses</text>
+<rect x="966.96" y="217.85" width="34.07" height="32.3" rx="16.15" fill="#212830"/><text x="984" y="239.95" font-size="17" fill="#9198a1" font-weight="600" text-anchor="middle">0</text>
+<circle cx="371.94" cy="295" r="5.5" fill="none" stroke="#4493f8" stroke-width="2.2"/>
+<text x="387.94" y="300" font-size="14" fill="#9198a1">track starts</text>
+<polygon points="516.59,295 498.39,303.4 498.39,286.6" fill="#4493f8"/>
+<text x="523.19" y="300" font-size="14" fill="#9198a1">track ends</text>
+<line x1="636.64" y1="286" x2="636.64" y2="304" stroke="#9198a1" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="652.64" y="300" font-size="14" fill="#9198a1">counting line</text>
+</svg>

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1146" height="222" viewBox="0 0 1146 222" role="img" aria-labelledby="title desc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif">
+<title id="title">PassageWatch pipeline</title>
+<desc id="desc">Sonar video, detection with YOLOX-Tiny on ONNX Runtime, Kalman tracking and counting by the start/end rule run automatically in one CPU worker; the technician then reviews a prioritized queue with random audits and exports CSV or JSON.</desc>
+<path d="M26 50 V42 H744 V50" fill="none" stroke="#4493f8" stroke-width="1.5" stroke-opacity="0.7"/>
+<text x="385" y="31" font-size="15" fill="#4493f8" font-weight="600" text-anchor="middle">Automatic · one inference worker on CPU</text>
+<path d="M778 50 V42 H1120 V50" fill="none" stroke="#ab7df8" stroke-width="1.5" stroke-opacity="0.7"/>
+<text x="949" y="31" font-size="15" fill="#ab7df8" font-weight="600" text-anchor="middle">Technician · review page</text>
+<rect x="20" y="64" width="166" height="138" rx="14" fill="#151b23" stroke="#3d444d"/>
+<circle cx="103" cy="102" r="24" fill="#0d2a4d"/>
+<g transform="translate(88 87) scale(1.25)" fill="none" stroke="#4493f8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L4.5 18.5 Q12 22.5 19.5 18.5 Z"/><path d="M8.2 12.6 Q12 14.6 15.8 12.6"/><path d="M6.6 15.8 Q12 18.6 17.4 15.8"/></g>
+<text x="103" y="156" font-size="19" fill="#f0f6fc" font-weight="600" text-anchor="middle">Sonar video</text>
+<text x="103" y="181" font-size="15" fill="#9198a1" text-anchor="middle">frames or video</text>
+<path d="M193 127 L200 133 L193 139" fill="none" stroke="#9198a1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="208" y="64" width="166" height="138" rx="14" fill="#151b23" stroke="#3d444d"/>
+<circle cx="291" cy="102" r="24" fill="#0d2a4d"/>
+<g transform="translate(276 87) scale(1.25)" fill="none" stroke="#4493f8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="1.5" stroke-dasharray="3 2.2"/><ellipse cx="13" cy="12" rx="4.6" ry="2"/><path d="M8.4 12 L5.8 10.2 V13.8 Z"/></g>
+<text x="291" y="156" font-size="19" fill="#f0f6fc" font-weight="600" text-anchor="middle">Detect</text>
+<text x="291" y="181" font-size="15" fill="#9198a1" text-anchor="middle">YOLOX-Tiny · ONNX</text>
+<path d="M381 127 L388 133 L381 139" fill="none" stroke="#9198a1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="396" y="64" width="166" height="138" rx="14" fill="#151b23" stroke="#3d444d"/>
+<circle cx="479" cy="102" r="24" fill="#0d2a4d"/>
+<g transform="translate(464 87) scale(1.25)" fill="none" stroke="#4493f8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17.5 C8 17.5 10 7 20.5 6.5" stroke-dasharray="0.1 4.4" stroke-width="3"/><circle cx="20.5" cy="6.5" r="2.2"/><circle cx="3.5" cy="17.5" r="1.6"/></g>
+<text x="479" y="156" font-size="19" fill="#f0f6fc" font-weight="600" text-anchor="middle">Track</text>
+<text x="479" y="181" font-size="15" fill="#9198a1" text-anchor="middle">Kalman tracker</text>
+<path d="M569 127 L576 133 L569 139" fill="none" stroke="#9198a1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="584" y="64" width="166" height="138" rx="14" fill="#151b23" stroke="#3d444d"/>
+<circle cx="667" cy="102" r="24" fill="#0d2a4d"/>
+<g transform="translate(652 87) scale(1.25)" fill="none" stroke="#4493f8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 V21" stroke-dasharray="2.4 2.4"/><path d="M4 12 H19"/><path d="M15.5 8.5 L19 12 L15.5 15.5"/></g>
+<text x="667" y="156" font-size="19" fill="#f0f6fc" font-weight="600" text-anchor="middle">Count</text>
+<text x="667" y="181" font-size="15" fill="#9198a1" text-anchor="middle">start/end rule</text>
+<path d="M757 127 L764 133 L757 139" fill="none" stroke="#9198a1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="772" y="64" width="166" height="138" rx="14" fill="#151b23" stroke="#3d444d"/>
+<circle cx="855" cy="102" r="24" fill="#2a1f45"/>
+<g transform="translate(840 87) scale(1.25)" fill="none" stroke="#ab7df8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.4 L10.8 15.2 L16.2 9.4"/></g>
+<text x="855" y="156" font-size="19" fill="#f0f6fc" font-weight="600" text-anchor="middle">Review</text>
+<text x="855" y="181" font-size="15" fill="#9198a1" text-anchor="middle">queue + audits</text>
+<path d="M945 127 L952 133 L945 139" fill="none" stroke="#9198a1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="960" y="64" width="166" height="138" rx="14" fill="#151b23" stroke="#3d444d"/>
+<circle cx="1043" cy="102" r="24" fill="#2a1f45"/>
+<g transform="translate(1028 87) scale(1.25)" fill="none" stroke="#ab7df8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H14 L18 7 V21 H6 Z"/><path d="M14 3 V7 H18"/><path d="M12 10.5 V17"/><path d="M9.2 14.4 L12 17.2 L14.8 14.4"/></g>
+<text x="1043" y="156" font-size="19" fill="#f0f6fc" font-weight="600" text-anchor="middle">Export</text>
+<text x="1043" y="181" font-size="15" fill="#9198a1" text-anchor="middle">CSV · JSON</text>
+</svg>

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="title desc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif">
+<title id="title">PassageWatch</title>
+<desc id="desc">Directional fish-passage counts from sonar video, with the evidence to check them. A stylized sonar view shows a tracked fish crossing the dashed counting line from left to right and being counted as one passage to the right.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1424"/><stop offset="1" stop-color="#0e2440"/></linearGradient>
+<radialGradient id="glow" cx="0.79" cy="0.62" r="0.42"><stop offset="0" stop-color="#1f6feb" stop-opacity="0.35"/><stop offset="1" stop-color="#1f6feb" stop-opacity="0"/></radialGradient>
+<radialGradient id="fanfill" cx="1010" cy="-250" r="560" gradientUnits="userSpaceOnUse"><stop offset="0.45" stop-color="#2a3442"/><stop offset="1" stop-color="#151c26"/></radialGradient>
+<filter id="speckle" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.07 0.22" numOctaves="2" seed="11"/><feColorMatrix values="0 0 0 0 0.86  0 0 0 0 0.9  0 0 0 0 0.94  2.2 0 0 0 -1.05"/></filter>
+<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.4"/></filter>
+<clipPath id="fan"><path d="M911.45 6.73 A275 275 0 0 0 1108.55 6.73 L1210.69 272.81 A560 560 0 0 1 809.31 272.81 Z"/></clipPath>
+<clipPath id="card"><rect width="1280" height="320" rx="16"/></clipPath>
+<linearGradient id="mark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f81f7"/><stop offset="1" stop-color="#1158c7"/></linearGradient>
+</defs>
+<g clip-path="url(#card)">
+<rect width="1280" height="320" fill="url(#bg)"/>
+<rect width="1280" height="320" fill="url(#glow)"/>
+<path d="M911.45 6.73 A275 275 0 0 0 1108.55 6.73 L1210.69 272.81 A560 560 0 0 1 809.31 272.81 Z" fill="url(#fanfill)"/>
+<g clip-path="url(#fan)" opacity="0.32"><rect x="760" y="0" width="500" height="320" filter="url(#speckle)"/></g>
+<path d="M911.45 6.73 A275 275 0 0 0 1108.55 6.73 L1210.69 272.81 A560 560 0 0 1 809.31 272.81 Z" fill="none" stroke="#ffffff" stroke-opacity="0.12"/>
+<line x1="1010" y1="25" x2="1010" y2="310" stroke="#e6edf3" stroke-opacity="0.8" stroke-width="2" stroke-dasharray="7 7"/>
+<circle cx="872" cy="246" r="2.6" fill="#58a6ff" opacity="0.15"/>
+<circle cx="886.96" cy="243.15" r="2.6" fill="#58a6ff" opacity="0.21"/>
+<circle cx="908.37" cy="239.19" r="2.6" fill="#58a6ff" opacity="0.27"/>
+<circle cx="930" cy="236" r="2.6" fill="#58a6ff" opacity="0.33"/>
+<circle cx="950.22" cy="234.63" r="2.6" fill="#58a6ff" opacity="0.39"/>
+<circle cx="970.67" cy="234.04" r="2.6" fill="#58a6ff" opacity="0.45"/>
+<circle cx="990" cy="233" r="2.6" fill="#58a6ff" opacity="0.51"/>
+<circle cx="1007.93" cy="230.85" r="2.6" fill="#58a6ff" opacity="0.57"/>
+<circle cx="1024.74" cy="228.26" r="2.6" fill="#58a6ff" opacity="0.63"/>
+<circle cx="1040" cy="226" r="2.6" fill="#58a6ff" opacity="0.69"/>
+<circle cx="1054.37" cy="224.3" r="2.6" fill="#58a6ff" opacity="0.75"/>
+<circle cx="905" cy="112" r="2.6" fill="#58a6ff" opacity="0.15"/>
+<circle cx="911.48" cy="114.22" r="2.6" fill="#58a6ff" opacity="0.3"/>
+<circle cx="920.74" cy="117.44" r="2.6" fill="#58a6ff" opacity="0.45"/>
+<circle cx="930" cy="121" r="2.6" fill="#58a6ff" opacity="0.6"/>
+<circle cx="939.26" cy="125.22" r="2.6" fill="#58a6ff" opacity="0.75"/>
+<g transform="translate(1076 222) rotate(-6)"><ellipse rx="19" ry="5.5" fill="#f2f6fa" opacity="0.92" filter="url(#soft)"/><path d="M-19 0 L-27 -5 L-25 0 L-27 5 Z" fill="#f2f6fa" opacity="0.7" filter="url(#soft)"/></g><rect x="1044" y="209" width="62" height="26" rx="3" fill="none" stroke="#58a6ff" stroke-width="2"/><text x="1044" y="203" font-size="14" fill="#58a6ff" font-weight="600">#7</text>
+<g transform="translate(955 133) rotate(24)"><ellipse rx="19" ry="5.5" fill="#f2f6fa" opacity="0.92" filter="url(#soft)"/><path d="M-19 0 L-27 -5 L-25 0 L-27 5 Z" fill="#f2f6fa" opacity="0.7" filter="url(#soft)"/></g><rect x="923" y="120" width="62" height="26" rx="3" fill="none" stroke="#58a6ff" stroke-width="2"/><text x="923" y="114" font-size="14" fill="#58a6ff" font-weight="600">#8</text>
+<rect x="1118" y="171.75" width="91.75" height="28.5" rx="14.25" fill="#1f6feb"/><text x="1163.88" y="191.25" font-size="15" fill="#ffffff" font-weight="600" text-anchor="middle">+1 → right</text>
+</g>
+<rect x="0.5" y="0.5" width="1279" height="319" rx="15.5" fill="none" stroke="#ffffff" stroke-opacity="0.1"/>
+<g transform="translate(76 76)">
+<rect width="60" height="60" rx="15" fill="url(#mark)"/>
+<path d="M30 9 L13 46 Q30 54 47 46 Z" fill="#ffffff" fill-opacity="0.18"/>
+<line x1="30" y1="10" x2="30" y2="52" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="4 3.5" stroke-linecap="round"/>
+<path d="M17 35 Q30 30 42 31" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M38 26 L45 31 L38 36" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<text x="154" y="128" font-size="60" fill="#f0f6fc" font-weight="700" letter-spacing="-1">PassageWatch</text>
+<text x="78" y="184" font-size="26" fill="#d1dbe6">Directional fish-passage counts from sonar video,</text>
+<text x="78" y="220" font-size="26" fill="#d1dbe6">with the evidence to check them.</text>
+<rect x="76" y="252" width="147.73" height="32" rx="16" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.16"/>
+<text x="149.86" y="273" font-size="15" fill="#b6c4d4" font-weight="500" text-anchor="middle">CFC benchmark</text>
+<rect x="233.73" y="252" width="185.89" height="32" rx="16" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.16"/>
+<text x="326.67" y="273" font-size="15" fill="#b6c4d4" font-weight="500" text-anchor="middle">CPU · ONNX Runtime</text>
+<rect x="429.61" y="252" width="135.8" height="32" rx="16" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.16"/>
+<text x="497.52" y="273" font-size="15" fill="#b6c4d4" font-weight="500" text-anchor="middle">Human review</text>
+<rect x="575.42" y="252" width="101.62" height="32" rx="16" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.16"/>
+<text x="626.22" y="273" font-size="15" fill="#b6c4d4" font-weight="500" text-anchor="middle">Audit trail</text>
+</svg>

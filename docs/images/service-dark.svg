@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1146" height="400" viewBox="0 0 1146 400" role="img" aria-labelledby="title desc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif">
+<title id="title">PassageWatch service</title>
+<desc id="desc">On one CPU host under Docker Compose: the browser review page talks to a FastAPI API; the API and one inference worker share SQLite in WAL mode (jobs, revisions, append-only reviews) and a media and artifacts volume. The worker leases one job at a time with heartbeats and loads a hash-checked release bundle once. Prometheus scrapes the API and the worker.</desc>
+<rect x="206" y="16" width="924" height="368" rx="18" fill="none" stroke="#3d444d" stroke-width="1.5" stroke-dasharray="7 6"/>
+<text x="228" y="44" font-size="14" fill="#9198a1" font-weight="600">One CPU host · Docker Compose</text>
+<path d="M166 218 L230 218" fill="none" stroke="#ab7df8" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="232.8,218 215.9,225.8 215.9,210.2" fill="#ab7df8"/>
+<path d="M380 218 L450 218" fill="none" stroke="#9198a1" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="452.8,218 435.9,225.8 435.9,210.2" fill="#9198a1"/>
+<polygon points="377.2,218 394.1,210.2 394.1,225.8" fill="#9198a1"/>
+<path d="M620 218 L690 218" fill="none" stroke="#9198a1" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="692.8,218 675.9,225.8 675.9,210.2" fill="#9198a1"/>
+<polygon points="617.2,218 634.1,210.2 634.1,225.8" fill="#9198a1"/>
+<path d="M305 266 L305 328 L562 328" fill="none" stroke="#9198a1" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="564.8,328 547.9,335.8 547.9,320.2" fill="#9198a1"/>
+<path d="M780 266 L780 328 L752 328" fill="none" stroke="#9198a1" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="749.2,328 766.1,320.2 766.1,335.8" fill="#9198a1"/>
+<path d="M940 218 L870 218" fill="none" stroke="#4493f8" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<polygon points="867.2,218 884.1,210.2 884.1,225.8" fill="#4493f8"/>
+<text x="905" y="208" font-size="12.5" fill="#4493f8" text-anchor="middle">loads</text>
+<path d="M450 90 L305 90 L305 170" fill="none" stroke="#9198a1" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<polygon points="305,172.8 297.2,155.9 312.8,155.9" fill="#9198a1"/>
+<path d="M620 90 L780 90 L780 170" fill="none" stroke="#9198a1" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<polygon points="780,172.8 772.2,155.9 787.8,155.9" fill="#9198a1"/>
+<text x="377.5" y="82" font-size="12.5" fill="#9198a1" text-anchor="middle">scrape</text>
+<text x="700" y="82" font-size="12.5" fill="#9198a1" text-anchor="middle">scrape</text>
+<rect x="16" y="170" width="150" height="96" rx="12" fill="#151b23" stroke="#ab7df8" stroke-width="1.5"/>
+<text x="91" y="204" font-size="17" fill="#f0f6fc" font-weight="600" text-anchor="middle">Review page</text>
+<text x="91" y="226" font-size="13.5" fill="#9198a1" text-anchor="middle">browser</text>
+<text x="91" y="245" font-size="13.5" fill="#9198a1" text-anchor="middle">TypeScript</text>
+<rect x="230" y="170" width="150" height="96" rx="12" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<text x="305" y="204" font-size="17" fill="#f0f6fc" font-weight="600" text-anchor="middle">API</text>
+<text x="305" y="226" font-size="13.5" fill="#9198a1" text-anchor="middle">FastAPI + Pydantic</text>
+<text x="305" y="245" font-size="13.5" fill="#9198a1" text-anchor="middle">202, then poll</text>
+<path d="M450 179 A85 9 0 0 1 620 179 V257 A85 9 0 0 1 450 257 Z" fill="#151b23" stroke="#3d444d"/>
+<ellipse cx="535" cy="179" rx="85" ry="9" fill="#212830" stroke="#3d444d"/>
+<text x="535" y="213" font-size="17" fill="#f0f6fc" font-weight="600" text-anchor="middle">SQLite (WAL)</text>
+<text x="535" y="235" font-size="13.5" fill="#9198a1" text-anchor="middle">jobs · revisions</text>
+<text x="535" y="254" font-size="13.5" fill="#9198a1" text-anchor="middle">append-only reviews</text>
+<rect x="690" y="170" width="180" height="96" rx="12" fill="#151b23" stroke="#4493f8" stroke-width="1.5"/>
+<text x="780" y="204" font-size="16.5" fill="#f0f6fc" font-weight="600" text-anchor="middle">Inference worker</text>
+<text x="780" y="226" font-size="13.5" fill="#9198a1" text-anchor="middle">one job at a time</text>
+<text x="780" y="245" font-size="13.5" fill="#9198a1" text-anchor="middle">lease + heartbeat</text>
+<rect x="940" y="170" width="170" height="96" rx="12" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<text x="1025" y="204" font-size="17" fill="#f0f6fc" font-weight="600" text-anchor="middle">Release bundle</text>
+<text x="1025" y="226" font-size="13.5" fill="#9198a1" text-anchor="middle">ONNX + configs</text>
+<text x="1025" y="245" font-size="13.5" fill="#9198a1" text-anchor="middle">hash-checked</text>
+<rect x="450" y="60" width="170" height="60" rx="12" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<text x="535" y="86" font-size="17" fill="#f0f6fc" font-weight="600" text-anchor="middle">Prometheus</text>
+<text x="535" y="108" font-size="13.5" fill="#9198a1" text-anchor="middle">metrics · alerts</text>
+<path d="M562 305 A95 9 0 0 1 752 305 V351 A95 9 0 0 1 562 351 Z" fill="#151b23" stroke="#3d444d"/>
+<ellipse cx="657" cy="305" rx="95" ry="9" fill="#212830" stroke="#3d444d"/>
+<text x="657" y="333" font-size="17" fill="#f0f6fc" font-weight="600" text-anchor="middle">Media + artifacts</text>
+<text x="657" y="355" font-size="13.5" fill="#9198a1" text-anchor="middle">tracks · audits</text>
+</svg>
