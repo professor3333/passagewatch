@@ -1,22 +1,27 @@
 <div align="center">
 
-# 🐟 PassageWatch
+<img src="docs/images/banner.svg" alt="PassageWatch: directional fish-passage counts from sonar video, with the evidence to check them" width="100%">
 
-**Directional fish-passage counts from sonar video, with the evidence to check them.**
+<br>
 
-[![ci](https://github.com/professor3333/passagewatch/actions/workflows/ci.yml/badge.svg)](https://github.com/professor3333/passagewatch/actions/workflows/ci.yml)
-[![release](https://img.shields.io/github/v/release/professor3333/passagewatch?label=release)](https://github.com/professor3333/passagewatch/releases)
-[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![python 3.12](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
-![serving: CPU](https://img.shields.io/badge/serving-CPU%20%C2%B7%20ONNX%20Runtime-555)
-![docker compose](https://img.shields.io/badge/deploy-Docker%20Compose-2496ED?logo=docker&logoColor=white)
+[![CI](https://img.shields.io/github/actions/workflow/status/professor3333/passagewatch/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white)](https://github.com/professor3333/passagewatch/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/professor3333/passagewatch?label=release&color=1f6feb)](https://github.com/professor3333/passagewatch/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f)](LICENSE)
+[![Data: Caltech Fish Counting](https://img.shields.io/badge/data-Caltech%20Fish%20Counting-8250df)](https://data.caltech.edu/records/g945x-41103)
+<br>
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-training-EE4C2C?logo=pytorch&logoColor=white)
+![ONNX Runtime](https://img.shields.io/badge/ONNX%20Runtime-CPU%20serving-005CED?logo=onnx&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-review%20UI-3178C6?logo=typescript&logoColor=white)
+![Docker Compose](https://img.shields.io/badge/Docker%20Compose-deploy-2496ED?logo=docker&logoColor=white)
 
-[Quick start](#-quick-start) · [How it works](#-how-it-works) · [Results](#-results) ·
-[Limitations](#-limitations) · [Documentation](#-documentation)
+**[Quick start](#-quick-start)** · **[How it works](#-how-it-works)** · **[Results](#-results)** ·
+**[Limitations](#-limitations)** · **[Documentation](#-documentation)**
 
 </div>
 
----
+<br>
 
 Fisheries technicians count salmon passing a sonar camera by watching hours of video.
 **PassageWatch** turns a recording into **suggested passage counts per direction**, each
@@ -38,16 +43,62 @@ as in the reference annotation.</sub>
 
 ## 📌 What to know first
 
-| | |
-|---|---|
-| **For** | Technicians who count fish passing a sonar camera. PassageWatch suggests; the technician checks and corrects before the counts are used. |
-| **How a fish is counted** | By the side of the counting line where its track **starts** and where it **ends**. Starts left, ends right: one passage → right. Crosses and comes back: **zero**, not two. Never crosses: zero. |
-| **Accuracy** | On four locations never used for training or setting selection, count errors add up to about **21 per 100 true passages** (nMAE 0.213), against 39 for a tuned classical baseline and 28 / 12 for the dataset authors' Baseline / Baseline++ ([results](#-results)). |
-| **Speed** | About **10 frames/s** on an Apple M1 CPU (roughly real time for sonar), peak memory ≈1.35 GB. |
-| **Human review** | Measured, and not yet a win: reviewers saved no time on short clips and counted pieces of already-counted fish, making reviewed counts *less* accurate ([limitations](#-limitations)). |
-| **Not for** | Species identification, unreviewed final figures, recognising a fish across recordings, or false-alarm rates on long empty footage. |
+<table>
+<tr>
+<td width="22%"><b>For</b></td>
+<td>Technicians who count fish passing a sonar camera. PassageWatch suggests; the technician checks and corrects before the counts are used.</td>
+</tr>
+<tr>
+<td><b>How a fish is counted</b></td>
+<td>By the side of the counting line where its track <b>starts</b> and where it <b>ends</b>. Starts left, ends right: one passage → right. Crosses and comes back: <b>zero</b>, not two. Never crosses: zero.</td>
+</tr>
+<tr>
+<td><b>Accuracy</b></td>
+<td>On four locations never used for training or setting selection, count errors add up to about <b>21 per 100 true passages</b> (nMAE 0.213), against 39 for a tuned classical baseline and 28 / 11 for the dataset authors' Baseline / Baseline++ (<a href="#-results">results</a>).</td>
+</tr>
+<tr>
+<td><b>Speed</b></td>
+<td>About <b>10 frames/s</b> on an Apple M1 CPU (roughly real time for sonar), peak memory ≈1.35 GB.</td>
+</tr>
+<tr>
+<td><b>Human review</b></td>
+<td>Measured, and not yet a win: reviewers saved no time on short clips and counted pieces of already-counted fish, making reviewed counts <i>less</i> accurate (<a href="#-limitations">limitations</a>).</td>
+</tr>
+<tr>
+<td><b>Not for</b></td>
+<td>Species identification, unreviewed final figures, recognising a fish across recordings, or false-alarm rates on long empty footage.</td>
+</tr>
+</table>
 
 ## 🧭 How it works
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/pipeline-dark.svg">
+  <img src="docs/images/pipeline-light.svg" alt="Pipeline: sonar video, detect (YOLOX-Tiny on ONNX Runtime), track (Kalman tracker) and count (start/end rule) run automatically in one CPU worker; the technician then reviews a queue with random audits and exports CSV or JSON" width="100%">
+</picture>
+
+Frames (a ZIP or a video) become a three-channel temporal input: the frame, the frame minus
+the clip's background, and the motion to the next frame. YOLOX-Tiny finds fish on ONNX
+Runtime (CPU), a Kalman tracker links them into tracks, and the counting policy turns
+completed tracks into counts. Each track gets a heuristic review score and a triage state,
+and audit windows are drawn at random from footage the model did not flag.
+
+### The counting rule
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/counting-rule-dark.svg">
+  <img src="docs/images/counting-rule-light.svg" alt="Four tracks and their counts: starts left and ends right, +1 right; starts right and ends left, +1 left; crosses then comes back, 0, not 2; approaches but never crosses, 0" width="100%">
+</picture>
+
+Counts come only from completed tracks, never from summing detections. The versioned
+policy `cfc-compatible-v1` uses the CFC benchmark's start/end-side rule, so a fish that
+crosses and returns contributes zero, and nearly stationary tracks are skipped. The primary
+output is the image direction (→ right, ← left); it maps to upstream/downstream only when
+the job sets `upstream_direction`, and that setting and the line position are stored in
+every job and export. Our evaluator matches CFC's official one on all 2,170 published
+baseline results ([counting policy](docs/counting_policy.md)).
+
+### The service
 
 ```mermaid
 flowchart LR
@@ -71,37 +122,84 @@ flowchart LR
     P -. scrape .-> W
 ```
 
-**Pipeline:** frames (ZIP or video) → temporal input (frame, minus background, motion to the
-next frame) → YOLOX-Tiny on ONNX Runtime (CPU) → Kalman tracker → counting policy → review
-score, triage and audit windows → human review → CSV/JSON export.
-
-**Counting.** Counts come only from completed tracks, never from summing detections. The
-versioned policy `cfc-compatible-v1` uses the CFC benchmark's start/end-side rule, so a
-fish that crosses and returns contributes zero, and nearly stationary tracks are skipped.
-The primary output is the image direction (→ right, ← left); it maps to
-upstream/downstream only when the job sets `upstream_direction`, and that setting and the
-line position are stored in every job and export. Our evaluator matches CFC's official one
-on all 2,170 published baseline results ([counting policy](docs/counting_policy.md)).
-
 ## 🧰 Features
 
-- **Asynchronous jobs.** `POST /v1/jobs` returns `202`; a separate worker leases jobs with
-  heartbeats, recovers abandoned ones and retries without duplicating results. Jobs are
-  idempotent and cached by recording SHA-256 plus pipeline hash.
-- **Review interface.** Playback with tracks and the counting line, a queue ordered by a
-  heuristic **review score** (never shown as a probability), triage states, accept / reject
-  / redirect / unresolved / add-missed-fish, and a "different fish?" check before counting a
-  track next to an already-counted one.
-- **Random audits** of unflagged footage, the only way to find fish the detector missed.
-- **Immutable history.** Predictions never change; each correction is an append-only event
-  creating a new revision, and a stale `base_revision` gets `409 Conflict`.
-- **Traceable exports** with recording ID, line and orientation, automatic and reviewed
-  counts, unresolved cases, pipeline versions and evidence timestamps.
-- **Operations.** JSON logs, Prometheus metrics and alerts, health checks, upload
-  retention, bounded queues, a read-only non-root container, hash-checked release bundles
-  and tested rollback.
-- **Demo examples.** Three CFC recordings, visibly labelled as **cached** results, next to
-  their reference counts ([demos](docs/demos.md)).
+<table>
+<tr>
+<td width="50%" valign="top">
+
+#### ⚡ Asynchronous jobs
+
+`POST /v1/jobs` returns `202`. A separate worker leases jobs with heartbeats, recovers
+abandoned ones and retries without duplicating results. Jobs are idempotent and cached by
+recording SHA-256 plus pipeline hash.
+
+</td>
+<td width="50%" valign="top">
+
+#### 🎯 Review queue
+
+Playback with tracks and the counting line, ordered by a heuristic **review score** (never
+shown as a probability). Accept, reject, redirect, mark unresolved or add a missed fish; a
+"different fish?" check runs before counting a track next to an already-counted one.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+#### 🎲 Random audits
+
+Windows of footage the model did **not** flag, sampled for every job: the only way a
+reviewer can find fish the detector missed entirely.
+
+</td>
+<td width="50%" valign="top">
+
+#### 🧾 Immutable history
+
+Predictions never change. Each correction is an append-only event that creates a new
+revision, and a review based on a stale revision gets `409 Conflict`.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+#### 📤 Traceable exports
+
+CSV or JSON with the recording ID, line and orientation, automatic **and** reviewed counts,
+unresolved cases, pipeline versions and evidence timestamps.
+
+</td>
+<td width="50%" valign="top">
+
+#### 🔖 Versioned releases
+
+An immutable manifest per release (code, lock, data, checkpoint and image hashes),
+hash-checked inference bundles, and an A → B → A rollback that runs as a test.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+#### 📈 Operations
+
+JSON logs, Prometheus metrics and alerts, health checks, upload retention, bounded queues
+and a read-only, non-root container.
+
+</td>
+<td width="50%" valign="top">
+
+#### 🎬 Demo examples
+
+Three CFC recordings on the home page, visibly labelled as **cached** results, next to their
+reference counts ([demos](docs/demos.md)).
+
+</td>
+</tr>
+</table>
 
 ## 🚀 Quick start
 
@@ -117,10 +215,18 @@ release's 38 MB bundle is attached to its
 
 ```bash
 git clone https://github.com/professor3333/passagewatch.git && cd passagewatch
-uv run python scripts/fetch_bundle.py --release passagewatch-0.3.3 --activate   # verified against the release manifest
-docker compose up -d --build                        # first build ≈9 min, ~2 GB image
-curl http://127.0.0.1:8000/v1/model-info            # must start with {"pipeline_version":"passagewatch-0.3.3"
-uv run python scripts/load_demos.py --url http://127.0.0.1:8000   # optional: 187 MB, ≈7 min
+
+# 1. Fetch the release bundle, verified against the release manifest
+uv run python scripts/fetch_bundle.py --release passagewatch-0.3.3 --activate
+
+# 2. Build and start the service (first build ≈9 min, ~2 GB image)
+docker compose up -d --build
+
+# 3. Check the release: the reply must start with {"pipeline_version":"passagewatch-0.3.3"
+curl http://127.0.0.1:8000/v1/model-info
+
+# 4. Optional: load the three demo recordings (187 MB, ≈7 min)
+uv run python scripts/load_demos.py --url http://127.0.0.1:8000
 ```
 
 Open **http://127.0.0.1:8000/**, then either open a demo from the home page or upload a
@@ -150,26 +256,32 @@ manifest.
 
 ## 📊 Results
 
-Measured on release `passagewatch-0.3.0`; 0.3.1–0.3.3 run the identical pipeline (same
-checkpoint, ONNX export and evaluations in their manifests). Directional
-nMAE = Σ(|R̂−R| + |L̂−L|) / Σ(R+L), lower is better; brackets are 95% paired-bootstrap
-intervals over clips.
+Measured on release `passagewatch-0.3.0` in a single evaluation on the **official CFC test
+locations** ([details](docs/test_results.md)); 0.3.1–0.3.3 run the identical pipeline (same
+checkpoint, ONNX export and evaluations in their manifests).
 
-**Official CFC test locations**: a one-time evaluation of the frozen release on 1,021 clips
-and 5,296 passages at locations never used for training or setting selection
-([details](docs/test_results.md)).
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/test-results-dark.svg">
+  <img src="docs/images/test-results-light.svg" alt="Bar chart of count errors per 100 true passages at the four CFC test locations. PassageWatch 0.3.0: elwha 16.8, kenai-channel 25.6, kenai-rightbank 7.5, nushagak 35.5, macro average 21.3. Tuned classical baseline: 41.9, 50.6, 24.1, 38.4, macro 38.8. CFC Baseline: 32.3, 53.0, 11.8, 14.0, macro 27.8. CFC Baseline++: 21.3, 12.2, 3.7, 8.8, macro 11.5" width="100%">
+</picture>
 
-| System | elwha | kenai-channel | kenai-rightbank | nushagak | **Macro average** |
-|---|---:|---:|---:|---:|---|
-| Classical baseline `classical-v2` | 0.419 | 0.506 | 0.241 | 0.384 | 0.388 [0.351, 0.428] |
-| YOLOX-Tiny, single frame (0.2.0) | 1.183 | 5.226 | 1.115 | 0.499 | 2.006 [1.708, 2.350] |
-| **YOLOX-Tiny, temporal input (0.3.0)** | **0.168** | **0.256** | **0.075** | **0.355** | **0.213** [0.189, 0.238] |
-| CFC published Baseline / Baseline++ | 0.323 / 0.213 | 0.530 / 0.122 | 0.118 / 0.037 | 0.140 / 0.088 | 0.278 / 0.115 |
+The same numbers as directional nMAE = Σ(|R̂−R| + |L̂−L|) / Σ(R+L), lower is better, with
+95% paired-bootstrap intervals over clips for the systems evaluated here:
+
+| Test location | **PassageWatch 0.3.0**<br><sub>YOLOX-Tiny, temporal</sub> | Classical<br><sub>`classical-v2`</sub> | Single frame<br><sub>YOLOX-Tiny 0.2.0</sub> | CFC Baseline<br><sub>published</sub> | CFC Baseline++<br><sub>published</sub> |
+|---|---:|---:|---:|---:|---:|
+| elwha | 0.168 | 0.419 | 1.183 | 0.323 | 0.213 |
+| kenai-channel | 0.256 | 0.506 | 5.226 | 0.530 | 0.122 |
+| kenai-rightbank | 0.075 | 0.241 | 1.115 | 0.118 | 0.037 |
+| nushagak | 0.355 | 0.384 | 0.499 | 0.140 | 0.088 |
+| **Macro average** | **0.213** | **0.388** | **2.006** | **0.278** | **0.115** |
+| <sub>95% interval</sub> | <sub>[0.189, 0.238]</sub> | <sub>[0.351, 0.428]</sub> | <sub>[1.708, 2.350]</sub> | | |
 
 The release beats the classical baseline at every location (macro −0.174 [−0.215, −0.137]).
-Temporal input is what makes it transfer; dense traffic (nushagak) is the main weakness, and
-CFC's Baseline++ (a larger detector, three times the training days) is still more accurate.
-The test set has now been inspected, so it is a known benchmark.
+Temporal input is what makes it transfer: the single-frame model, off the chart's scale,
+counts static clutter on unfamiliar sonars as fish. Dense traffic (nushagak) is the main
+weakness, and CFC's Baseline++ (a larger detector, three times the training days) is still
+more accurate. The test set has now been inspected, so it is a known benchmark.
 
 <details>
 <summary><b>Development data and runtime</b></summary>
@@ -225,13 +337,15 @@ docker compose up -d --build && ./scripts/compose_smoke_test.sh   # the Compose 
 Tests target what could silently change a count: coordinate conversion, direction mapping,
 counting fixtures, train/serve preprocessing parity, API contracts and worker-kill
 recovery. CI runs all of this plus the frontend build, Prometheus rules and a composed
-smoke test, and never touches the full dataset or the test split.
+smoke test, and never touches the full dataset or the test split. The README's figures are
+generated from the committed results (`uv run python scripts/make_readme_figures.py`), and
+a test fails if they drift.
 
 <details>
 <summary><b>Reproducing the baselines and the release</b></summary>
 
 ```bash
-uv run python scripts/evaluate_counts.py --tracker baseline++   # our evaluator vs CFC's tracks (kenai-val)
+uv run python scripts/evaluate_counts.py --tracker baseline++   # CFC's tracks, our evaluator
 uv run python scripts/run_classical.py --manifest full-v2 --partitions val \
     --frames-dir data/extracted/cfc/kenai-dev-v1 --config configs/tracking/classical-v2.yaml
 ```
@@ -275,6 +389,7 @@ src/passagewatch/
 ├── evaluation/       nMAE, paired bootstrap, error attribution, ablations, studies
 ├── inference/        batch and service inference
 ├── monitoring/       stage timing
+├── visualization/    frame overlays, README figures
 └── service/          API, worker, jobs, reviews, export, bundles, releases, metrics
 frontend/  configs/  scripts/  tests/  releases/  docs/
 ```
@@ -335,3 +450,19 @@ Dataset: Caltech Fish Counting (Kay et al., ECCV 2022), MIT. Temporal input insp
 the CFC authors' Baseline++ (differences in the [model card](docs/model_card.md)).
 Detector: YOLOX (Megvii, Apache-2.0), vendored at a pinned commit. PassageWatch is MIT
 licensed: [LICENSE](LICENSE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+<details>
+<summary><b>Citing the dataset</b></summary>
+
+```bibtex
+@inproceedings{kay2022cfc,
+  title     = {The Caltech Fish Counting Dataset: A Benchmark for Multiple-Object
+               Tracking and Counting},
+  author    = {Kay, J. and Kulits, P. and Stathatos, S. and Deng, S. and Young, E. and
+               Beery, S. and Van Horn, G. and Perona, P.},
+  booktitle = {European Conference on Computer Vision (ECCV)},
+  year      = {2022}
+}
+```
+
+</details>
